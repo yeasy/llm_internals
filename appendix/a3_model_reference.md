@@ -12,6 +12,11 @@
 | Llama 2-70B | 2023 | Decoder | 70B | 80 | 8192 | 64 | 4096 | GQA(8KV头) |
 | Llama 3-8B | 2024 | Decoder | 8B | 32 | 4096 | 32 | 128K | 128K词汇表 |
 | Llama 3-70B | 2024 | Decoder | 70B | 80 | 8192 | 64 | 128K | GQA |
+| Llama 3.1-405B | 2024 | Decoder | 405B | 126 | 16384 | 128 | 128K | 开源追平 GPT-4 |
+| GPT-4o mini | 2024 | Decoder | 未公开 | - | - | - | 128K | 极致性价比 |
+| Claude 3.5 Sonnet | 2024 | Decoder | 未公开 | - | - | - | 200K | Artifacts/Computer Use |
+| Qwen 2.5-72B | 2024 | Decoder | 72B | 80 | 8192 | 64 | 128K | 多语言、代码、数学 |
+| DeepSeek-R1 | 2025 | MoE-Dec | 671B(37B激活) | 61 | 7168 | 128 | 128K | 纯 RL 推理 |
 | Mistral 7B | 2023 | Decoder | 7B | 32 | 4096 | 32 | 32K | 滑动窗口注意力 |
 | DeepSeek-V3 | 2025 | MoE-Dec | 671B(37B激活) | 61 | 7168 | 128 | 128K | MoE + FP8 |
 | Gemini 2.5 | 2025 | 多模态 | 未公开 | - | - | - | 1M | 原生多模态 |
