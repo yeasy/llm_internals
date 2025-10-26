@@ -75,6 +75,7 @@
   * [9.2 贪心搜索与束搜索：确定性与全局最优](09_decoding/9.2_greedy_beam.md)
   * [9.3 采样策略：温度、Top-k 与 Top-p 的设计直觉](09_decoding/9.3_sampling.md)
   * [9.4 结构化输出与约束解码](09_decoding/9.4_constrained.md)
+  * [9.5 推理时计算扩展：让模型学会深度思考](09_decoding/9.5_test_time_scaling.md)
   * [本章小结](09_decoding/summary.md)
 
 * [第十章：推理优化：第一性原理的分析](10_inference_optimization/README.md)
