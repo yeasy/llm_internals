@@ -114,7 +114,8 @@
   * [14.2 混合专家模型：为什么不必激活所有参数](14_future_trends/14.2_moe.md)
   * [14.3 状态空间模型与混合架构：注意力的挑战者](14_future_trends/14.3_ssm_hybrid.md)
   * [14.4 多模态 Transformer：统一不同模态的表示](14_future_trends/14.4_multimodal.md)
-  * [14.5 未来展望](14_future_trends/14.5_outlook.md)
+  * [14.5 AI Agent 与工具调用：让模型从"说"到"做"](14_future_trends/14.5_agent_tool_use.md)
+  * [14.6 未来展望](14_future_trends/14.6_outlook.md)
   * [本章小结](14_future_trends/summary.md)
 
 * [附录](appendix/README.md)
