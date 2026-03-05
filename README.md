@@ -46,6 +46,10 @@
 
 建议按顺序阅读第一部分以建立深层理解，之后可根据个人需求选择性深入后续部分。
 
+## 在线阅读
+
+本书在线托管于 GitBook，可直接访问 [https://yeasy.gitbook.io/llm_internals](https://yeasy.gitbook.io/llm_internals/) 进行阅读。
+
 ## 本地阅读
 
 本书使用 [HonKit](https://github.com/honkit/honkit) 构建，支持本地阅读：
