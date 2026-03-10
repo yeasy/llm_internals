@@ -11,3 +11,6 @@
 **批次大小和序列长度**的选择是效率与质量的权衡：更大的批次提高吞吐量但可能影响泛化，序列打包和动态长度策略提升了训练效率。显存分析显示优化器状态是最大消耗者。
 
 下一章将讨论如何将这些训练技术扩展到多 GPU 甚至多节点的大规模分布式训练场景。
+---
+
+> 📝 **发现错误或有改进建议？** 欢迎提交 [Issue](https://github.com/yeasy/llm_internals/issues) 或 [PR](https://github.com/yeasy/llm_internals/pulls)。

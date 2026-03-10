@@ -15,3 +15,6 @@
 **长上下文技术**的系统性发展使大语言模型从 4K 上下文窗口跨越到百万级。Ring Attention 和序列并行（DeepSpeed Ulysses）解决了分布式注意力的工程实现，RoPE 外推技术（YaRN 等）使模型能从短序列训练扩展到长序列推理。然而，“Lost in the Middle”现象和注意力稀释问题揭示了支持长上下文与有效利用长上下文之间的鸿沟，上下文工程和 RAG 的互补使用正成为弥合这一鸿沟的实践方向。
 
 Transformer 的核心设计原则——注意力机制的全局连接、残差连接的梯度保障、并行计算的效率——依然是深度学习最成功的架构范式。在这些原则之上的持续创新，将继续推动人工智能向更高的峰值攀登。
+---
+
+> 📝 **发现错误或有改进建议？** 欢迎提交 [Issue](https://github.com/yeasy/llm_internals/issues) 或 [PR](https://github.com/yeasy/llm_internals/pulls)。

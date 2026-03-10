@@ -13,3 +13,6 @@
 **平方复杂度是核心权衡**：自注意力以 $O(n^2)$ 的计算和内存代价换来了 $O(1)$ 的信息路径长度和完全并行能力。这一权衡在短到中等长度序列上非常有利，但对超长序列构成瓶颈，催生了大量后续优化工作。
 
 下一章将继续解析 Transformer 的其他核心组件——词嵌入、前馈网络、残差连接和层归一化——它们与注意力机制协同工作，共同构成了完整的 Transformer 架构。
+---
+
+> 📝 **发现错误或有改进建议？** 欢迎提交 [Issue](https://github.com/yeasy/llm_internals/issues) 或 [PR](https://github.com/yeasy/llm_internals/pulls)。

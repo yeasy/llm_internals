@@ -17,3 +17,6 @@
 **三种架构变体**——仅编码器、仅解码器、编码器-解码器——各有适用场景。仅解码器架构凭借良好的扩展性和通用性，成为了大语言模型时代的主流选择。
 
 下一章将深入讨论位置编码的不同方案及其设计哲学——这是近年来 Transformer 架构中演化最为活跃的领域之一。
+---
+
+> 📝 **发现错误或有改进建议？** 欢迎提交 [Issue](https://github.com/yeasy/llm_internals/issues) 或 [PR](https://github.com/yeasy/llm_internals/pulls)。

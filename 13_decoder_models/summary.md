@@ -9,3 +9,6 @@
 **T5/BART** 等编码器-解码器模型在 Seq2Seq 任务上有架构优势，但在大规模实践中让位于更简洁的纯解码器架构。
 
 下一章将讨论 Transformer 架构的前沿创新与未来趋势。
+---
+
+> 📝 **发现错误或有改进建议？** 欢迎提交 [Issue](https://github.com/yeasy/llm_internals/issues) 或 [PR](https://github.com/yeasy/llm_internals/pulls)。

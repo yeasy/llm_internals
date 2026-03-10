@@ -11,3 +11,6 @@
 **规模定律**揭示了模型性能与参数量、数据量之间的幂律关系，Chinchilla 原则指出参数和数据应同比例增长。数据质量（去重、过滤、领域混合）对模型能力有着与规模同样重要的影响。
 
 下一章将讨论训练过程中的具体技术——损失函数、优化器、学习率调度等，理解这些“底层逻辑”对成功训练大模型至关重要。
+---
+
+> 📝 **发现错误或有改进建议？** 欢迎提交 [Issue](https://github.com/yeasy/llm_internals/issues) 或 [PR](https://github.com/yeasy/llm_internals/pulls)。

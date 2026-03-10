@@ -9,3 +9,6 @@
 **投机解码**通过“先猜后验”打破了逐词元生成的瓶颈，实现无损的 2-3 倍加速。
 
 下一章将讨论如何将这些优化技术整合到完整的推理引擎和生产部署方案中。
+---
+
+> 📝 **发现错误或有改进建议？** 欢迎提交 [Issue](https://github.com/yeasy/llm_internals/issues) 或 [PR](https://github.com/yeasy/llm_internals/pulls)。

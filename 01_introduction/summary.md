@@ -17,3 +17,6 @@
 **从论文到产业变革**：Transformer 催生了预训练革命（GPT、BERT），推动了规模定律的发现（GPT-3），最终发展为当代大语言模型的基础架构（GPT-4、Llama、DeepSeek 等）。
 
 下一章将深入 Transformer 最核心的组件——注意力机制，详细解析其数学原理和每一个设计选择背后的原因。
+---
+
+> 📝 **发现错误或有改进建议？** 欢迎提交 [Issue](https://github.com/yeasy/llm_internals/issues) 或 [PR](https://github.com/yeasy/llm_internals/pulls)。

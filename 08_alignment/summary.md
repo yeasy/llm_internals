@@ -9,3 +9,6 @@
 **参数高效微调（LoRA 等）**利用微调更新的低秩特性，只训练极少量参数即可达到接近全参数微调的效果，大幅降低了微调的资源门槛。
 
 至此，第二部分“训练篇”结束。下一部分将进入“推理与部署篇”，关注如何让训练好的模型高效地为用户服务。
+---
+
+> 📝 **发现错误或有改进建议？** 欢迎提交 [Issue](https://github.com/yeasy/llm_internals/issues) 或 [PR](https://github.com/yeasy/llm_internals/pulls)。

@@ -15,3 +15,6 @@
 **检查点管理**和**容错机制**确保长时间训练任务的可靠完成。检查点平均是一种零成本提升最终模型性能的有效技巧。
 
 下一章将讨论预训练之后的关键步骤——如何通过微调和对齐技术让模型变得有用且安全。
+---
+
+> 📝 **发现错误或有改进建议？** 欢迎提交 [Issue](https://github.com/yeasy/llm_internals/issues) 或 [PR](https://github.com/yeasy/llm_internals/pulls)。

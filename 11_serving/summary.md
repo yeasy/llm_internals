@@ -13,3 +13,6 @@
 **生产部署**涉及模型量化、负载均衡、流式输出、请求调度和监控告警等多方面最佳实践。
 
 至此，第三部分“推理与部署篇”结束。下一部分将梳理主流 Transformer 变体模型和前沿架构创新。
+---
+
+> 📝 **发现错误或有改进建议？** 欢迎提交 [Issue](https://github.com/yeasy/llm_internals/issues) 或 [PR](https://github.com/yeasy/llm_internals/pulls)。
