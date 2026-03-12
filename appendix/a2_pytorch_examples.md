@@ -1,6 +1,6 @@
 ## A.2 PyTorch 实现示例
 
-以下代码展示了 Transformer 核心组件的 PyTorch 实现。更多与正文数学推导配套的可运行代码示例，可参见[第2章](../02_attention/2.2_scaled_dot_product.md)和[第3章](../03_components/3.3_feedforward.md)中的内嵌代码。
+以下代码展示了 Transformer 核心组件的 PyTorch 实现。更多与正文数学推导配套的可运行代码示例，可参见[第2章](../02_attention/2.2_scaled_dot_product.md)和[第3章](../03_components/3.4_feedforward.md)中的内嵌代码。
 
 ### 缩放点积注意力
 
