@@ -21,7 +21,7 @@
 | DeepSeek-V3 | 2025 | MoE-Dec | 671B(37B激活) | 61 | 7168 | 128 | 128K | MoE + FP8 |
 | Gemini 2.5 | 2025 | 多模态 | 未公开 | - | - | - | 1M | 原生多模态 |
 | o3 | 2025年4月 | Decoder | 未公开 | - | - | - | 128K | 推理模型 |
-| Claude Opus 4.6 | 2025 | Decoder | 未公开 | - | - | - | 200K | 增强推理 |
+| Claude Opus 4.6 | 2026 | Decoder | 未公开 | - | - | - | 200K | 增强推理 |
 | Llama 4 | 2025年4月 | MoE-Dec | 未公开 | - | - | - | 128K+ | MoE 架构 |
 
 图 A-1：主流 Transformer 模型参数速查表
