@@ -27,7 +27,7 @@
 ### 前沿架构
 
 13. Gu, A. & Dao, T. (2024). [Mamba: Linear-Time Sequence Modeling with Selective State Spaces](https://arxiv.org/abs/2312.00752).
-14. DeepSeek-AI. (2025). [DeepSeek-V3 Technical Report](https://arxiv.org/abs/2412.19437).
+14. DeepSeek-AI. (2024). [DeepSeek-V3 Technical Report](https://arxiv.org/abs/2412.19437).
 
 ### 教程与可视化
 
