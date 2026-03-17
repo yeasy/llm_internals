@@ -1,0 +1,15 @@
+{
+  "name": "llm-internals",
+  "version": "1.0.0",
+  "description": "大模型原理与架构",
+  "scripts": {
+    "start": "honkit serve",
+    "serve": "honkit serve",
+    "build": "honkit build"
+  },
+  "devDependencies": {
+    "gitbook-plugin-mermaid-gb3": "^2.1.0",
+    "honkit": "^6.1.6"
+  },
+  "private": true
+}
