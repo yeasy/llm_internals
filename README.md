@@ -105,6 +105,13 @@ npm install        # 安装依赖
 npx honkit serve   # 启动本地服务器后，访问 http://localhost:4000
 ```
 
+或使用 [mdpress](https://github.com/yeasy/mdpress) 构建：
+
+```bash
+go install github.com/yeasy/mdpress@latest
+mdpress serve
+```
+
 ---
 
 ## 进阶阅读
