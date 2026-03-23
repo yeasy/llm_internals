@@ -24,8 +24,8 @@
 | Gemini 3.1 Pro | 2026.02.19 | 多模态 | 未公开 | - | - | - | 1M | 原生多模态 |
 | o3 | 2025.04 | Decoder | 未公开 | - | - | - | 128K | 推理模型 |
 | Claude Opus 4.6 | 2026.02 | Decoder | 未公开 | - | - | - | 1M | 增强推理 |
-| Claude Sonnet 4.6 | 2025.09.29 | Decoder | 未公开 | - | - | - | 200K | 中端模型 |
-| Claude Haiku 4.5 | 2025.10.01 | Decoder | 未公开 | - | - | - | 200K | 快速轻量级 |
+| Claude Sonnet 4.6 | 2026.02 | Decoder | 未公开 | - | - | - | 200K | 中端模型 |
+| Claude Haiku 4.5 | 2025.10.15 | Decoder | 未公开 | - | - | - | 200K | 快速轻量级 |
 | Llama 4 | 2025.04 | MoE-Dec | 未公开 | - | - | - | 128K+ | MoE 架构 |
 
 图 A-1：主流 Transformer 模型参数速查表
