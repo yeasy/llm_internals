@@ -98,11 +98,11 @@ graph LR
 
 ## 本地阅读
 
-使用 [mdPress](https://github.com/yeasy/mdpress) 构建：
+先安装 [mdPress](https://github.com/yeasy/mdpress)：
 
 ```bash
 brew tap yeasy/tap && brew install mdpress
-mdpress serve
+npm run serve
 ```
 
 ---
