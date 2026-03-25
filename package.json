@@ -8,9 +8,6 @@
     "build": "rm -rf _site _site_site && mdpress build --format site --output _site && rm -rf _site && mv _site_site _site",
     "pdf": "mdpress build --format pdf"
   },
-  "devDependencies": {
-    "gitbook-plugin-mermaid-gb3": "^2.1.0",
-    "honkit-plugin-prism": "^2.5.4"
-  },
+  "devDependencies": {},
   "private": true
 }
