@@ -1,5 +1,6 @@
 # HonKit / GitBook build output
 _book/
+_site*
 
 # Node.js
 node_modules/
