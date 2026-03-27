@@ -4,6 +4,7 @@
 
 [![License: CC BY-NC-SA 4.0](https://img.shields.io/badge/License-CC%20BY--NC--SA%204.0-lightgrey.svg)](https://creativecommons.org/licenses/by-nc-sa/4.0/)
 [![GitHub stars](https://img.shields.io/github/stars/yeasy/llm_internals?style=social)](https://github.com/yeasy/llm_internals)
+[![Release](https://img.shields.io/github/release/yeasy/llm_internals.svg)](https://github.com/yeasy/llm_internals/releases)
 [![Online Reading](https://img.shields.io/badge/在线阅读-GitBook-brightgreen)](https://yeasy.gitbook.io/llm_internals)
 [![PDF](https://img.shields.io/badge/PDF-下载-orange)](https://github.com/yeasy/llm_internals/releases/latest/download/llm_internals.pdf)
 
@@ -97,13 +98,17 @@ graph LR
 
 本书在线阅读，可直接访问 [GitBook](https://yeasy.gitbook.io/llm_internals/)。
 
+## 下载离线版本
+
+本书提供 PDF 版本供离线阅读，可前往 [GitHub Releases](https://github.com/yeasy/llm_internals/releases/latest) 页面下载最新版本。
+
 ## 本地阅读
 
 先安装 [mdPress](https://github.com/yeasy/mdpress)：
 
 ```bash
 brew tap yeasy/tap && brew install mdpress
-npm run serve
+mdpress serve
 ```
 
 ---
