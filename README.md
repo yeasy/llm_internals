@@ -6,7 +6,7 @@
 [![GitHub stars](https://img.shields.io/github/stars/yeasy/llm_internals?style=social)](https://github.com/yeasy/llm_internals)
 [![Release](https://img.shields.io/github/release/yeasy/llm_internals.svg)](https://github.com/yeasy/llm_internals/releases)
 [![Online Reading](https://img.shields.io/badge/在线阅读-GitBook-brightgreen)](https://yeasy.gitbook.io/llm_internals)
-[![PDF](https://img.shields.io/badge/PDF-下载-orange)](https://github.com/yeasy/llm_internals/releases/latest/download/llm_internals.pdf)
+[![PDF](https://img.shields.io/badge/PDF-下载-orange)](https://github.com/yeasy/llm_internals/releases/latest)
 
 > 以 Transformer 为例，深入剖析大模型为什么能工作、为什么这样设计，系统掌握从架构原理到训练部署的完整知识体系。
 
