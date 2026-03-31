@@ -121,13 +121,13 @@ mdpress serve
 
 | 书名 | 说明 |
 |------|------|
-| [《零基础学 AI》](https://github.com/yeasy/ai_beginner_guide) | 普通人视角的 AI 入门与基础认知 |
-| [《大模型提示词工程指南》](https://github.com/yeasy/prompt_engineering_guide) | 系统掌握与 AI 高效对话的提示词技术 |
-| [《大模型上下文工程权威指南》](https://github.com/yeasy/context_engineering_guide) | 从提示词工程进阶到上下文工程 |
-| [《Claude 技术指南》](https://github.com/yeasy/claude_guide) | 深入掌握 Claude 的核心能力与最佳实践 |
-| [《智能体 AI 权威指南》](https://github.com/yeasy/agentic_ai_guide) | 全面学习智能体架构、多智能体协作与工程实践 |
-| [《大模型安全权威指南》](https://github.com/yeasy/ai_security_guide) | 了解大语言模型面临的安全威胁与防御机制 |
-| [《OpenClaw 从入门到精通》](https://github.com/yeasy/openclaw_guide) | 开源智能体框架的实践入门 |
+| [《零基础学 AI》](https://yeasy.gitbook.io/ai_beginner_guide) | 普通人视角的 AI 入门与基础认知 |
+| [《大模型提示词工程指南》](https://yeasy.gitbook.io/prompt_engineering_guide) | 系统掌握与 AI 高效对话的提示词技术 |
+| [《大模型上下文工程权威指南》](https://yeasy.gitbook.io/context_engineering_guide) | 从提示词工程进阶到上下文工程 |
+| [《Claude 技术指南》](https://yeasy.gitbook.io/claude_guide) | 深入掌握 Claude 的核心能力与最佳实践 |
+| [《智能体 AI 权威指南》](https://yeasy.gitbook.io/agentic_ai_guide) | 全面学习智能体架构、多智能体协作与工程实践 |
+| [《大模型安全权威指南》](https://yeasy.gitbook.io/ai_security_guide) | 了解大语言模型面临的安全威胁与防御机制 |
+| [《OpenClaw 从入门到精通》](https://yeasy.gitbook.io/openclaw_guide) | 开源智能体框架的实践入门 |
 
 ---
 
