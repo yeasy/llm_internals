@@ -15,17 +15,22 @@
 | Llama 3.1-405B | 2024.07 | Decoder | 405B | 126 | 16384 | 128 | 128K | 开源追平 GPT-4 |
 | GPT-4o mini | 2024.07 | Decoder | 未公开 | - | - | - | 128K | 极致性价比 |
 | Claude 3.5 Sonnet | 2024.06 | Decoder | 未公开 | - | - | - | 200K | Artifacts/Computer Use |
+| o1 | 2024.12 | Decoder | 未公开 | - | - | - | 200K | 推理时计算扩展 |
+| o1-mini | 2024.12 | Decoder | 未公开 | - | - | - | 200K | 轻量级推理 |
 | Qwen 2.5-72B | 2024.09 | Decoder | 72B | 80 | 8192 | 64 | 128K | 多语言、代码、数学 |
 | DeepSeek-R1 | 2025.01 | MoE-Dec | 671B(37B激活) | 61 | 7168 | 128 | 128K | 纯 RL 推理 |
 | Mistral 7B | 2023.09 | Decoder | 7B | 32 | 4096 | 32 | 32K | 滑动窗口注意力 |
 | DeepSeek-V3 | 2024.12 | MoE-Dec | 671B(37B激活) | 61 | 7168 | 128 | 128K | MoE + FP8 |
+| Claude 3.7 Sonnet | 2025.02 | Decoder | 未公开 | - | - | - | 200K | 混合推理能力 |
+| Claude Opus 4 | 2025.05 | Decoder | 未公开 | - | - | - | 200K | 多模态和代理能力 |
+| Claude Sonnet 4.5 | 2025.09 | Decoder | 未公开 | - | - | - | 200K | 轻量级推理 |
+| Claude Haiku 4.5 | 2025.10 | Decoder | 未公开 | - | - | - | 200K | 快速轻量级 |
 | Gemini 2.5 Pro | 2025.03 | 多模态 | 未公开 | - | - | - | 1M | 原生多模态 |
 | Gemini 3 Pro | 2025.11 | 多模态 | 未公开 | - | - | - | 1M | 原生多模态 |
 | Gemini 3.1 Pro | 2026.02 | 多模态 | 未公开 | - | - | - | 1M | 原生多模态 |
 | o3 | 2025.04 | Decoder | 未公开 | - | - | - | 200K | 推理模型 |
 | Claude Opus 4.6 | 2026.02 | Decoder | 未公开 | - | - | - | 1M | 增强推理 |
-| Claude Sonnet 4.6 | 2026.02 | Decoder | 未公开 | - | - | - | 1M | 中端模型 |
-| Claude Haiku 4.5 | 2025.10 | Decoder | 未公开 | - | - | - | 200K | 快速轻量级 |
+| Claude Sonnet 4.6 | 2026.02 | Decoder | 未公开 | - | - | - | 1M | 长上下文能力 |
 | Llama 4 | 2025.04 | MoE-Dec | 未公开 | - | - | - | 1M-10M（因 Scout/Maverick 不同） | MoE 架构 |
 
 图 A-1：主流 Transformer 模型参数速查表
