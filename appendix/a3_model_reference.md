@@ -21,17 +21,24 @@
 | DeepSeek-R1 | 2025.01 | MoE-Dec | 671B(37B激活) | 61 | 7168 | 128 | 128K | 纯 RL 推理 |
 | Mistral 7B | 2023.09 | Decoder | 7B | 32 | 4096 | 32 | 32K | 滑动窗口注意力 |
 | DeepSeek-V3 | 2024.12 | MoE-Dec | 671B(37B激活) | 61 | 7168 | 128 | 128K | MoE + FP8 |
-| Claude 3.7 Sonnet | 2025.02 | Decoder | 未公开 | - | - | - | 200K | 混合推理能力 |
+| Claude 3.7 Sonnet | 2025.02.01 | Decoder | 未公开 | - | - | - | 200K | 混合推理能力 |
 | Claude Opus 4 | 2025.05 | Decoder | 未公开 | - | - | - | 200K | 多模态和代理能力 |
-| Claude Sonnet 4.5 | 2025.09 | Decoder | 未公开 | - | - | - | 200K | 轻量级推理 |
-| Claude Haiku 4.5 | 2025.10 | Decoder | 未公开 | - | - | - | 200K | 快速轻量级 |
+| Claude Sonnet 4.5 | 2025.09.29 | Decoder | 未公开 | - | - | - | 200K | 高性能推理 |
+| Claude Haiku 4.5 | 2025.10.15 | Decoder | 未公开 | - | - | - | 200K | 快速轻量级 |
 | Gemini 2.5 Pro | 2025.03 | 多模态 | 未公开 | - | - | - | 1M | 原生多模态 |
 | Gemini 3 Pro | 2025.11 | 多模态 | 未公开 | - | - | - | 1M | 原生多模态 |
 | Gemini 3.1 Pro | 2026.02 | 多模态 | 未公开 | - | - | - | 1M | 原生多模态 |
 | o3 | 2025.04 | Decoder | 未公开 | - | - | - | 200K | 推理模型 |
-| Claude Opus 4.6 | 2026.02 | Decoder | 未公开 | - | - | - | 1M | 增强推理 |
-| Claude Sonnet 4.6 | 2026.02 | Decoder | 未公开 | - | - | - | 1M | 长上下文能力 |
+| Claude Opus 4.6 | 2026.02.05 | Decoder | 未公开 | - | - | - | 1M | 增强推理 |
+| Claude Sonnet 4.6 | 2026.02.17 | Decoder | 未公开 | - | - | - | 1M | 长上下文能力 |
 | Llama 4 | 2025.04 | MoE-Dec | 未公开 | - | - | - | 1M-10M（因 Scout/Maverick 不同） | MoE 架构 |
+| GPT-5 | 2025.08.07 | Decoder | 未公开 | - | - | - | 未公开 | 多模态推理 |
+| GPT-5.1 | 2025.11 | Decoder | 未公开 | - | - | - | 未公开 | 迭代更新 |
+| GPT-5.2 | 2025.12.11 | Decoder | 未公开 | - | - | - | 未公开 | 旗舰推理模型 |
+| GPT-5.3 | 2026.02.05 | Decoder | 未公开 | - | - | - | 未公开 | Codex 融合 |
+| GPT-5.4 | 2026.03.05 | Decoder | 未公开 | - | - | - | 未公开 | 融合推理与编码 |
+| GPT-5.4 mini | 2026.03 | Decoder | 未公开 | - | - | - | 未公开 | 极致性价比 |
+| GPT-5.4 nano | 2026.03 | Decoder | 未公开 | - | - | - | 未公开 | 超轻量级 |
 
 图 A-1：主流 Transformer 模型参数速查表
 
