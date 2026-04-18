@@ -5,11 +5,15 @@
   "author": "yeasy",
   "root": ".",
   "plugins": [
-    "mermaid-gb3"
+    "mermaid-gb3",
+    "mathjax-single-dollar"
   ],
   "pluginsConfig": {
     "mermaid-gb3": {
       "theme": "default"
+    },
+    "mathjax": {
+      "forceSVG": true
     }
   }
 }
