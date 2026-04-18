@@ -31,7 +31,7 @@
 | o3 | 2025.04 | Decoder | 未公开 | - | - | - | 200K | 推理模型 |
 | Claude Opus 4.6 | 2026.02.05 | Decoder | 未公开 | - | - | - | 1M | 增强推理 |
 | Claude Sonnet 4.6 | 2026.02.17 | Decoder | 未公开 | - | - | - | 1M | 长上下文能力 |
-| Claude Opus 4.7 | 2026.04.16 | Decoder | 未公开 | - | - | - | 1M | 软件工程能力（SWE-bench 87.6%，GPQA 94.2%） |
+| Claude Opus 4.7 | 2026.04.16 | Decoder | 未公开 | - | - | - | 1M | 软件工程能力（SWE-bench 87.6%，GPQA 94.2%，Terminal-Bench 2.0 69.4%，Finance Agent 64.4%） |
 | Llama 4 | 2025.04 | MoE-Dec | 未公开 | - | - | - | 1M-10M（因 Scout/Maverick 不同） | MoE 架构 |
 | GPT-5 | 2025.08.07 | Decoder | 未公开 | - | - | - | 未公开 | 多模态推理 |
 | GPT-5.1 | 2025.11 | Decoder | 未公开 | - | - | - | 未公开 | 迭代更新 |
