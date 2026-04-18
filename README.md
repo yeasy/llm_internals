@@ -10,7 +10,7 @@
 
 > 以 Transformer 为例，深入剖析大模型为什么能工作、为什么这样设计，系统掌握从架构原理到训练部署的完整知识体系。
 
-<img src="cover.jpg" width="400px" alt="封面">
+<img src="cover.jpg" width="300" alt="大模型原理与架构封面">
 
 </div>
 
@@ -138,9 +138,9 @@ mdpress serve
 
 欢迎贡献！您可以通过以下方式参与：
 
-- 🐛 [提交 Issue](https://github.com/yeasy/llm_internals/issues) — 报告错误或提出建议
-- 📝 [提交 PR](https://github.com/yeasy/llm_internals/pulls) — 改进内容或修复 typo
-- ⭐ Star 本项目 — 帮助更多人发现这本书
+- [提交 Issue](https://github.com/yeasy/llm_internals/issues)：报告错误或提出建议
+- [提交 PR](https://github.com/yeasy/llm_internals/pulls)：改进内容或修复 typo
+- Star 本项目：帮助更多人发现这本书
 
 ---
 
