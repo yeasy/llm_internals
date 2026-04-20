@@ -3,17 +3,5 @@
   "description": "大模型原理与架构",
   "language": "zh-hans",
   "author": "yeasy",
-  "root": ".",
-  "plugins": [
-    "mermaid-gb3",
-    "mathjax-single-dollar"
-  ],
-  "pluginsConfig": {
-    "mermaid-gb3": {
-      "theme": "default"
-    },
-    "mathjax": {
-      "forceSVG": true
-    }
-  }
+  "root": "."
 }
