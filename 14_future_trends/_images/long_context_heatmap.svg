@@ -1,0 +1,73 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="760" viewBox="0 0 1200 760">
+  <defs>
+    <style>
+      .title { font: 700 26px Arial, Helvetica, sans-serif; fill: #0f172a; }
+      .label { font: 700 18px Arial, Helvetica, sans-serif; fill: #0f172a; }
+      .text { font: 16px Arial, Helvetica, sans-serif; fill: #334155; }
+      .small { font: 14px Arial, Helvetica, sans-serif; fill: #475569; }
+      .axis { stroke: #64748b; stroke-width: 2; }
+    </style>
+  </defs>
+
+  <rect x="0" y="0" width="1200" height="760" fill="#f8fafc"/>
+  <text class="title" x="70" y="70">Needle position vs context length heatmap</text>
+  <text class="small" x="70" y="98">Illustrative pattern from NIAH and RULER-style evaluation: accuracy drops first in long contexts and around the middle positions.</text>
+
+  <line class="axis" x1="210" y1="620" x2="860" y2="620"/>
+  <line class="axis" x1="210" y1="620" x2="210" y2="180"/>
+  <text class="label" x="480" y="680">Needle position in context</text>
+  <text class="label" x="110" y="420" transform="rotate(-90 110 420)">Context length</text>
+
+  <text class="small" x="240" y="650">start</text>
+  <text class="small" x="510" y="650">middle</text>
+  <text class="small" x="800" y="650">end</text>
+  <text class="small" x="150" y="588">8K</text>
+  <text class="small" x="143" y="500">32K</text>
+  <text class="small" x="136" y="412">128K</text>
+  <text class="small" x="136" y="324">512K</text>
+  <text class="small" x="136" y="236">1M+</text>
+
+  <g>
+    <rect x="240" y="220" width="120" height="80" fill="#0f766e"/>
+    <rect x="370" y="220" width="120" height="80" fill="#14b8a6"/>
+    <rect x="500" y="220" width="120" height="80" fill="#5eead4"/>
+    <rect x="630" y="220" width="120" height="80" fill="#14b8a6"/>
+    <rect x="760" y="220" width="120" height="80" fill="#0f766e"/>
+
+    <rect x="240" y="308" width="120" height="80" fill="#14b8a6"/>
+    <rect x="370" y="308" width="120" height="80" fill="#67e8f9"/>
+    <rect x="500" y="308" width="120" height="80" fill="#bae6fd"/>
+    <rect x="630" y="308" width="120" height="80" fill="#67e8f9"/>
+    <rect x="760" y="308" width="120" height="80" fill="#14b8a6"/>
+
+    <rect x="240" y="396" width="120" height="80" fill="#5eead4"/>
+    <rect x="370" y="396" width="120" height="80" fill="#bae6fd"/>
+    <rect x="500" y="396" width="120" height="80" fill="#e2e8f0"/>
+    <rect x="630" y="396" width="120" height="80" fill="#bae6fd"/>
+    <rect x="760" y="396" width="120" height="80" fill="#5eead4"/>
+
+    <rect x="240" y="484" width="120" height="80" fill="#67e8f9"/>
+    <rect x="370" y="484" width="120" height="80" fill="#dbeafe"/>
+    <rect x="500" y="484" width="120" height="80" fill="#f8fafc"/>
+    <rect x="630" y="484" width="120" height="80" fill="#dbeafe"/>
+    <rect x="760" y="484" width="120" height="80" fill="#67e8f9"/>
+
+    <rect x="240" y="572" width="120" height="80" fill="#a5f3fc"/>
+    <rect x="370" y="572" width="120" height="80" fill="#e0f2fe"/>
+    <rect x="500" y="572" width="120" height="80" fill="#ffffff"/>
+    <rect x="630" y="572" width="120" height="80" fill="#e0f2fe"/>
+    <rect x="760" y="572" width="120" height="80" fill="#a5f3fc"/>
+  </g>
+
+  <rect x="930" y="220" width="180" height="28" fill="#0f766e"/>
+  <rect x="930" y="248" width="180" height="28" fill="#14b8a6"/>
+  <rect x="930" y="276" width="180" height="28" fill="#5eead4"/>
+  <rect x="930" y="304" width="180" height="28" fill="#67e8f9"/>
+  <rect x="930" y="332" width="180" height="28" fill="#bae6fd"/>
+  <rect x="930" y="360" width="180" height="28" fill="#e2e8f0"/>
+  <rect x="930" y="388" width="180" height="28" fill="#f8fafc"/>
+  <rect x="930" y="416" width="180" height="28" fill="#ffffff" stroke="#cbd5e1"/>
+  <text class="label" x="930" y="190">Accuracy legend</text>
+  <text class="small" x="930" y="470">dark = high accuracy</text>
+  <text class="small" x="930" y="494">light = degraded retrieval</text>
+</svg>

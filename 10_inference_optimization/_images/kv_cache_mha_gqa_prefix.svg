@@ -1,0 +1,180 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="760" viewBox="0 0 1200 760">
+  <defs>
+    <style>
+      .title { font: 700 26px Arial, Helvetica, sans-serif; fill: #0f172a; }
+      .label { font: 600 18px Arial, Helvetica, sans-serif; fill: #0f172a; }
+      .text { font: 16px Arial, Helvetica, sans-serif; fill: #334155; }
+      .mono { font: 15px 'Courier New', monospace; fill: #334155; }
+      .small { font: 14px Arial, Helvetica, sans-serif; fill: #475569; }
+      .axis { stroke: #64748b; stroke-width: 2; }
+      .grid { stroke: #e2e8f0; stroke-width: 1; }
+      .panel { fill: #ffffff; stroke: #cbd5e1; stroke-width: 2; rx: 18; }
+      .chip { fill: #f8fafc; stroke: #94a3b8; stroke-width: 1.5; rx: 10; }
+      .prefix { fill: #dbeafe; stroke: #2563eb; stroke-width: 1.5; rx: 8; }
+      .suffix { fill: #dcfce7; stroke: #16a34a; stroke-width: 1.5; rx: 8; }
+      .request { fill: #fff7ed; stroke: #f59e0b; stroke-width: 1.5; rx: 10; }
+    </style>
+    <marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#64748b"/>
+    </marker>
+  </defs>
+
+  <rect x="0" y="0" width="1200" height="760" fill="#f8fafc"/>
+
+  <rect class="panel" x="30" y="30" width="720" height="700"/>
+  <text class="title" x="60" y="72">KV cache growth per generated token</text>
+  <text class="small" x="60" y="100">Relative cache size is illustrative: MHA grows with all KV heads, GQA with grouped KV heads.</text>
+
+  <line class="axis" x1="110" y1="640" x2="690" y2="640" marker-end="url(#arrow)"/>
+  <line class="axis" x1="110" y1="640" x2="110" y2="150" marker-end="url(#arrow)"/>
+
+  <text class="label" x="650" y="675">Generated tokens</text>
+  <text class="label" x="45" y="175" transform="rotate(-90 45 175)">Relative KV cache size</text>
+
+  <g class="small">
+    <line class="grid" x1="110" y1="560" x2="690" y2="560"/>
+    <line class="grid" x1="110" y1="480" x2="690" y2="480"/>
+    <line class="grid" x1="110" y1="400" x2="690" y2="400"/>
+    <line class="grid" x1="110" y1="320" x2="690" y2="320"/>
+    <line class="grid" x1="110" y1="240" x2="690" y2="240"/>
+    <line class="grid" x1="190" y1="150" x2="190" y2="640"/>
+    <line class="grid" x1="270" y1="150" x2="270" y2="640"/>
+    <line class="grid" x1="350" y1="150" x2="350" y2="640"/>
+    <line class="grid" x1="430" y1="150" x2="430" y2="640"/>
+    <line class="grid" x1="510" y1="150" x2="510" y2="640"/>
+    <line class="grid" x1="590" y1="150" x2="590" y2="640"/>
+    <text x="85" y="645">0</text>
+    <text x="75" y="565">1x</text>
+    <text x="75" y="485">2x</text>
+    <text x="75" y="405">3x</text>
+    <text x="75" y="325">4x</text>
+    <text x="75" y="245">5x</text>
+    <text x="105" y="665">0</text>
+    <text x="185" y="665">2K</text>
+    <text x="265" y="665">4K</text>
+    <text x="345" y="665">6K</text>
+    <text x="425" y="665">8K</text>
+    <text x="500" y="665">10K</text>
+    <text x="580" y="665">12K</text>
+  </g>
+
+  <polyline fill="none" stroke="#dc2626" stroke-width="5" points="110,640 190,574 270,508 350,442 430,376 510,310 590,244 670,178"/>
+  <polyline fill="none" stroke="#2563eb" stroke-width="5" points="110,640 190,632 270,624 350,616 430,608 510,600 590,592 670,584"/>
+  <polyline fill="none" stroke="#16a34a" stroke-width="5" stroke-dasharray="12 8" points="110,640 190,640 270,640 350,640 430,640 510,620 590,612 670,604"/>
+
+  <circle cx="510" cy="620" r="7" fill="#16a34a"/>
+  <text class="text" x="525" y="614">prefix hit: reused shared prompt</text>
+  <text class="text" x="525" y="636">only suffix appends new KV blocks</text>
+
+  <rect x="150" y="165" width="18" height="18" fill="#dc2626"/>
+  <text class="text" x="176" y="180">MHA: one KV head set per query head</text>
+  <rect x="150" y="195" width="18" height="18" fill="#2563eb"/>
+  <text class="text" x="176" y="210">GQA: fewer KV head groups reduce slope</text>
+  <rect x="150" y="225" width="18" height="18" fill="#16a34a"/>
+  <text class="text" x="176" y="240">Prefix cache: cache grows only on uncached suffix</text>
+
+  <rect class="panel" x="780" y="30" width="390" height="700"/>
+  <text class="title" x="810" y="72">Head sharing and prefix reuse</text>
+  <text class="small" x="810" y="100">Example with 8 query heads and 4 cached prefix blocks.</text>
+
+  <text class="label" x="820" y="150">MHA</text>
+  <g transform="translate(820 175)">
+    <rect class="chip" x="0" y="0" width="60" height="36"/>
+    <rect class="chip" x="0" y="48" width="60" height="36"/>
+    <rect class="chip" x="0" y="96" width="60" height="36"/>
+    <rect class="chip" x="0" y="144" width="60" height="36"/>
+    <rect class="chip" x="0" y="192" width="60" height="36"/>
+    <rect class="chip" x="0" y="240" width="60" height="36"/>
+    <rect class="chip" x="0" y="288" width="60" height="36"/>
+    <rect class="chip" x="0" y="336" width="60" height="36"/>
+    <text class="mono" x="14" y="23">Q0</text>
+    <text class="mono" x="14" y="71">Q1</text>
+    <text class="mono" x="14" y="119">Q2</text>
+    <text class="mono" x="14" y="167">Q3</text>
+    <text class="mono" x="14" y="215">Q4</text>
+    <text class="mono" x="14" y="263">Q5</text>
+    <text class="mono" x="14" y="311">Q6</text>
+    <text class="mono" x="14" y="359">Q7</text>
+    <rect class="chip" x="108" y="0" width="88" height="36"/>
+    <rect class="chip" x="108" y="48" width="88" height="36"/>
+    <rect class="chip" x="108" y="96" width="88" height="36"/>
+    <rect class="chip" x="108" y="144" width="88" height="36"/>
+    <rect class="chip" x="108" y="192" width="88" height="36"/>
+    <rect class="chip" x="108" y="240" width="88" height="36"/>
+    <rect class="chip" x="108" y="288" width="88" height="36"/>
+    <rect class="chip" x="108" y="336" width="88" height="36"/>
+    <text class="mono" x="132" y="23">KV0</text>
+    <text class="mono" x="132" y="71">KV1</text>
+    <text class="mono" x="132" y="119">KV2</text>
+    <text class="mono" x="132" y="167">KV3</text>
+    <text class="mono" x="132" y="215">KV4</text>
+    <text class="mono" x="132" y="263">KV5</text>
+    <text class="mono" x="132" y="311">KV6</text>
+    <text class="mono" x="132" y="359">KV7</text>
+    <line x1="60" y1="18" x2="108" y2="18" stroke="#64748b" stroke-width="2"/>
+    <line x1="60" y1="66" x2="108" y2="66" stroke="#64748b" stroke-width="2"/>
+    <line x1="60" y1="114" x2="108" y2="114" stroke="#64748b" stroke-width="2"/>
+    <line x1="60" y1="162" x2="108" y2="162" stroke="#64748b" stroke-width="2"/>
+    <line x1="60" y1="210" x2="108" y2="210" stroke="#64748b" stroke-width="2"/>
+    <line x1="60" y1="258" x2="108" y2="258" stroke="#64748b" stroke-width="2"/>
+    <line x1="60" y1="306" x2="108" y2="306" stroke="#64748b" stroke-width="2"/>
+    <line x1="60" y1="354" x2="108" y2="354" stroke="#64748b" stroke-width="2"/>
+  </g>
+
+  <text class="label" x="1035" y="150">GQA</text>
+  <g transform="translate(1035 175)">
+    <rect class="chip" x="0" y="0" width="60" height="36"/>
+    <rect class="chip" x="0" y="48" width="60" height="36"/>
+    <rect class="chip" x="0" y="96" width="60" height="36"/>
+    <rect class="chip" x="0" y="144" width="60" height="36"/>
+    <rect class="chip" x="0" y="192" width="60" height="36"/>
+    <rect class="chip" x="0" y="240" width="60" height="36"/>
+    <rect class="chip" x="0" y="288" width="60" height="36"/>
+    <rect class="chip" x="0" y="336" width="60" height="36"/>
+    <text class="mono" x="14" y="23">Q0</text>
+    <text class="mono" x="14" y="71">Q1</text>
+    <text class="mono" x="14" y="119">Q2</text>
+    <text class="mono" x="14" y="167">Q3</text>
+    <text class="mono" x="14" y="215">Q4</text>
+    <text class="mono" x="14" y="263">Q5</text>
+    <text class="mono" x="14" y="311">Q6</text>
+    <text class="mono" x="14" y="359">Q7</text>
+    <rect class="chip" x="110" y="0" width="78" height="84"/>
+    <rect class="chip" x="110" y="96" width="78" height="84"/>
+    <rect class="chip" x="110" y="192" width="78" height="84"/>
+    <rect class="chip" x="110" y="288" width="78" height="84"/>
+    <text class="mono" x="132" y="48">KV0</text>
+    <text class="mono" x="132" y="144">KV1</text>
+    <text class="mono" x="132" y="240">KV2</text>
+    <text class="mono" x="132" y="336">KV3</text>
+    <line x1="60" y1="18" x2="110" y2="18" stroke="#64748b" stroke-width="2"/>
+    <line x1="60" y1="66" x2="110" y2="66" stroke="#64748b" stroke-width="2"/>
+    <line x1="60" y1="114" x2="110" y2="114" stroke="#64748b" stroke-width="2"/>
+    <line x1="60" y1="162" x2="110" y2="162" stroke="#64748b" stroke-width="2"/>
+    <line x1="60" y1="210" x2="110" y2="210" stroke="#64748b" stroke-width="2"/>
+    <line x1="60" y1="258" x2="110" y2="258" stroke="#64748b" stroke-width="2"/>
+    <line x1="60" y1="306" x2="110" y2="306" stroke="#64748b" stroke-width="2"/>
+    <line x1="60" y1="354" x2="110" y2="354" stroke="#64748b" stroke-width="2"/>
+  </g>
+
+  <text class="label" x="820" y="605">Prefix cache</text>
+  <g transform="translate(820 625)">
+    <rect class="request" x="0" y="0" width="320" height="64"/>
+    <text class="text" x="12" y="24">Request A</text>
+    <rect class="prefix" x="12" y="34" width="52" height="18"/>
+    <rect class="prefix" x="70" y="34" width="52" height="18"/>
+    <rect class="prefix" x="128" y="34" width="52" height="18"/>
+    <rect class="prefix" x="186" y="34" width="52" height="18"/>
+    <rect class="suffix" x="244" y="34" width="52" height="18"/>
+    <text class="small" x="104" y="18">shared prefix blocks</text>
+    <rect class="request" x="0" y="86" width="320" height="64"/>
+    <text class="text" x="12" y="110">Request B</text>
+    <rect class="prefix" x="12" y="120" width="52" height="18"/>
+    <rect class="prefix" x="70" y="120" width="52" height="18"/>
+    <rect class="prefix" x="128" y="120" width="52" height="18"/>
+    <rect class="prefix" x="186" y="120" width="52" height="18"/>
+    <rect class="suffix" x="244" y="120" width="52" height="18"/>
+    <text class="small" x="92" y="154">reused</text>
+    <text class="small" x="248" y="154">new suffix</text>
+  </g>
+</svg>

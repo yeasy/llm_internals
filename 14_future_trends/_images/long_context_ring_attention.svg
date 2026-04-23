@@ -1,0 +1,66 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="760" viewBox="0 0 1200 760">
+  <defs>
+    <style>
+      .title { font: 700 26px Arial, Helvetica, sans-serif; fill: #0f172a; }
+      .label { font: 700 18px Arial, Helvetica, sans-serif; fill: #0f172a; }
+      .text { font: 16px Arial, Helvetica, sans-serif; fill: #334155; }
+      .small { font: 14px Arial, Helvetica, sans-serif; fill: #475569; }
+      .gpu { fill: #ffffff; stroke: #64748b; stroke-width: 2; rx: 18; }
+      .tile { fill: #eff6ff; stroke: #2563eb; stroke-width: 1.5; rx: 10; }
+      .kv { fill: #dcfce7; stroke: #16a34a; stroke-width: 1.5; rx: 10; }
+    </style>
+    <marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#475569"/>
+    </marker>
+  </defs>
+
+  <rect x="0" y="0" width="1200" height="760" fill="#f8fafc"/>
+  <text class="title" x="70" y="70">Ring Attention and sequence sharding</text>
+  <text class="small" x="70" y="100">Each device keeps its local Q shard, while K/V blocks circulate around the ring and are merged with online softmax.</text>
+
+  <rect class="gpu" x="150" y="170" width="280" height="180"/>
+  <rect class="gpu" x="770" y="170" width="280" height="180"/>
+  <rect class="gpu" x="770" y="430" width="280" height="180"/>
+  <rect class="gpu" x="150" y="430" width="280" height="180"/>
+
+  <text class="label" x="250" y="205">GPU 0</text>
+  <text class="label" x="870" y="205">GPU 1</text>
+  <text class="label" x="870" y="465">GPU 2</text>
+  <text class="label" x="250" y="465">GPU 3</text>
+
+  <rect class="tile" x="190" y="225" width="90" height="36"/>
+  <rect class="kv" x="300" y="225" width="90" height="36"/>
+  <text class="text" x="218" y="248">Q 0..N/4</text>
+  <text class="text" x="331" y="248">KV tile</text>
+
+  <rect class="tile" x="810" y="225" width="90" height="36"/>
+  <rect class="kv" x="920" y="225" width="90" height="36"/>
+  <text class="text" x="838" y="248">Q N/4</text>
+  <text class="text" x="951" y="248">KV tile</text>
+
+  <rect class="tile" x="810" y="485" width="90" height="36"/>
+  <rect class="kv" x="920" y="485" width="90" height="36"/>
+  <text class="text" x="838" y="508">Q N/2</text>
+  <text class="text" x="951" y="508">KV tile</text>
+
+  <rect class="tile" x="190" y="485" width="90" height="36"/>
+  <rect class="kv" x="300" y="485" width="90" height="36"/>
+  <text class="text" x="218" y="508">Q 3N/4</text>
+  <text class="text" x="331" y="508">KV tile</text>
+
+  <line x1="430" y1="260" x2="770" y2="260" stroke="#475569" stroke-width="4" marker-end="url(#arrow)"/>
+  <line x1="910" y1="350" x2="910" y2="430" stroke="#475569" stroke-width="4" marker-end="url(#arrow)"/>
+  <line x1="770" y1="520" x2="430" y2="520" stroke="#475569" stroke-width="4" marker-end="url(#arrow)"/>
+  <line x1="290" y1="430" x2="290" y2="350" stroke="#475569" stroke-width="4" marker-end="url(#arrow)"/>
+
+  <text class="small" x="520" y="245">send KV block</text>
+  <text class="small" x="928" y="395">send KV block</text>
+  <text class="small" x="500" y="546">send KV block</text>
+  <text class="small" x="307" y="395">send KV block</text>
+
+  <rect class="gpu" x="450" y="285" width="300" height="170"/>
+  <text class="label" x="505" y="325">Per-step work on each GPU</text>
+  <text class="text" x="485" y="365">1. local Q shard stays resident</text>
+  <text class="text" x="485" y="395">2. arriving KV block runs blockwise attention</text>
+  <text class="text" x="485" y="425">3. online softmax merges partial results</text>
+</svg>

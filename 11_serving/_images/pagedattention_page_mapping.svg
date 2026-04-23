@@ -1,0 +1,89 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="760" viewBox="0 0 1200 760">
+  <defs>
+    <style>
+      .title { font: 700 26px Arial, Helvetica, sans-serif; fill: #0f172a; }
+      .label { font: 700 18px Arial, Helvetica, sans-serif; fill: #0f172a; }
+      .text { font: 16px Arial, Helvetica, sans-serif; fill: #334155; }
+      .small { font: 14px Arial, Helvetica, sans-serif; fill: #475569; }
+      .panel { fill: #ffffff; stroke: #cbd5e1; stroke-width: 2; rx: 18; }
+      .logical { fill: #eff6ff; stroke: #2563eb; stroke-width: 1.5; rx: 10; }
+      .physical { fill: #f8fafc; stroke: #64748b; stroke-width: 1.5; rx: 10; }
+      .shared { fill: #dcfce7; stroke: #16a34a; stroke-width: 1.5; rx: 10; }
+      .private { fill: #fff7ed; stroke: #f59e0b; stroke-width: 1.5; rx: 10; }
+      .cow { fill: #fee2e2; stroke: #dc2626; stroke-width: 1.5; rx: 10; }
+    </style>
+    <marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#64748b"/>
+    </marker>
+  </defs>
+
+  <rect x="0" y="0" width="1200" height="760" fill="#f8fafc"/>
+
+  <text class="title" x="60" y="70">PagedAttention: logical block table to physical KV pages</text>
+  <text class="small" x="60" y="100">Requests grow by appending fixed-size pages instead of reserving one long contiguous KV buffer.</text>
+
+  <rect class="panel" x="40" y="130" width="320" height="580"/>
+  <text class="label" x="70" y="170">Request A block table</text>
+  <rect class="shared" x="70" y="210" width="140" height="56"/>
+  <rect class="shared" x="70" y="286" width="140" height="56"/>
+  <rect class="private" x="70" y="362" width="140" height="56"/>
+  <rect class="private" x="70" y="438" width="140" height="56"/>
+  <text class="text" x="96" y="243">L0 prefix</text>
+  <text class="text" x="96" y="319">L1 prefix</text>
+  <text class="text" x="96" y="395">L2 decode</text>
+  <text class="text" x="96" y="471">L3 decode</text>
+
+  <text class="mono" x="250" y="243" style="font: 15px 'Courier New', monospace; fill: #334155;">P07</text>
+  <text class="mono" x="250" y="319" style="font: 15px 'Courier New', monospace; fill: #334155;">P19</text>
+  <text class="mono" x="250" y="395" style="font: 15px 'Courier New', monospace; fill: #334155;">P31</text>
+  <text class="mono" x="250" y="471" style="font: 15px 'Courier New', monospace; fill: #334155;">P42</text>
+
+  <rect class="panel" x="390" y="130" width="320" height="580"/>
+  <text class="label" x="420" y="170">Request B block table</text>
+  <rect class="shared" x="420" y="210" width="140" height="56"/>
+  <rect class="shared" x="420" y="286" width="140" height="56"/>
+  <rect class="private" x="420" y="362" width="140" height="56"/>
+  <rect class="cow" x="420" y="438" width="140" height="56"/>
+  <text class="text" x="446" y="243">L0 prefix</text>
+  <text class="text" x="446" y="319">L1 prefix</text>
+  <text class="text" x="446" y="395">L2 decode</text>
+  <text class="text" x="446" y="471">L3 branch</text>
+
+  <text class="mono" x="600" y="243" style="font: 15px 'Courier New', monospace; fill: #334155;">P07</text>
+  <text class="mono" x="600" y="319" style="font: 15px 'Courier New', monospace; fill: #334155;">P19</text>
+  <text class="mono" x="600" y="395" style="font: 15px 'Courier New', monospace; fill: #334155;">P55</text>
+  <text class="mono" x="600" y="471" style="font: 15px 'Courier New', monospace; fill: #334155;">P63</text>
+
+  <rect class="panel" x="740" y="130" width="420" height="580"/>
+  <text class="label" x="770" y="170">Physical KV page pool</text>
+  <rect class="physical" x="780" y="210" width="120" height="56"/>
+  <rect class="physical" x="930" y="210" width="120" height="56"/>
+  <rect class="physical" x="780" y="286" width="120" height="56"/>
+  <rect class="physical" x="930" y="286" width="120" height="56"/>
+  <rect class="physical" x="780" y="362" width="120" height="56"/>
+  <rect class="physical" x="930" y="362" width="120" height="56"/>
+  <rect class="physical" x="780" y="438" width="120" height="56"/>
+  <rect class="physical" x="930" y="438" width="120" height="56"/>
+  <text class="text" x="820" y="243">P07</text>
+  <text class="text" x="969" y="243">P19</text>
+  <text class="text" x="820" y="319">P31</text>
+  <text class="text" x="969" y="319">P42</text>
+  <text class="text" x="820" y="395">P55</text>
+  <text class="text" x="969" y="395">P63</text>
+  <text class="text" x="815" y="471">free page</text>
+  <text class="text" x="965" y="471">free page</text>
+
+  <line x1="210" y1="238" x2="780" y2="238" stroke="#16a34a" stroke-width="3" marker-end="url(#arrow)"/>
+  <line x1="210" y1="314" x2="930" y2="238" stroke="#16a34a" stroke-width="3" marker-end="url(#arrow)"/>
+  <line x1="210" y1="390" x2="780" y2="314" stroke="#f59e0b" stroke-width="3" marker-end="url(#arrow)"/>
+  <line x1="210" y1="466" x2="930" y2="314" stroke="#f59e0b" stroke-width="3" marker-end="url(#arrow)"/>
+
+  <line x1="560" y1="238" x2="780" y2="238" stroke="#16a34a" stroke-width="3" marker-end="url(#arrow)"/>
+  <line x1="560" y1="314" x2="930" y2="238" stroke="#16a34a" stroke-width="3" marker-end="url(#arrow)"/>
+  <line x1="560" y1="390" x2="780" y2="390" stroke="#f59e0b" stroke-width="3" marker-end="url(#arrow)"/>
+  <line x1="560" y1="466" x2="930" y2="390" stroke="#dc2626" stroke-width="3" stroke-dasharray="10 6" marker-end="url(#arrow)"/>
+
+  <text class="small" x="770" y="548">Green pages are shared prefix blocks.</text>
+  <text class="small" x="770" y="572">Orange pages are per-request decode growth.</text>
+  <text class="small" x="770" y="596">Red dashed edge shows copy-on-write when a shared branch diverges.</text>
+</svg>

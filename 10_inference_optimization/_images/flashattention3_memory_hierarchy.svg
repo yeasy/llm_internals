@@ -1,0 +1,61 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="760" viewBox="0 0 1200 760">
+  <defs>
+    <style>
+      .title { font: 700 26px Arial, Helvetica, sans-serif; fill: #0f172a; }
+      .label { font: 700 18px Arial, Helvetica, sans-serif; fill: #0f172a; }
+      .text { font: 16px Arial, Helvetica, sans-serif; fill: #334155; }
+      .small { font: 14px Arial, Helvetica, sans-serif; fill: #475569; }
+      .layer { stroke-width: 2; rx: 18; }
+      .chip { fill: #ffffff; stroke: #94a3b8; stroke-width: 1.5; rx: 12; }
+      .path { stroke-width: 4; fill: none; marker-end: url(#arrow); }
+    </style>
+    <marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#475569"/>
+    </marker>
+  </defs>
+
+  <rect x="0" y="0" width="1200" height="760" fill="#f8fafc"/>
+
+  <text class="title" x="70" y="70">FlashAttention-3 on Hopper: memory hierarchy and overlapped compute</text>
+  <text class="small" x="70" y="100">Based on the FlashAttention-3 paper's Hopper-specific optimizations: TMA, warp specialization, interleaved GEMM and softmax, FP8 support.</text>
+
+  <rect class="layer" x="80" y="140" width="1040" height="100" fill="#e2e8f0" stroke="#64748b"/>
+  <text class="label" x="110" y="180">HBM</text>
+  <text class="text" x="110" y="210">Global K/V tiles, Q tiles, output O tiles</text>
+
+  <rect class="layer" x="140" y="280" width="920" height="110" fill="#dbeafe" stroke="#2563eb"/>
+  <text class="label" x="170" y="322">TMA + producer warps</text>
+  <text class="text" x="170" y="350">Asynchronously stage next K/V tile from HBM into on-chip SRAM</text>
+  <text class="text" x="170" y="374">Copy runs in parallel with compute instead of blocking it</text>
+
+  <rect class="layer" x="210" y="440" width="780" height="130" fill="#dcfce7" stroke="#16a34a"/>
+  <text class="label" x="240" y="482">Shared memory / SRAM tile buffer</text>
+  <text class="text" x="240" y="510">Resident Q, K, V tiles for the current block</text>
+  <rect class="chip" x="240" y="528" width="160" height="28"/>
+  <rect class="chip" x="420" y="528" width="160" height="28"/>
+  <rect class="chip" x="600" y="528" width="160" height="28"/>
+  <text class="small" x="300" y="547">Q tile</text>
+  <text class="small" x="474" y="547">K tile</text>
+  <text class="small" x="657" y="547">V tile</text>
+
+  <rect class="chip" x="160" y="620" width="300" height="90"/>
+  <text class="label" x="190" y="654">Tensor Cores</text>
+  <text class="text" x="190" y="682">QK^T GEMM and PV matmul</text>
+
+  <rect class="chip" x="500" y="620" width="250" height="90"/>
+  <text class="label" x="530" y="654">CUDA Cores</text>
+  <text class="text" x="530" y="682">Online softmax, rescale, stats merge</text>
+
+  <rect class="chip" x="790" y="620" width="280" height="90"/>
+  <text class="label" x="820" y="654">FP8 block quantization</text>
+  <text class="text" x="820" y="682">Tile-level scales reduce bandwidth and keep error bounded</text>
+
+  <path class="path" stroke="#2563eb" d="M 600 240 C 600 255, 600 265, 600 280"/>
+  <path class="path" stroke="#16a34a" d="M 600 390 C 600 405, 600 420, 600 440"/>
+  <path class="path" stroke="#0f766e" d="M 390 570 C 350 590, 330 600, 310 620"/>
+  <path class="path" stroke="#0f766e" d="M 600 570 C 600 590, 600 600, 625 620"/>
+  <path class="path" stroke="#0f766e" d="M 760 570 C 835 590, 890 600, 930 620"/>
+
+  <path class="path" stroke="#64748b" d="M 310 710 C 310 730, 930 730, 930 710"/>
+  <text class="small" x="475" y="748">Output tile written back to HBM after on-chip accumulation</text>
+</svg>
