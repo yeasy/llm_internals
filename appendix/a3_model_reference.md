@@ -10,15 +10,15 @@
 | T5-Large | 2020.10 | Enc-Dec | 770M | 24 | 1024 | 16 | 512 | 文本到文本 |
 | Llama 2-7B | 2023.07 | Decoder | 7B | 32 | 4096 | 32 | 4096 | RoPE + GQA |
 | Llama 2-70B | 2023.07 | Decoder | 70B | 80 | 8192 | 64 | 4096 | GQA(8KV头) |
-| Llama 3-8B | 2024.04 | Decoder | 8B | 32 | 4096 | 32 | 128K | 128K词汇表 |
-| Llama 3-70B | 2024.04 | Decoder | 70B | 80 | 8192 | 64 | 128K | GQA |
+| Llama 3-8B | 2024.04 | Decoder | 8B | 32 | 4096 | 32 | 8192 | 128K词汇表 |
+| Llama 3-70B | 2024.04 | Decoder | 70B | 80 | 8192 | 64 | 8192 | GQA |
 | Llama 3.1-405B | 2024.07 | Decoder | 405B | 126 | 16384 | 128 | 128K | 开源追平 GPT-4 |
 | GPT-4o mini | 2024.07 | Decoder | 未公开 | - | - | - | 128K | 极致性价比 |
 | Claude 3.5 Sonnet | 2024.06 | Decoder | 未公开 | - | - | - | 200K | Artifacts/Computer Use |
 | o1 | 2024.12 | Decoder | 未公开 | - | - | - | 200K | 推理时计算扩展 |
 | o1-mini | 2024.12 | Decoder | 未公开 | - | - | - | 200K | 轻量级推理 |
 | Qwen 2.5-72B | 2024.09 | Decoder | 72B | 80 | 8192 | 64 | 128K | 多语言、代码、数学 |
-| DeepSeek-R1 | 2025.01.20 | MoE-Dec | 671B(37B激活) | 61 | 7168 | 128 | 128K | 纯 RL 推理 |
+| DeepSeek-R1 | 2025.01.20 | MoE-Dec | 671B(37B激活) | 61 | 7168 | 128 | 128K | cold-start + 多阶段训练 |
 | Mistral 7B | 2023.09 | Decoder | 7B | 32 | 4096 | 32 | 32K | 滑动窗口注意力 |
 | DeepSeek-V3 | 2024.12 | MoE-Dec | 671B(37B激活) | 61 | 7168 | 128 | 128K | MoE + FP8 |
 | Claude 3.7 Sonnet | 2025.02.24 | Decoder | 未公开 | - | - | - | 200K | 混合推理能力 |
