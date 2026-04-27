@@ -27,16 +27,13 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y chromium-browser fonts-noto-cjk fonts-noto-cjk-extra
 
-      - name: Install mdpress 0.7.9
-        env:
-          MDPRESS_VERSION: "0.7.9"
-          MDPRESS_SHA256: "922bf55514d6705431956250f6d76141d4301055c43099a6902928508db55dc7"
+      - name: Install mdpress (latest)
         run: |
-          archive="/tmp/mdpress_${MDPRESS_VERSION}_linux_amd64.tar.gz"
-          echo "Installing mdpress ${MDPRESS_VERSION}"
-          curl -fsSL "https://github.com/yeasy/mdPress/releases/download/v${MDPRESS_VERSION}/mdpress_${MDPRESS_VERSION}_linux_amd64.tar.gz" -o "$archive"
-          echo "${MDPRESS_SHA256}  $archive" | sha256sum -c -
-          tar xzf "$archive" -C /tmp mdpress
+          LATEST_TAG=$(curl -fsSL -H "Accept: application/vnd.github+json" -H "Authorization: Bearer ${{ github.token }}" https://api.github.com/repos/yeasy/mdpress/releases/latest | jq -r .tag_name)
+          VERSION="${LATEST_TAG#v}"
+          echo "Installing mdpress $VERSION"
+          curl -fsSL "https://github.com/yeasy/mdPress/releases/download/$LATEST_TAG/mdpress_${VERSION}_linux_amd64.tar.gz" -o /tmp/mdpress.tar.gz
+          tar xzf /tmp/mdpress.tar.gz -C /tmp mdpress
           sudo mv /tmp/mdpress /usr/local/bin/
           mdpress --version
 
