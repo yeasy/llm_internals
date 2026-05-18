@@ -128,3 +128,4 @@
   * [A.2 PyTorch 实现示例](appendix/a2_pytorch_examples.md)
   * [A.3 主流模型参数速查表](appendix/a3_model_reference.md)
   * [A.4 推荐阅读与参考文献](appendix/a4_references.md)
+  * [A.5 快变事实核验表](appendix/a5_volatile_facts.md)
