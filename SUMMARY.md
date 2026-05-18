@@ -1,6 +1,6 @@
 # Summary
 
-* [前言](README.md)
+* [大模型原理与架构](README.md)
 
 ## 第一部分：基础篇
 

@@ -106,7 +106,7 @@ graph LR
 
 ## 本地阅读
 
-先安装 [mdPress](https://github.com/yeasy/mdpress)：
+本仓库的预览 PDF 与本地阅读入口使用 [mdPress](https://github.com/yeasy/mdpress)：
 
 ```bash
 brew tap yeasy/tap && brew install mdpress
