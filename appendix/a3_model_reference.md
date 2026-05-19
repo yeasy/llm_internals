@@ -18,9 +18,9 @@
 | o1 | 2024.12 | Decoder | 未公开 | - | - | - | 200K | 推理时计算扩展 |
 | o1-mini | 2024.12 | Decoder | 未公开 | - | - | - | 200K | 轻量级推理 |
 | Qwen 2.5-72B | 2024.09 | Decoder | 72B | 80 | 8192 | 64 | 128K | 多语言、代码、数学 |
-| DeepSeek-R1 | 2025.01.20 | MoE-Dec | 671B(37B激活) | 61 | 7168 | 128 | 128K | cold-start + 多阶段训练 |
 | Mistral 7B | 2023.09 | Decoder | 7B | 32 | 4096 | 32 | 32K | 滑动窗口注意力 |
 | DeepSeek-V3 | 2024.12 | MoE-Dec | 671B(37B激活) | 61 | 7168 | 128 | 128K | MoE + FP8 |
+| DeepSeek-R1 | 2025.01.20 | MoE-Dec | 671B(37B激活) | 61 | 7168 | 128 | 128K | cold-start + 多阶段训练 |
 | Claude 3.7 Sonnet | 2025.02.24 | Decoder | 未公开 | - | - | - | 200K | 混合推理能力 |
 | Claude Opus 4 | 2025.05 | Decoder | 未公开 | - | - | - | 200K | 多模态和代理能力 |
 | Claude Sonnet 4.5 | 2025.09.29 | Decoder | 未公开 | - | - | - | 200K | 高性能推理 |
