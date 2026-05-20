@@ -4,6 +4,8 @@
 
 ### 缩放点积注意力
 
+下面的函数支持常见 padding mask 和 causal mask。padding mask 通常形如 `(batch, key_len)`，causal mask 通常形如 `(query_len, key_len)` 或 `(batch, query_len, key_len)`。
+
 ```python
 import torch
 import torch.nn.functional as F
@@ -14,6 +16,13 @@ def scaled_dot_product_attention(Q, K, V, mask=None):
     d_k = Q.size(-1)
     scores = torch.matmul(Q, K.transpose(-2, -1)) / math.sqrt(d_k)
     if mask is not None:
+        if mask.dim() == 2:
+            if mask.size(0) == Q.size(-2) and mask.size(1) == K.size(-2):
+                mask = mask.unsqueeze(0).unsqueeze(0)
+            else:
+                mask = mask[:, None, None, :]
+        elif mask.dim() == 3:
+            mask = mask[:, None, :, :]
         scores = scores.masked_fill(mask == 0, float('-inf'))
     attn_weights = F.softmax(scores, dim=-1)
     output = torch.matmul(attn_weights, V)
@@ -22,12 +31,16 @@ def scaled_dot_product_attention(Q, K, V, mask=None):
 
 ### 多头注意力
 
+多头注意力需要 `d_model` 能被注意力头数整除，否则无法把投影后的张量均匀拆成多个头。
+
 ```python
 import torch.nn as nn
 
 class MultiHeadAttention(nn.Module):
     def __init__(self, d_model, n_heads):
         super().__init__()
+        if d_model % n_heads != 0:
+            raise ValueError("d_model must be divisible by n_heads")
         self.d_model = d_model
         self.n_heads = n_heads
         self.d_k = d_model // n_heads
@@ -51,6 +64,8 @@ class MultiHeadAttention(nn.Module):
 
 ### 前馈网络
 
+下面的代码块延续前文导入的 `nn` 和 `F`，展示逐位置前馈网络的最小结构。
+
 ```python
 class FeedForward(nn.Module):
     def __init__(self, d_model, d_ff, dropout=0.1):
@@ -65,7 +80,9 @@ class FeedForward(nn.Module):
 
 ### 训练循环示例
 
-```python
+下面是训练循环骨架，省略了具体模型类、数据加载器和 epoch 配置，重点展示损失计算、梯度裁剪和优化器更新的位置。
+
+```text
 model = MyTransformerModel(vocab_size=32000, d_model=512, n_heads=8, n_layers=6)
 criterion = nn.CrossEntropyLoss(ignore_index=0, label_smoothing=0.1)
 optimizer = torch.optim.Adam(model.parameters(), lr=1e-4, betas=(0.9, 0.98), eps=1e-9)
@@ -76,7 +93,7 @@ for epoch in range(num_epochs):
         input_ids, target_ids = batch
         optimizer.zero_grad()
         logits = model(input_ids)
-        loss = criterion(logits.view(-1, vocab_size), target_ids.view(-1))
+        loss = criterion(logits.reshape(-1, logits.size(-1)), target_ids.reshape(-1))
         loss.backward()
         torch.nn.utils.clip_grad_norm_(model.parameters(), max_norm=1.0)
         optimizer.step()

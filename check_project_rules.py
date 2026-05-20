@@ -3,6 +3,7 @@
 
 from __future__ import annotations
 
+import argparse
 import re
 import sys
 from pathlib import Path
@@ -118,9 +119,27 @@ def check_summary_links() -> list[str]:
     return check_links(summary, summary.read_text(encoding="utf-8", errors="ignore"))
 
 
-def main() -> int:
+def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
+    parser = argparse.ArgumentParser(
+        description="Run lightweight Markdown checks for this book."
+    )
+    parser.add_argument(
+        "-v",
+        "--verbose",
+        action="store_true",
+        help="Show scanned Markdown files.",
+    )
+    return parser.parse_args(argv)
+
+
+def main(argv: list[str] | None = None) -> int:
+    args = parse_args(argv)
     issues: list[str] = []
     files = iter_markdown_files()
+    if args.verbose:
+        print("Scanned Markdown files:")
+        for path in files:
+            print(f"- {path.relative_to(ROOT)}")
     for path in files:
         text = path.read_text(encoding="utf-8", errors="ignore")
         issues.extend(check_fences(path, text))

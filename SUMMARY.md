@@ -77,7 +77,7 @@
   * [9.2 贪心搜索与束搜索：确定性与全局最优](09_decoding/9.2_greedy_beam.md)
   * [9.3 采样策略：温度、Top-k 与 Top-p 的设计直觉](09_decoding/9.3_sampling.md)
   * [9.4 结构化输出与约束解码](09_decoding/9.4_constrained.md)
-  * [9.5 推理时计算扩展：让模型学会深度思考](09_decoding/9.5_test_time_scaling.md)
+  * [9.5 解码侧的推理时扩展：生成、搜索与验证](09_decoding/9.5_test_time_scaling.md)
   * [本章小结](09_decoding/summary.md)
 
 * [第十章：推理优化：第一性原理的分析](10_inference_optimization/README.md)
@@ -97,7 +97,7 @@
   * [11.5 生产部署最佳实践](11_serving/11.5_best_practices.md)
   * [本章小结](11_serving/summary.md)
 
-## 第四部分：前沿与实践篇
+## 第四部分：模型与前沿篇
 
 * [第十二章：编码器系列模型](12_encoder_models/README.md)
   * [12.1 BERT：双向理解的突破](12_encoder_models/12.1_bert.md)
@@ -107,7 +107,7 @@
 
 * [第十三章：解码器系列与主流 LLM](13_decoder_models/README.md)
   * [13.1 GPT 系列：从语言模型到通用智能的扩展之路](13_decoder_models/13.1_gpt_series.md)
-  * [13.2 Llama 家族：开源如何改变 LLM 格局](13_decoder_models/13.2_llama.md)
+  * [13.2 Llama 家族：开放权重如何改变 LLM 格局](13_decoder_models/13.2_llama.md)
   * [13.3 DeepSeek、Gemini 与其他前沿模型](13_decoder_models/13.3_deepseek_gemini.md)
   * [13.4 编码器-解码器模型：T5 与 BART 的设计选择](13_decoder_models/13.4_t5_bart.md)
   * [本章小结](13_decoder_models/summary.md)
