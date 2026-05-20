@@ -17,12 +17,16 @@ def scaled_dot_product_attention(Q, K, V, mask=None):
     scores = torch.matmul(Q, K.transpose(-2, -1)) / math.sqrt(d_k)
     if mask is not None:
         if mask.dim() == 2:
-            if mask.size(0) == Q.size(-2) and mask.size(1) == K.size(-2):
+            if mask.size(0) == Q.size(0) and mask.size(1) == K.size(-2):
+                mask = mask[:, None, None, :]
+            elif mask.size(0) == Q.size(-2) and mask.size(1) == K.size(-2):
                 mask = mask.unsqueeze(0).unsqueeze(0)
             else:
-                mask = mask[:, None, None, :]
+                raise ValueError("2D mask must be (batch, key_len) or (query_len, key_len)")
         elif mask.dim() == 3:
             mask = mask[:, None, :, :]
+        elif mask.dim() != 4:
+            raise ValueError("mask must have 2, 3, or 4 dimensions")
         scores = scores.masked_fill(mask == 0, float('-inf'))
     attn_weights = F.softmax(scores, dim=-1)
     output = torch.matmul(attn_weights, V)
