@@ -8,7 +8,7 @@
 | GPT-2 | 2019.02 | Decoder | 1.5B | 48 | 1600 | 25 | 1024 | 自回归 LM |
 | GPT-3 | 2020.06 | Decoder | 175B | 96 | 12288 | 96 | 2048 | 少样本学习 |
 | T5-Large | 2020.10 | Enc-Dec | 770M | 24 | 1024 | 16 | 512 | 文本到文本 |
-| Llama 2-7B | 2023.07 | Decoder | 7B | 32 | 4096 | 32 | 4096 | RoPE + GQA |
+| Llama 2-7B | 2023.07 | Decoder | 7B | 32 | 4096 | 32 | 4096 | RoPE |
 | Llama 2-70B | 2023.07 | Decoder | 70B | 80 | 8192 | 64 | 4096 | GQA(8KV头) |
 | Llama 3-8B | 2024.04 | Decoder | 8B | 32 | 4096 | 32 | 8192 | 128K词汇表 |
 | Llama 3-70B | 2024.04 | Decoder | 70B | 80 | 8192 | 64 | 8192 | GQA |
@@ -33,7 +33,8 @@
 | Claude Opus 4.6 | 2026.02.05 | Decoder | 未公开 | - | - | - | 1M | 增强推理 |
 | Claude Sonnet 4.6 | 2026.02.17 | Decoder | 未公开 | - | - | - | 1M | 长上下文能力 |
 | Claude Opus 4.7 | 2026.04.16 | Decoder | 未公开 | - | - | - | 以官方模型页为准 | 软件工程、视觉理解和复杂多步任务 |
-| Llama 4 | 2025.04 | MoE-Dec | 未公开 | - | - | - | 1M-10M（因 Scout/Maverick 不同） | MoE 架构 |
+| Llama 4 Scout | 2025.04 | MoE-Dec | 109B total / 17B active | - | - | - | 10M | MoE 架构 |
+| Llama 4 Maverick | 2025.04 | MoE-Dec | 400B total / 17B active | - | - | - | 1M | MoE 架构 |
 | GPT-5 | 2025.08.07 | Decoder | 未公开 | - | - | - | 未公开 | 多模态推理 |
 | GPT-5.1 | 2025.11 | Decoder | 未公开 | - | - | - | 未公开 | 迭代更新 |
 | GPT-5.2 | 2025.12.11 | Decoder | 未公开 | - | - | - | 未公开 | 旗舰推理模型 |
