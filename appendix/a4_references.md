@@ -48,7 +48,7 @@
 
 ### 前沿架构
 
-35. Gu, A. & Dao, T. (2024). [Mamba: Linear-Time Sequence Modeling with Selective State Spaces](https://arxiv.org/abs/2312.00752).
+35. Gu, A. & Dao, T. (2023; revised 2024). [Mamba: Linear-Time Sequence Modeling with Selective State Spaces](https://arxiv.org/abs/2312.00752).
 36. DeepSeek-AI. (2024). [DeepSeek-V3 Technical Report](https://arxiv.org/abs/2412.19437).
 37. Yao, S., et al. (2022). [ReAct: Synergizing Reasoning and Acting in Language Models](https://arxiv.org/abs/2210.03629). *ICLR 2023*.
 38. Yao, S., et al. (2023). [Tree of Thoughts: Deliberate Problem Solving with Large Language Models](https://arxiv.org/abs/2305.10601).
@@ -64,3 +64,14 @@
 
 43. Jurafsky, D. & Martin, J.H. *Speech and Language Processing* (3rd ed.). 第10章 Transformer 部分。
 44. 邱锡鹏. 《神经网络与深度学习》. 第15章注意力机制与 Transformer。
+
+### 官方模型、硬件与工程资料
+
+45. OpenAI. [GPT-5 Model Documentation](https://developers.openai.com/api/docs/models/gpt-5).
+46. OpenAI. [Retiring GPT-4o and other ChatGPT models](https://help.openai.com/en/articles/20001051).
+47. Meta AI. [The Llama 4 herd](https://ai.meta.com/blog/llama-4-multimodal-intelligence/).
+48. Google. [Introducing Gemini 1.5](https://blog.google/innovation-and-ai/products/google-gemini-next-generation-model-february-2024/).
+49. Google Cloud. [Our eighth generation TPUs: TPU 8t and TPU 8i](https://blog.google/innovation-and-ai/infrastructure-and-cloud/google-cloud/eighth-generation-tpu-agentic-era/).
+50. NVIDIA. [H100 GPU Product Specifications](https://www.nvidia.com/en-us/data-center/h100/).
+51. PyTorch. [DistributedDataParallel Documentation](https://docs.pytorch.org/docs/stable/generated/torch.nn.parallel.DistributedDataParallel.html).
+52. DeepSpeed. [ZeRO Documentation](https://deepspeed.readthedocs.io/en/stable/zero3.html).

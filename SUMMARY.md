@@ -74,7 +74,7 @@
 
 * [第九章：解码策略：模型如何生成文本](09_decoding/README.md)
   * [9.1 自回归解码：逐词生成的机制](09_decoding/9.1_autoregressive_decode.md)
-  * [9.2 贪心搜索与束搜索：确定性与全局最优](09_decoding/9.2_greedy_beam.md)
+  * [9.2 贪心搜索与束搜索：确定性与近似搜索](09_decoding/9.2_greedy_beam.md)
   * [9.3 采样策略：温度、Top-k 与 Top-p 的设计直觉](09_decoding/9.3_sampling.md)
   * [9.4 结构化输出与约束解码](09_decoding/9.4_constrained.md)
   * [9.5 解码侧的推理时扩展：生成、搜索与验证](09_decoding/9.5_test_time_scaling.md)
@@ -84,7 +84,7 @@
   * [10.1 推理瓶颈分析：计算密集还是访存密集](10_inference_optimization/10.1_bottleneck.md)
   * [10.2 KV 缓存：为什么能避免重复计算](10_inference_optimization/10.2_kv_cache.md)
   * [10.3 Flash Attention：IO 感知的算法设计](10_inference_optimization/10.3_flash_attention.md)
-  * [10.4 模型量化：用更少的位数表示权重](10_inference_optimization/10.4_quantization.md)
+  * [10.4 模型量化：用更少的位数表示权重与激活值](10_inference_optimization/10.4_quantization.md)
   * [10.5 剪枝与知识蒸馏：模型瘦身的两条路](10_inference_optimization/10.5_pruning_distillation.md)
   * [10.6 投机解码：为什么“先猜后验”能加速](10_inference_optimization/10.6_speculative_decoding.md)
   * [本章小结](10_inference_optimization/summary.md)

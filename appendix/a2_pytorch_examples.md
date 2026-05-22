@@ -27,8 +27,12 @@ def scaled_dot_product_attention(Q, K, V, mask=None):
             mask = mask[:, None, :, :]
         elif mask.dim() != 4:
             raise ValueError("mask must have 2, 3, or 4 dimensions")
-        scores = scores.masked_fill(mask == 0, float('-inf'))
+        valid_mask = mask != 0
+        scores = scores.masked_fill(~valid_mask, torch.finfo(scores.dtype).min)
     attn_weights = F.softmax(scores, dim=-1)
+    if mask is not None:
+        fully_masked = valid_mask.sum(dim=-1, keepdim=True) == 0
+        attn_weights = attn_weights.masked_fill(fully_masked, 0.0)
     output = torch.matmul(attn_weights, V)
     return output, attn_weights
 ```

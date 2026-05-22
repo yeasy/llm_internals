@@ -10,9 +10,9 @@
 
 ### Softmax 函数
 
-$$\text{softmax}(z_i) = \frac{e^{z_i}}{\sum_{j=1}^{K} e^{z_j}}$$
+$$[\text{softmax}(z)]_i = \frac{e^{z_i}}{\sum_{j=1}^{K} e^{z_j}}$$
 
-将实数向量转换为概率分布（非负且和为 1）。具有平移不变性：$$\text{softmax}(z + c) = \text{softmax}(z)$$。
+将实数向量转换为概率分布（非负且和为 1）。具有平移不变性：对任意标量 $$c$$，$$\text{softmax}(z + c\mathbf{1}) = \text{softmax}(z)$$。
 
 ### 交叉熵
 

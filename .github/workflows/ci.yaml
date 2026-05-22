@@ -36,6 +36,8 @@ jobs:
           tar xzf "$archive" -C /tmp mdpress
           sudo mv /tmp/mdpress /usr/local/bin/
           mdpress --version
+      - name: Validate book rules
+        run: python3 check_project_rules.py --verbose
       - name: Build PDF
         run: mdpress build --format pdf --output llm_internals.pdf
       - name: Upload PDF as artifact
