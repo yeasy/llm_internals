@@ -90,7 +90,7 @@ class FeedForward(nn.Module):
 
 下面是训练循环骨架，省略了具体模型类、数据加载器和 epoch 配置，重点展示损失计算、梯度裁剪和优化器更新的位置。
 
-```text
+```python
 model = MyTransformerModel(vocab_size=32000, d_model=512, n_heads=8, n_layers=6)
 criterion = nn.CrossEntropyLoss(ignore_index=0, label_smoothing=0.1)
 optimizer = torch.optim.Adam(model.parameters(), lr=1e-4, betas=(0.9, 0.98), eps=1e-9)
