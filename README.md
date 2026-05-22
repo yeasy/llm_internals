@@ -132,7 +132,7 @@ mdpress serve
 | [《Claude 技术指南》](https://yeasy.gitbook.io/claude_guide) | 深入掌握 Claude 的核心能力与最佳实践 |
 | [《智能体 AI 权威指南》](https://yeasy.gitbook.io/agentic_ai_guide) | 全面学习智能体架构、多智能体协作与工程实践 |
 | [《大模型安全权威指南》](https://yeasy.gitbook.io/ai_security_guide) | 了解大语言模型面临的安全威胁与防御机制 |
-| [《OpenClaw 从入门到精通》](https://yeasy.gitbook.io/openclaw_guide) | 开源智能体框架的实践入门 |
+| [《OpenClaw 入门到精通》](https://yeasy.gitbook.io/openclaw_guide) | 开源智能体框架的实践入门 |
 | [《智能体 Harness 工程指南》](https://yeasy.gitbook.io/harness_engineering_guide) | 深入智能体 Harness 的模型集成层与输出治理设计 |
 
 ---
