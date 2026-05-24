@@ -21,5 +21,9 @@ Thumbs.db
 *.tmp
 *.bak
 
+# Python bytecode
+__pycache__/
+*.pyc
+
 # Agent files
 .agent/
