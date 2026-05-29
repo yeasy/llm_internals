@@ -1,0 +1,69 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1120" height="540" viewBox="0 0 1120 540">
+  <defs>
+    <style>
+      .title { font: 700 24px Arial, Helvetica, sans-serif; fill: #0f172a; }
+      .sub { font: 14px Arial, Helvetica, sans-serif; fill: #475569; }
+      .label { font: 700 17px Arial, Helvetica, sans-serif; fill: #0f172a; }
+      .text { font: 15px Arial, Helvetica, sans-serif; fill: #334155; }
+      .small { font: 13px Arial, Helvetica, sans-serif; fill: #475569; }
+      .box { rx: 12; stroke-width: 1.5; }
+      .path { stroke-width: 3; fill: none; marker-end: url(#arrow); }
+    </style>
+    <marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#475569"/>
+    </marker>
+  </defs>
+  <rect x="0" y="0" width="1120" height="540" fill="#f8fafc"/>
+  <text class="title" x="60" y="54">Sampling the next token: serial multinomial vs. parallel Gumbel-Max</text>
+  <text class="sub" x="60" y="82">Both draw from the same categorical distribution p; Gumbel-Max trades the serial prefix-sum for element-wise ops plus one argmax.</text>
+
+  <!-- Lane A: multinomial -->
+  <text class="label" x="60" y="140">Multinomial: cumulative-sum + search</text>
+  <rect class="box" x="60"  y="158" width="160" height="68" fill="#e2e8f0" stroke="#64748b"/>
+  <text class="text" x="80" y="190">softmax</text>
+  <text class="small" x="80" y="212">logits &#8594; p</text>
+
+  <rect class="box" x="290" y="158" width="240" height="68" fill="#fee2e2" stroke="#dc2626"/>
+  <text class="text" x="310" y="190">prefix-sum cumsum(p)</text>
+  <text class="small" x="310" y="212">serial dependency across V</text>
+
+  <rect class="box" x="600" y="158" width="250" height="68" fill="#fee2e2" stroke="#dc2626"/>
+  <text class="text" x="620" y="190">first cumsum &gt; u</text>
+  <text class="small" x="620" y="212">u ~ Uniform(0,1), binary search</text>
+
+  <rect class="box" x="920" y="158" width="140" height="68" fill="#dbeafe" stroke="#2563eb"/>
+  <text class="text" x="952" y="197">token id</text>
+
+  <path class="path" stroke="#64748b" d="M 220 192 L 286 192"/>
+  <path class="path" stroke="#64748b" d="M 530 192 L 596 192"/>
+  <path class="path" stroke="#64748b" d="M 850 192 L 916 192"/>
+  <text class="small" x="290" y="252">Tensor-parallel vocab split &#8594; all-gather logits or cross-GPU scan: O(V) communication.</text>
+
+  <!-- divider -->
+  <line x1="60" y1="288" x2="1060" y2="288" stroke="#cbd5e1" stroke-width="1" stroke-dasharray="6 6"/>
+
+  <!-- Lane B: gumbel-max -->
+  <text class="label" x="60" y="336">Gumbel-Max: element-wise + argmax  &#8212;  arg max_i ( p_i / q_i ),  q_i ~ Exp(1)</text>
+  <rect class="box" x="60"  y="354" width="160" height="68" fill="#e2e8f0" stroke="#64748b"/>
+  <text class="text" x="80" y="386">softmax</text>
+  <text class="small" x="80" y="408">logits &#8594; p</text>
+
+  <rect class="box" x="290" y="354" width="240" height="68" fill="#dcfce7" stroke="#16a34a"/>
+  <text class="text" x="310" y="386">q.exponential_()</text>
+  <text class="small" x="310" y="408">i.i.d. noise, element-wise</text>
+
+  <rect class="box" x="600" y="354" width="250" height="68" fill="#dcfce7" stroke="#16a34a"/>
+  <text class="text" x="620" y="386">probs.div_(q)</text>
+  <text class="small" x="620" y="408">element-wise divide</text>
+
+  <rect class="box" x="920" y="354" width="140" height="68" fill="#dcfce7" stroke="#16a34a"/>
+  <text class="text" x="952" y="386">argmax</text>
+  <text class="small" x="940" y="408">parallel reduce</text>
+
+  <path class="path" stroke="#16a34a" d="M 220 388 L 286 388"/>
+  <path class="path" stroke="#16a34a" d="M 530 388 L 596 388"/>
+  <path class="path" stroke="#16a34a" d="M 850 388 L 916 388"/>
+  <text class="small" x="290" y="448">Tensor-parallel vocab split &#8594; local max+index, one All-Reduce(MAX): O(world_size) communication.</text>
+
+  <text class="small" x="60" y="500">Why equal: with q ~ Exp(1), &#8722;ln q is exactly Gumbel(0,1), so arg max_i (p_i / q_i) = arg max_i (ln p_i + g_i) &#8212; sampling from p.</text>
+</svg>
