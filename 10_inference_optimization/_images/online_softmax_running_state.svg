@@ -1,0 +1,63 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1120" height="520" viewBox="0 0 1120 520">
+  <defs>
+    <style>
+      .title { font: 700 24px Arial, Helvetica, sans-serif; fill: #0f172a; }
+      .sub { font: 14px Arial, Helvetica, sans-serif; fill: #475569; }
+      .label { font: 700 16px Arial, Helvetica, sans-serif; fill: #0f172a; }
+      .text { font: 15px Arial, Helvetica, sans-serif; fill: #334155; }
+      .mono { font: 14px "Courier New", monospace; fill: #0f172a; }
+      .small { font: 13px Arial, Helvetica, sans-serif; fill: #475569; }
+      .box { rx: 12; stroke-width: 1.5; }
+      .path { stroke-width: 3; fill: none; marker-end: url(#arrow); }
+    </style>
+    <marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#475569"/>
+    </marker>
+  </defs>
+  <rect x="0" y="0" width="1120" height="520" fill="#f8fafc"/>
+  <text class="title" x="60" y="54">Online softmax: one streaming pass keeps (m, &#8467;) exact</text>
+  <text class="sub" x="60" y="82">No global max needed up front &#8212; each new block raises the running max m and rescales the running sum by e^(m_old &#8722; m_new).</text>
+
+  <!-- streamed blocks (3 aligned columns: cx 160 / 530 / 920) -->
+  <text class="label" x="60" y="138">Streamed K/V blocks (scores S_j)</text>
+  <rect class="box" x="60"  y="152" width="200" height="60" fill="#dbeafe" stroke="#2563eb"/>
+  <text class="text" x="128" y="188">block 1</text>
+  <rect class="box" x="430" y="152" width="200" height="60" fill="#dbeafe" stroke="#2563eb"/>
+  <text class="text" x="486" y="180">block 2</text>
+  <text class="small" x="486" y="200">raises max &#8593;</text>
+  <rect class="box" x="820" y="152" width="200" height="60" fill="#dbeafe" stroke="#2563eb"/>
+  <text class="text" x="888" y="188">block 3</text>
+
+  <!-- vertical arrows into running state -->
+  <path class="path" stroke="#2563eb" d="M 160 212 L 160 296"/>
+  <path class="path" stroke="#2563eb" d="M 530 212 L 530 296"/>
+  <path class="path" stroke="#2563eb" d="M 920 212 L 920 296"/>
+
+  <!-- running state -->
+  <rect class="box" x="60"  y="298" width="200" height="92" fill="#dcfce7" stroke="#16a34a"/>
+  <text class="mono" x="80" y="328">m = m&#8321;</text>
+  <text class="mono" x="80" y="352">&#8467; = &#931; e^(S&#8722;m&#8321;)</text>
+  <text class="mono" x="80" y="376">&#213; = &#931; e^(S&#8722;m&#8321;)&#183;V</text>
+
+  <rect class="box" x="430" y="298" width="200" height="92" fill="#dcfce7" stroke="#16a34a"/>
+  <text class="mono" x="450" y="328">m = max(m&#8321;,S&#8322;)</text>
+  <text class="mono" x="450" y="352">&#8467; &#8592; &#8467;&#183;e^(m&#8321;&#8722;m) + &#8230;</text>
+  <text class="mono" x="450" y="376">&#213; &#8592; &#213;&#183;e^(m&#8321;&#8722;m) + &#8230;</text>
+
+  <rect class="box" x="820" y="298" width="200" height="92" fill="#dcfce7" stroke="#16a34a"/>
+  <text class="mono" x="840" y="328">m, &#8467;, &#213;</text>
+  <text class="small" x="840" y="352">after all blocks</text>
+  <text class="mono" x="840" y="376">= global values</text>
+
+  <!-- horizontal state transitions -->
+  <path class="path" stroke="#16a34a" d="M 260 344 L 426 344"/>
+  <text class="small" x="266" y="334">rescale by e^(m&#8321;&#8722;m)</text>
+  <path class="path" stroke="#16a34a" d="M 630 344 L 816 344"/>
+
+  <!-- final -->
+  <rect class="box" x="350" y="434" width="420" height="56" fill="#fef9c3" stroke="#ca8a04"/>
+  <text class="mono" x="372" y="468">O = &#213; / &#8467;        LSE = m + ln &#8467;</text>
+  <path class="path" stroke="#ca8a04" d="M 920 390 C 920 415, 620 415, 600 432"/>
+  <text class="small" x="60" y="468">One divide at the very end;</text>
+  <text class="small" x="60" y="486">store LSE (1 FP32 / row) to replay softmax.</text>
+</svg>
