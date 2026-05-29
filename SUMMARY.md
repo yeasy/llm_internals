@@ -120,7 +120,8 @@
   * [14.5 AI Agent 与工具调用：让模型从“说”到“做”](14_future_trends/14.5_agent_tool_use.md)
   * [14.6 推理时计算扩展：让模型学会深度思考](14_future_trends/14.6_test_time_scaling.md)
   * [14.7 长上下文技术：从理论到工程实践](14_future_trends/14.7_long_context.md)
-  * [14.8 未来展望](14_future_trends/14.8_outlook.md)
+  * [14.8 机制可解释性：打开黑箱](14_future_trends/14.8_interpretability.md)
+  * [14.9 未来展望](14_future_trends/14.9_outlook.md)
   * [本章小结](14_future_trends/summary.md)
 
 * [附录](appendix/README.md)
