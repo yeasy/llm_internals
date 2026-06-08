@@ -84,3 +84,6 @@
 59. NVIDIA. [H100 GPU Product Specifications](https://www.nvidia.com/en-us/data-center/h100/).
 60. PyTorch. [DistributedDataParallel Documentation](https://docs.pytorch.org/docs/stable/generated/torch.nn.parallel.DistributedDataParallel.html).
 61. DeepSpeed. [ZeRO Documentation](https://deepspeed.readthedocs.io/en/stable/zero3.html).
+62. Qwen Team. [Qwen1.5-MoE: Matching 7B Model Performance with 1/3 Activated Parameters](https://qwenlm.github.io/blog/qwen-moe/).
+63. Qwen. [Qwen2-57B-A14B Model Card](https://huggingface.co/Qwen/Qwen2-57B-A14B).
+64. Qwen Team. [Qwen2.5 Technical Report](https://arxiv.org/abs/2412.15115).
