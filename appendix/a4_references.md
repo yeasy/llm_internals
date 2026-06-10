@@ -51,39 +51,40 @@
 38. Liu, H., et al. (2023). [Ring Attention with Blockwise Transformers for Near-Infinite Context](https://arxiv.org/abs/2310.01889).
 39. Milakov, M. & Gimelshein, N. (2018). [Online normalizer calculation for softmax](https://arxiv.org/abs/1805.02867). *NVIDIA*.
 40. Zadouri, T., et al. (2026). [FlashAttention-4: Algorithm and Kernel Pipelining Co-Design for Asymmetric Hardware Scaling](https://arxiv.org/abs/2603.05451).
+41. Agrawal, A., et al. (2024). [Taming Throughput-Latency Tradeoff in LLM Inference with Sarathi-Serve](https://arxiv.org/abs/2403.02310). *OSDI 2024*.
 
 ### 前沿架构
 
-41. Gu, A. & Dao, T. (2023; revised 2024). [Mamba: Linear-Time Sequence Modeling with Selective State Spaces](https://arxiv.org/abs/2312.00752).
-42. DeepSeek-AI. (2024). [DeepSeek-V2: A Strong, Economical, and Efficient Mixture-of-Experts Language Model](https://arxiv.org/abs/2405.04434).
-43. DeepSeek-AI. (2024). [DeepSeek-V3 Technical Report](https://arxiv.org/abs/2412.19437).
-44. Fedus, W., et al. (2021). [Switch Transformers: Scaling to Trillion Parameter Models with Simple and Efficient Sparsity](https://arxiv.org/abs/2101.03961). *JMLR 2022*.
-45. Wei, J., et al. (2022). [Chain-of-Thought Prompting Elicits Reasoning in Large Language Models](https://arxiv.org/abs/2201.11903). *NeurIPS 2022*.
-46. Yao, S., et al. (2022). [ReAct: Synergizing Reasoning and Acting in Language Models](https://arxiv.org/abs/2210.03629). *ICLR 2023*.
-47. Yao, S., et al. (2023). [Tree of Thoughts: Deliberate Problem Solving with Large Language Models](https://arxiv.org/abs/2305.10601).
-48. Besta, M., et al. (2023). [Graph of Thoughts: Solving Elaborate Problems with Large Language Models](https://arxiv.org/abs/2308.09687).
+42. Gu, A. & Dao, T. (2023; revised 2024). [Mamba: Linear-Time Sequence Modeling with Selective State Spaces](https://arxiv.org/abs/2312.00752).
+43. DeepSeek-AI. (2024). [DeepSeek-V2: A Strong, Economical, and Efficient Mixture-of-Experts Language Model](https://arxiv.org/abs/2405.04434).
+44. DeepSeek-AI. (2024). [DeepSeek-V3 Technical Report](https://arxiv.org/abs/2412.19437).
+45. Fedus, W., et al. (2021). [Switch Transformers: Scaling to Trillion Parameter Models with Simple and Efficient Sparsity](https://arxiv.org/abs/2101.03961). *JMLR 2022*.
+46. Wei, J., et al. (2022). [Chain-of-Thought Prompting Elicits Reasoning in Large Language Models](https://arxiv.org/abs/2201.11903). *NeurIPS 2022*.
+47. Yao, S., et al. (2022). [ReAct: Synergizing Reasoning and Acting in Language Models](https://arxiv.org/abs/2210.03629). *ICLR 2023*.
+48. Yao, S., et al. (2023). [Tree of Thoughts: Deliberate Problem Solving with Large Language Models](https://arxiv.org/abs/2305.10601).
+49. Besta, M., et al. (2023). [Graph of Thoughts: Solving Elaborate Problems with Large Language Models](https://arxiv.org/abs/2308.09687).
 
 ### 教程与可视化
 
-49. Jay Alammar. [The Illustrated Transformer](https://jalammar.github.io/illustrated-transformer/).
-50. Lilian Weng. [The Transformer Family](https://lilianweng.github.io/posts/2023-01-27-the-transformer-family-v2/).
-51. HuggingFace. [Transformers Documentation](https://huggingface.co/docs/transformers/).
+50. Jay Alammar. [The Illustrated Transformer](https://jalammar.github.io/illustrated-transformer/).
+51. Lilian Weng. [The Transformer Family](https://lilianweng.github.io/posts/2023-01-27-the-transformer-family-v2/).
+52. HuggingFace. [Transformers Documentation](https://huggingface.co/docs/transformers/).
 
 ### 推荐书籍
 
-52. Jurafsky, D. & Martin, J.H. *Speech and Language Processing* (3rd ed.). 第10章 Transformer 部分。
-53. 邱锡鹏. 《神经网络与深度学习》. 第15章注意力机制与 Transformer。
+53. Jurafsky, D. & Martin, J.H. *Speech and Language Processing* (3rd ed.). 第10章 Transformer 部分。
+54. 邱锡鹏. 《神经网络与深度学习》. 第15章注意力机制与 Transformer。
 
 ### 官方模型、硬件与工程资料
 
-54. OpenAI. [GPT-5 Model Documentation](https://developers.openai.com/api/docs/models/gpt-5).
-55. OpenAI. [Retiring GPT-4o and other ChatGPT models](https://help.openai.com/en/articles/20001051).
-56. Meta AI. [The Llama 4 herd](https://ai.meta.com/blog/llama-4-multimodal-intelligence/).
-57. Google. [Introducing Gemini 1.5](https://blog.google/innovation-and-ai/products/google-gemini-next-generation-model-february-2024/).
-58. Google Cloud. [Our eighth generation TPUs: TPU 8t and TPU 8i](https://blog.google/innovation-and-ai/infrastructure-and-cloud/google-cloud/eighth-generation-tpu-agentic-era/).
-59. NVIDIA. [H100 GPU Product Specifications](https://www.nvidia.com/en-us/data-center/h100/).
-60. PyTorch. [DistributedDataParallel Documentation](https://docs.pytorch.org/docs/stable/generated/torch.nn.parallel.DistributedDataParallel.html).
-61. DeepSpeed. [ZeRO Documentation](https://deepspeed.readthedocs.io/en/stable/zero3.html).
-62. Qwen Team. [Qwen1.5-MoE: Matching 7B Model Performance with 1/3 Activated Parameters](https://qwenlm.github.io/blog/qwen-moe/).
-63. Qwen. [Qwen2-57B-A14B Model Card](https://huggingface.co/Qwen/Qwen2-57B-A14B).
-64. Qwen Team. [Qwen2.5 Technical Report](https://arxiv.org/abs/2412.15115).
+55. OpenAI. [GPT-5 Model Documentation](https://developers.openai.com/api/docs/models/gpt-5).
+56. OpenAI. [Retiring GPT-4o and other ChatGPT models](https://help.openai.com/en/articles/20001051).
+57. Meta AI. [The Llama 4 herd](https://ai.meta.com/blog/llama-4-multimodal-intelligence/).
+58. Google. [Introducing Gemini 1.5](https://blog.google/innovation-and-ai/products/google-gemini-next-generation-model-february-2024/).
+59. Google Cloud. [Our eighth generation TPUs: TPU 8t and TPU 8i](https://blog.google/innovation-and-ai/infrastructure-and-cloud/google-cloud/eighth-generation-tpu-agentic-era/).
+60. NVIDIA. [H100 GPU Product Specifications](https://www.nvidia.com/en-us/data-center/h100/).
+61. PyTorch. [DistributedDataParallel Documentation](https://docs.pytorch.org/docs/stable/generated/torch.nn.parallel.DistributedDataParallel.html).
+62. DeepSpeed. [ZeRO Documentation](https://deepspeed.readthedocs.io/en/stable/zero3.html).
+63. Qwen Team. [Qwen1.5-MoE: Matching 7B Model Performance with 1/3 Activated Parameters](https://qwenlm.github.io/blog/qwen-moe/).
+64. Qwen. [Qwen2-57B-A14B Model Card](https://huggingface.co/Qwen/Qwen2-57B-A14B).
+65. Qwen Team. [Qwen2.5 Technical Report](https://arxiv.org/abs/2412.15115).
