@@ -9,14 +9,14 @@
 | BERT-Large | 2018.10 | Encoder | 340M | 24 | 1024 | 16 | 512 | MLM + NSP |
 | GPT-2 | 2019.02 | Decoder | 1.5B | 48 | 1600 | 25 | 1024 | 自回归 LM |
 | T5-Large | 2019.10 | Enc-Dec | 770M | 24 | 1024 | 16 | 512 | 文本到文本 |
-| GPT-3 | 2020.06 | Decoder | 175B | 96 | 12288 | 96 | 2048 | 少样本学习 |
+| GPT-3 | 2020.05 | Decoder | 175B | 96 | 12288 | 96 | 2048 | 少样本学习 |
 | Llama 2-7B | 2023.07 | Decoder | 7B | 32 | 4096 | 32 | 4096 | RoPE |
 | Llama 2-70B | 2023.07 | Decoder | 70B | 80 | 8192 | 64 | 4096 | GQA(8KV头) |
 | Llama 3-8B | 2024.04 | Decoder | 8B | 32 | 4096 | 32 | 8192 | 128K词汇表 |
 | Llama 3-70B | 2024.04 | Decoder | 70B | 80 | 8192 | 64 | 8192 | GQA |
 | Llama 3.1-405B | 2024.07 | Decoder | 405B | 126 | 16384 | 128 | 128K | GQA(8KV头)；开放权重追近 GPT-4 |
 | GPT-4o mini | 2024.07 | Decoder | 未公开 | - | - | - | 128K | 极致性价比 |
-| Claude 3.5 Sonnet | 2024.06 | Decoder | 未公开 | - | - | - | 200K | Artifacts/Computer Use |
+| Claude 3.5 Sonnet | 2024.06 | Decoder | 未公开 | - | - | - | 200K | Artifacts；Computer Use（2024.10 升级版起） |
 | o1 | 2024.12 | Decoder | 未公开 | - | - | - | 200K | 推理时计算扩展 |
 | o1-mini | 2024.09.12 | Decoder | 未公开 | - | - | - | 128K | 轻量级推理；OpenAI 推荐新项目优先看 o3-mini |
 | Qwen 2.5-72B | 2024.09 | Decoder | 72B | 80 | 8192 | 64 | 128K | 多语言、代码、数学 |

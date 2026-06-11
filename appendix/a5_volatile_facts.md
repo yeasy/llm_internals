@@ -9,3 +9,4 @@
 | 推理引擎 | vLLM、TensorRT-LLM、SGLang、TGI 等部署状态以项目文档和 release 为准。 | 项目官方文档 / release | 避免写“某厂商已大规模使用”除非有公开证据。 |
 | 硬件 | NVIDIA、TPU、AI ASIC 等路线图以厂商公开资料为准。 | 厂商发布页和技术白皮书；TPU 8t/8i、H100/H200/B200 等条目需核对发布时间和可用状态 | 对未来硬件写 planned / announced，不写已可用。 |
 | Benchmark | SWE-bench、GPQA、MMLU、long-context eval 等只作为 dated snapshot。 | benchmark 官方站点、论文、仓库 | 说明评测集、版本和污染风险。 |
+| 新近论文快照数字 | 正文引用的 2026 年新近研究（3.5.5 AttnRes 的基准增益、8.3.4 IH-Challenge 的 +10.0% 等）按论文当时版本记录。 | [AttnRes](https://arxiv.org/abs/2603.15031), [IH-Challenge](https://arxiv.org/abs/2603.10521), [Making Claude a chemist](https://www.anthropic.com/research/making-claude-a-chemist) | 复核时对照 arXiv/官方页当前版本；数字变动则更新正文快照口径。 |
