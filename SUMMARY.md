@@ -83,7 +83,7 @@
 * [第十章：推理优化：第一性原理的分析](10_inference_optimization/README.md)
   * [10.1 推理瓶颈分析：计算密集还是访存密集](10_inference_optimization/10.1_bottleneck.md)
   * [10.2 KV 缓存：为什么能避免重复计算](10_inference_optimization/10.2_kv_cache.md)
-  * [10.3 Flash Attention：IO 感知的算法设计](10_inference_optimization/10.3_flash_attention.md)
+  * [10.3 FlashAttention：IO 感知的算法设计](10_inference_optimization/10.3_flash_attention.md)
   * [10.4 模型量化：用更少的位数表示权重与激活值](10_inference_optimization/10.4_quantization.md)
   * [10.5 剪枝与知识蒸馏：模型瘦身的两条路](10_inference_optimization/10.5_pruning_distillation.md)
   * [10.6 投机解码：为什么“先猜后验”能加速](10_inference_optimization/10.6_speculative_decoding.md)
@@ -106,7 +106,7 @@
   * [本章小结](12_encoder_models/summary.md)
 
 * [第十三章：解码器系列与主流 LLM](13_decoder_models/README.md)
-  * [13.1 GPT 系列：从语言模型到通用智能的扩展之路](13_decoder_models/13.1_gpt_series.md)
+  * [13.1 GPT 系列：从语言模型到通用能力平台的扩展之路](13_decoder_models/13.1_gpt_series.md)
   * [13.2 Llama 家族：开放权重如何改变 LLM 格局](13_decoder_models/13.2_llama.md)
   * [13.3 DeepSeek、Gemini 与其他前沿模型](13_decoder_models/13.3_deepseek_gemini.md)
   * [13.4 编码器-解码器模型：T5 与 BART 的设计选择](13_decoder_models/13.4_t5_bart.md)

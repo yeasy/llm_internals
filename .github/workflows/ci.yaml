@@ -38,6 +38,11 @@ jobs:
           mdpress --version
       - name: Validate book rules
         run: python3 check_project_rules.py --verbose
+      - name: Run appendix example tests
+        run: |
+          python3 -m pip install --upgrade pip
+          python3 -m pip install torch --index-url https://download.pytorch.org/whl/cpu
+          python3 -m unittest discover -s tests
       - name: Build PDF
         run: mdpress build --format pdf --output llm_internals.pdf
       - name: Upload PDF as artifact

@@ -27,9 +27,9 @@
 | Claude Opus 4 | 2025.05 | Decoder | 未公开 | - | - | - | 200K | 多模态和智能体能力 |
 | Claude Sonnet 4.5 | 2025.09.29 | Decoder | 未公开 | - | - | - | 200K | 高性能推理 |
 | Claude Haiku 4.5 | 2025.10.15 | Decoder | 未公开 | - | - | - | 200K | 快速轻量级 |
-| Gemini 2.5 Pro | 2025.03.25 | 多模态 | 未公开 | - | - | - | 1M | 原生多模态 |
+| Gemini 2.5 Pro | 2025.03.25 Experimental；2025.06.17 stable GA | 多模态 | 未公开 | - | - | - | 1M | 原生多模态 |
 | Gemini 3 Pro Preview | 2025.11.18 | 多模态 | 未公开 | - | - | - | 1M | 官方文档标记已于 2026-03-09 关闭 |
-| Gemini 3.1 Pro Preview | 2026 | 多模态 | 未公开 | - | - | - | 1M | 当前预览代际 |
+| Gemini 3.1 Pro Preview | 2026.02.19 | 多模态 | 未公开 | - | - | - | 1M | 当前预览代际 |
 | Gemini 3.5 Flash | 2026.05.19 | 多模态 | 未公开 | - | - | - | 1M | 智能体、编码、多模态；64K 输出 |
 | o3 | 2025.04 | Decoder | 未公开 | - | - | - | 200K | 推理模型 |
 | Claude Opus 4.6 | 2026.02.05 | Decoder | 未公开 | - | - | - | 1M | 增强推理 |
@@ -38,7 +38,7 @@
 | Claude Opus 4.8 | 2026.05.28 | Decoder | 未公开 | - | - | - | 1M | 当前 Opus 代际；128K 输出、Adaptive Thinking、fast mode |
 | Claude Fable 5 | 2026.06.09 | Decoder | 未公开 | - | - | - | 1M | 新一代命名体系；能力最强的广泛发布模型，128K 输出、Adaptive Thinking 常开（\$10/\$50）；2026-06-12 起与 Mythos 5 一同暂停访问 |
 | Llama 4 Scout | 2025.04 | MoE-Dec | 109B total / 17B active | - | - | - | 10M | MoE 架构 |
-| Llama 4 Maverick | 2025.04 | MoE-Dec | 400B total / 17B active | - | - | - | 10M | MoE 架构 |
+| Llama 4 Maverick | 2025.04 | MoE-Dec | 400B total / 17B active | - | - | - | 1M | MoE 架构 |
 | GPT-5 | 2025.08.07 | Decoder | 未公开 | - | - | - | 400,000 | 文本/图像输入推理 |
 | GPT-5.1 | 2025.11 | Decoder | 未公开 | - | - | - | 400,000 | 迭代更新 |
 | GPT-5.2 | 2025.12.11 | Decoder | 未公开 | - | - | - | 400,000 | 旗舰推理模型 |
