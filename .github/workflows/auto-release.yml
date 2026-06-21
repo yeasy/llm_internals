@@ -72,9 +72,10 @@ jobs:
           sudo dpkg -i /tmp/pandoc.deb && pandoc --version | head -1
           PUPPETEER_SKIP_DOWNLOAD=true npm install -g @mermaid-js/mermaid-cli@10
           TITLE=$(python3 -c "import json;print(json.load(open('book.json')).get('title') or '${{ github.event.repository.name }}')")
+          TAG=$(echo "${{ steps.tag.outputs.TAG_NAME || 'latest' }}" | sed 's#.*/##')   # slash-free (handles non-tag dispatch)
           python3 tools/render_mermaid.py --book-dir . --svg-out /tmp/mmsvg
           python3 tools/build_mobile_book.py --book-dir . --title "$TITLE" --svg-dir /tmp/mmsvg \
-            --out "${{ github.event.repository.name }}-${{ steps.tag.outputs.TAG_NAME || 'latest' }}-mobile.html"
+            --out "${{ github.event.repository.name }}-${TAG}-mobile.html"
           ls -lh ${{ github.event.repository.name }}-*-mobile.html
 
       - name: Attach mobile HTML to release
