@@ -61,8 +61,8 @@ jobs:
           generate_release_notes: true
           files: llm_internals-${{ steps.tag.outputs.TAG_NAME }}.pdf
 
-      - name: Build mobile HTML reader
-        id: mobile
+      - name: Build HTML reader
+        id: htmlreader
         continue-on-error: true
         env:
           CHROME_BIN: ${{ steps.setupchrome.outputs.chrome-path }}
@@ -74,23 +74,23 @@ jobs:
           TITLE=$(python3 -c "import json;print(json.load(open('book.json')).get('title') or '${{ github.event.repository.name }}')")
           TAG=$(echo "${{ steps.tag.outputs.TAG_NAME || 'latest' }}" | sed 's#.*/##')   # slash-free (handles non-tag dispatch)
           python3 tools/render_mermaid.py --book-dir . --svg-out /tmp/mmsvg
-          python3 tools/build_mobile_book.py --book-dir . --title "$TITLE" --svg-dir /tmp/mmsvg \
-            --out "${{ github.event.repository.name }}-${TAG}-mobile.html"
-          ls -lh ${{ github.event.repository.name }}-*-mobile.html
+          python3 tools/build_html_reader.py --book-dir . --title "$TITLE" --svg-dir /tmp/mmsvg \
+            --out "${{ github.event.repository.name }}-${TAG}.html"
+          ls -lh ${{ github.event.repository.name }}-${TAG}.html
 
-      - name: Attach mobile HTML to release
-        if: steps.mobile.outcome == 'success' && startsWith(github.ref, 'refs/tags/')
+      - name: Attach HTML to release
+        if: steps.htmlreader.outcome == 'success' && startsWith(github.ref, 'refs/tags/')
         uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ steps.tag.outputs.TAG_NAME }}
-          files: "${{ github.event.repository.name }}-${{ steps.tag.outputs.TAG_NAME }}-mobile.html"
+          files: "${{ github.event.repository.name }}-${{ steps.tag.outputs.TAG_NAME }}.html"
 
-      - name: Upload mobile HTML as artifact
-        if: steps.mobile.outcome == 'success'
+      - name: Upload HTML as artifact
+        if: steps.htmlreader.outcome == 'success'
         uses: actions/upload-artifact@v7
         with:
-          name: mobile-html
-          path: "*-mobile.html"
+          name: html-edition
+          path: "${{ github.event.repository.name }}-*.html"
 
       - name: Upload PDF as artifact
         uses: actions/upload-artifact@v7
