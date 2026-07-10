@@ -7,10 +7,10 @@ import argparse
 import json
 import os
 import re
+import signal
 import shutil
 import subprocess
 import sys
-import time
 from pathlib import Path
 
 
@@ -105,17 +105,49 @@ def published_sources(book: Path) -> list[str]:
     return sources
 
 
+def terminate_process_group(
+    process: subprocess.Popen[str],
+) -> tuple[str, str]:
+    """Stop mmdc and browser descendants without leaving orphan processes."""
+    if os.name == "posix":
+        try:
+            os.killpg(process.pid, signal.SIGTERM)
+        except ProcessLookupError:
+            pass
+    elif process.poll() is None:
+        process.terminate()
+    try:
+        return process.communicate(timeout=3)
+    except subprocess.TimeoutExpired:
+        if os.name == "posix":
+            try:
+                os.killpg(process.pid, signal.SIGKILL)
+            except ProcessLookupError:
+                pass
+        else:
+            process.kill()
+        return process.communicate(timeout=3)
+
+
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--book-dir", default=".")
     parser.add_argument("--svg-out", required=True)
     parser.add_argument("--chunk", type=int, default=4)
+    parser.add_argument(
+        "--render-timeout",
+        type=float,
+        default=90.0,
+        help="maximum seconds allowed for each mmdc batch (default: 90)",
+    )
     mode = parser.add_mutually_exclusive_group()
     mode.add_argument("--strict", dest="strict", action="store_true", default=True)
     mode.add_argument("--allow-fallback", dest="strict", action="store_false")
     args = parser.parse_args()
     if args.chunk <= 0:
         parser.error("--chunk must be positive")
+    if args.render_timeout <= 0:
+        parser.error("--render-timeout must be positive")
     try:
         book, output = validate_output_directory(args.book_dir, args.svg_out)
         sources = published_sources(book)
@@ -161,10 +193,7 @@ def main() -> int:
     def done() -> int:
         return sum((output / f"d-{index + 1}.svg").is_file() for index in range(count))
 
-    process_failed = False
-
     def render(indices: list[int]) -> None:
-        nonlocal process_failed
         chunk_file = output / "_chunk.md"
         chunk_file.write_text(
             "\n".join(f"```mermaid\n{sources[index]}\n```\n" for index in indices),
@@ -172,36 +201,56 @@ def main() -> int:
         )
         for stale in output.glob("_c*.svg"):
             stale.unlink()
-        result = subprocess.run(
-            [
-                mmdc,
-                "-i",
-                str(chunk_file),
-                "-o",
-                str(output / "_c.svg"),
-                "-p",
-                str(pptr),
-                "-c",
-                str(config),
-                "-b",
-                "transparent",
-            ],
-            capture_output=True,
+        command = [
+            mmdc,
+            "-i",
+            str(chunk_file),
+            "-o",
+            str(output / "_c.svg"),
+            "-p",
+            str(pptr),
+            "-c",
+            str(config),
+            "-b",
+            "transparent",
+        ]
+        process = subprocess.Popen(
+            command,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
             text=True,
-            check=False,
+            start_new_session=True,
         )
-        if result.returncode:
-            process_failed = True
-            print((result.stderr or result.stdout).strip(), file=sys.stderr)
-        else:
+        try:
+            try:
+                stdout, stderr = process.communicate(timeout=args.render_timeout)
+            except subprocess.TimeoutExpired:
+                stdout, stderr = terminate_process_group(process)
+                print(
+                    f"mmdc timed out after {args.render_timeout:g}s for diagrams "
+                    f"{[index + 1 for index in indices]}",
+                    file=sys.stderr,
+                )
+                detail = (stderr or stdout).strip()
+                if detail:
+                    print(detail, file=sys.stderr)
+                return
+            except BaseException:
+                terminate_process_group(process)
+                raise
+            if process.returncode:
+                print((stderr or stdout).strip(), file=sys.stderr)
+                return
             for position, index in enumerate(indices, 1):
                 source = output / f"_c-{position}.svg"
                 if len(indices) == 1 and not source.is_file():
                     source = output / "_c.svg"
                 if source.is_file() and source.stat().st_size:
                     source.replace(output / f"d-{index + 1}.svg")
-        for stale in output.glob("_c*.svg"):
-            stale.unlink()
+        finally:
+            for stale in output.glob("_c*.svg"):
+                stale.unlink()
+            chunk_file.unlink(missing_ok=True)
 
     for start in range(0, count, args.chunk):
         render(list(range(start, min(start + args.chunk, count))))
@@ -214,8 +263,10 @@ def main() -> int:
         ]
         if not missing:
             break
-        if attempt and process_failed:
-            time.sleep(min(2 ** (attempt - 1), 4))
+        print(
+            f"  retry {attempt + 1}: {len(missing)} missing",
+            flush=True,
+        )
         for index in missing:
             render([index])
     for temporary in (pptr, config, output / "_chunk.md"):

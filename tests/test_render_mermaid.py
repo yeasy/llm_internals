@@ -5,6 +5,7 @@ import subprocess
 import sys
 import tempfile
 import textwrap
+import time
 import unittest
 from pathlib import Path
 
@@ -86,7 +87,38 @@ class RenderMermaidTests(unittest.TestCase):
         mmdc.chmod(0o755)
         return binary, chrome
 
-    def run_renderer(self, book: Path, output: Path, env: dict[str, str], *flags: str):
+    def fake_hanging_tools(self, root: Path) -> tuple[Path, Path]:
+        binary = root / "bin"
+        binary.mkdir()
+        chrome = binary / "chrome"
+        chrome.write_text("", encoding="utf-8")
+        mmdc = binary / "mmdc"
+        mmdc.write_text(
+            textwrap.dedent(
+                f"""\
+                #!{sys.executable}
+                import os, subprocess, sys, time
+                child = subprocess.Popen(
+                    [sys.executable, "-c", "import time; time.sleep(3600)"]
+                )
+                with open(os.environ["FAKE_MMDC_CHILD_PIDS"], "a", encoding="utf-8") as stream:
+                    stream.write(f"{{child.pid}}\\n")
+                time.sleep(3600)
+                """
+            ),
+            encoding="utf-8",
+        )
+        mmdc.chmod(0o755)
+        return binary, chrome
+
+    def run_renderer(
+        self,
+        book: Path,
+        output: Path,
+        env: dict[str, str],
+        *flags: str,
+        harness_timeout: float = 10,
+    ):
         return subprocess.run(
             [
                 sys.executable,
@@ -102,6 +134,7 @@ class RenderMermaidTests(unittest.TestCase):
             text=True,
             capture_output=True,
             check=False,
+            timeout=harness_timeout,
         )
 
     def test_output_must_not_overlap_source_and_unrelated_files_survive(self):
@@ -203,6 +236,60 @@ class RenderMermaidTests(unittest.TestCase):
             self.assertIn("RENDERED 1/1", result.stdout)
             self.assertTrue((output / "d-1.svg").is_file())
             self.assertEqual((root / "mmdc-attempt").read_text(), "2")
+
+    def test_hanging_renderer_times_out_kills_process_group_and_retries(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            book = self.book(root)
+            binary, chrome = self.fake_hanging_tools(root)
+            child_pids = root / "child-pids.txt"
+            env = os.environ.copy()
+            env.update(
+                {
+                    "PATH": f"{binary}{os.pathsep}{env['PATH']}",
+                    "CHROME_BIN": str(chrome),
+                    "FAKE_MMDC_CHILD_PIDS": str(child_pids),
+                }
+            )
+            output = root / "out"
+
+            started = time.monotonic()
+            result = self.run_renderer(
+                book,
+                output,
+                env,
+                "--render-timeout",
+                "0.2",
+                harness_timeout=5,
+            )
+            elapsed = time.monotonic() - started
+
+            self.assertNotEqual(result.returncode, 0)
+            self.assertLess(elapsed, 5)
+            self.assertIn("timed out after 0.2s", result.stderr)
+            pids = [int(value) for value in child_pids.read_text().splitlines()]
+            for attempt in range(1, 5):
+                self.assertIn(f"retry {attempt}: 1 missing", result.stdout)
+            self.assertTrue(pids)
+            deadline = time.monotonic() + 2
+            while time.monotonic() < deadline:
+                if all(not self.process_exists(pid) for pid in pids):
+                    break
+                time.sleep(0.02)
+            self.assertTrue(all(not self.process_exists(pid) for pid in pids))
+            self.assertFalse(any(output.glob("_c*.svg")))
+            for name in ("_chunk.md", "_pptr.json", "_rc.json"):
+                self.assertFalse((output / name).exists(), name)
+
+    @staticmethod
+    def process_exists(pid: int) -> bool:
+        try:
+            os.kill(pid, 0)
+        except ProcessLookupError:
+            return False
+        except PermissionError:
+            return True
+        return True
 
 
 if __name__ == "__main__":

@@ -109,6 +109,42 @@ class LearningRouteTests(unittest.TestCase):
                 relative = unquote(target.split("#", 1)[0])
                 self.assertTrue((ROOT / relative).is_file(), target)
 
+    def test_chapter_four_is_direct_prerequisite_for_chapter_five(self):
+        graph = route_mermaid(self.text)
+        edges = set(
+            re.findall(
+                r"(?m)^\s*([A-Za-z][A-Za-z0-9_]*)[^\n]*?-->\s*"
+                r"([A-Za-z][A-Za-z0-9_]*)",
+                graph,
+            )
+        )
+        self.assertIn(("Ch4", "Ch5"), edges)
+        self.assertNotIn(("Ch3", "Ch5"), edges)
+
+    def test_every_role_endpoint_requires_chapter_four(self):
+        graph = route_mermaid(self.text)
+        adjacency: dict[str, set[str]] = defaultdict(set)
+        for source, target in re.findall(
+            r"(?m)^\s*([A-Za-z][A-Za-z0-9_]*)[^\n]*?-->\s*"
+            r"([A-Za-z][A-Za-z0-9_]*)",
+            graph,
+        ):
+            adjacency[source].add(target)
+
+        reachable_without_chapter_four = {"Start"}
+        queue = deque(["Start"])
+        while queue:
+            for target in adjacency[queue.popleft()]:
+                if target == "Ch4" or target in reachable_without_chapter_four:
+                    continue
+                reachable_without_chapter_four.add(target)
+                queue.append(target)
+
+        self.assertTrue(
+            ENDPOINTS.isdisjoint(reachable_without_chapter_four),
+            "every role requires chapters 1-4, so no endpoint may bypass Ch4",
+        )
+
 
 if __name__ == "__main__":
     unittest.main()

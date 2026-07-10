@@ -160,6 +160,11 @@ class WorkflowSafetyTests(unittest.TestCase):
         self.assertNotIn("skipUnless", appendix_tests)
         self.assertNotIn("SkipTest", appendix_tests)
 
+    def test_publication_build_jobs_have_bounded_timeouts(self):
+        for name in PUBLICATION_WORKFLOWS:
+            build = job_text(self.text(name), "build")
+            self.assertIn("timeout-minutes: 30", build, name)
+
     def test_mermaid_lock_is_exact(self):
         package = json.loads((ROOT / "tools/mermaid/package.json").read_text())
         lock = json.loads((ROOT / "tools/mermaid/package-lock.json").read_text())
