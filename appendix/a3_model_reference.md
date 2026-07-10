@@ -8,7 +8,7 @@
 | BERT-Base | 2018.10 | Encoder | 110M | 12 | 768 | 12 | 512 | MLM + NSP |
 | BERT-Large | 2018.10 | Encoder | 340M | 24 | 1024 | 16 | 512 | MLM + NSP |
 | GPT-2 | 2019.02 | Decoder | 1.5B | 48 | 1600 | 25 | 1024 | 自回归 LM |
-| T5-Large | 2019.10 | Enc-Dec | 770M | 24 | 1024 | 16 | 512 | 文本到文本 |
+| T5-Large | 2019.10 | Enc-Dec | 770M | 24 | 1024 | 16 | 512 | 文本到文本；2019.10 为 arXiv 预印本时间，正式发表于 2020 年 |
 | GPT-3 | 2020.05 | Decoder | 175B | 96 | 12288 | 96 | 2048 | 少样本学习 |
 | Llama 2-7B | 2023.07 | Decoder | 7B | 32 | 4096 | 32 | 4096 | RoPE |
 | Llama 2-70B | 2023.07 | Decoder | 70B | 80 | 8192 | 64 | 4096 | GQA(8KV头) |
@@ -36,7 +36,7 @@
 | Claude Sonnet 4.6 | 2026.02.17 | Decoder | 未公开 | - | - | - | 1M | 长上下文能力 |
 | Claude Opus 4.7 | 2026.04.16 | Decoder | 未公开 | - | - | - | 以官方模型页为准 | 软件工程、视觉理解和复杂多步任务 |
 | Claude Opus 4.8 | 2026.05.28 | Decoder | 未公开 | - | - | - | 1M | 当前 Opus 代际；128K 输出、Adaptive Thinking、fast mode |
-| Claude Fable 5 | 2026.06.09 | Decoder | 未公开 | - | - | - | 1M | 新一代命名体系；能力最强的广泛发布模型，128K 输出、Adaptive Thinking 常开（\$10/\$50）；2026-06-12 起与 Mythos 5 一同暂停访问 |
+| Claude Fable 5 | 2026.06.09 | Decoder | 未公开 | - | - | - | 1M | 新一代命名体系；能力最强的广泛发布模型，128K 输出、Adaptive Thinking 常开（\$10/\$50）；曾于 2026-06-12 与 Mythos 5 一同因出口管制暂停访问，截至 2026-07-09 官方模型页已恢复列为正常提供 |
 | Llama 4 Scout | 2025.04 | MoE-Dec | 109B total / 17B active | - | - | - | 10M | MoE 架构 |
 | Llama 4 Maverick | 2025.04 | MoE-Dec | 400B total / 17B active | - | - | - | 1M | MoE 架构 |
 | GPT-5 | 2025.08.07 | Decoder | 未公开 | - | - | - | 400,000 | 文本/图像输入推理 |
