@@ -193,12 +193,13 @@ def main() -> int:
         if result.returncode:
             process_failed = True
             print((result.stderr or result.stdout).strip(), file=sys.stderr)
-        for position, index in enumerate(indices, 1):
-            source = output / f"_c-{position}.svg"
-            if len(indices) == 1 and not source.is_file():
-                source = output / "_c.svg"
-            if source.is_file() and source.stat().st_size:
-                source.replace(output / f"d-{index + 1}.svg")
+        else:
+            for position, index in enumerate(indices, 1):
+                source = output / f"_c-{position}.svg"
+                if len(indices) == 1 and not source.is_file():
+                    source = output / "_c.svg"
+                if source.is_file() and source.stat().st_size:
+                    source.replace(output / f"d-{index + 1}.svg")
         for stale in output.glob("_c*.svg"):
             stale.unlink()
 

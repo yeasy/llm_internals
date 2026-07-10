@@ -56,6 +56,36 @@ class RenderMermaidTests(unittest.TestCase):
         mmdc.chmod(0o755)
         return binary, chrome
 
+    def fake_nonzero_after_write_tools(
+        self, root: Path, *, fail_first_only: bool
+    ) -> tuple[Path, Path]:
+        binary = root / "bin"
+        binary.mkdir()
+        chrome = binary / "chrome"
+        chrome.write_text("", encoding="utf-8")
+        attempt = root / "mmdc-attempt"
+        mmdc = binary / "mmdc"
+        mmdc.write_text(
+            textwrap.dedent(
+                f"""\
+                #!{sys.executable}
+                import pathlib, sys
+                args=sys.argv[1:]; src=pathlib.Path(args[args.index('-i')+1]); out=pathlib.Path(args[args.index('-o')+1])
+                count=src.read_text().count('```mermaid')
+                for i in range(1, count+1): out.with_name(f'{{out.stem}}-{{i}}.svg').write_text('<svg></svg>')
+                attempt=pathlib.Path({str(attempt)!r})
+                attempt_count=int(attempt.read_text()) if attempt.exists() else 0
+                attempt.write_text(str(attempt_count + 1))
+                if {fail_first_only!r} is False or attempt_count == 0:
+                    print('renderer reported fatal error', file=sys.stderr)
+                    raise SystemExit(1)
+                """
+            ),
+            encoding="utf-8",
+        )
+        mmdc.chmod(0o755)
+        return binary, chrome
+
     def run_renderer(self, book: Path, output: Path, env: dict[str, str], *flags: str):
         return subprocess.run(
             [
@@ -130,6 +160,49 @@ class RenderMermaidTests(unittest.TestCase):
             result = self.run_renderer(book, root / "out", env)
             self.assertEqual(result.returncode, 0, result.stderr)
             self.assertIn("RENDERED 9/9", result.stdout)
+
+    def test_strict_rejects_complete_output_from_nonzero_renderer(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            book = self.book(root)
+            binary, chrome = self.fake_nonzero_after_write_tools(
+                root, fail_first_only=False
+            )
+            env = os.environ.copy()
+            env.update(
+                {
+                    "PATH": f"{binary}{os.pathsep}{env['PATH']}",
+                    "CHROME_BIN": str(chrome),
+                }
+            )
+            output = root / "out"
+            result = self.run_renderer(book, output, env)
+            self.assertNotEqual(result.returncode, 0)
+            self.assertIn("renderer reported fatal error", result.stderr)
+            self.assertIn("RENDERED 0/1", result.stdout)
+            self.assertFalse((output / "d-1.svg").exists())
+
+    def test_nonzero_batch_can_recover_on_successful_retry(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            book = self.book(root)
+            binary, chrome = self.fake_nonzero_after_write_tools(
+                root, fail_first_only=True
+            )
+            env = os.environ.copy()
+            env.update(
+                {
+                    "PATH": f"{binary}{os.pathsep}{env['PATH']}",
+                    "CHROME_BIN": str(chrome),
+                }
+            )
+            output = root / "out"
+            result = self.run_renderer(book, output, env)
+            self.assertEqual(result.returncode, 0, result.stderr)
+            self.assertIn("renderer reported fatal error", result.stderr)
+            self.assertIn("RENDERED 1/1", result.stdout)
+            self.assertTrue((output / "d-1.svg").is_file())
+            self.assertEqual((root / "mmdc-attempt").read_text(), "2")
 
 
 if __name__ == "__main__":
