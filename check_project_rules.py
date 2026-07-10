@@ -6,6 +6,7 @@ from __future__ import annotations
 import argparse
 import re
 import sys
+from datetime import date, datetime, timedelta
 from pathlib import Path
 from urllib.parse import unquote, urlparse
 
@@ -23,6 +24,13 @@ SKIP_DIRS = {
 LINK_RE = re.compile(r"(!?)\[[^\]]*\]\(([^)\s]+(?:\s+\"[^\"]*\")?)\)")
 FENCE_RE = re.compile(r"^\s*(`{3,}|~{3,})")
 HEADING_RE = re.compile(r"^(#{1,6})\s+(.+?)\s*$")
+VOLATILE_METADATA_RE = re.compile(
+    r"<!--\s*volatile-facts:\s*"
+    r"verified_at=(\d{4}-\d{2}-\d{2})\s+"
+    r"expires_at=(\d{4}-\d{2}-\d{2})\s+"
+    r"ttl_days=(\d+)\s+"
+    r"conflict_status=([a-z-]+)\s*-->"
+)
 
 
 def iter_markdown_files() -> list[Path]:
@@ -150,15 +158,21 @@ def check_links(path: Path, text: str) -> list[str]:
         try:
             target_path.relative_to(ROOT)
         except ValueError:
-            issues.append(f"{rel(path)}:{line_no}: local link escapes book root: {raw_target}")
+            issues.append(
+                f"{rel(path)}:{line_no}: local link escapes book root: {raw_target}"
+            )
             continue
         if not target_path.exists():
-            issues.append(f"{rel(path)}:{line_no}: missing local link target: {raw_target}")
+            issues.append(
+                f"{rel(path)}:{line_no}: missing local link target: {raw_target}"
+            )
             continue
         if anchor and target_path.suffix == ".md":
             target_text = target_path.read_text(encoding="utf-8", errors="ignore")
             if anchor not in heading_anchors(target_text):
-                issues.append(f"{rel(path)}:{line_no}: missing local link anchor: {raw_target}")
+                issues.append(
+                    f"{rel(path)}:{line_no}: missing local link anchor: {raw_target}"
+                )
     return issues
 
 
@@ -186,9 +200,13 @@ def check_headings(path: Path, text: str) -> list[str]:
     expected = expected_first_heading(path)
     if expected is not None and headings[0][1] != expected:
         if expected == 2:
-            issues.append(f"{rel(path)}:{headings[0][0]}: section files must start with level-2 heading")
+            issues.append(
+                f"{rel(path)}:{headings[0][0]}: section files must start with level-2 heading"
+            )
         else:
-            issues.append(f"{rel(path)}:{headings[0][0]}: README files must start with level-1 heading")
+            issues.append(
+                f"{rel(path)}:{headings[0][0]}: README files must start with level-1 heading"
+            )
     previous_level = headings[0][1]
     for line_no, level in headings[1:]:
         if level > previous_level + 1:
@@ -240,6 +258,38 @@ def check_summary_coverage(summary_text: str, files: list[Path]) -> list[str]:
     return issues
 
 
+def check_volatile_facts(
+    path: Path, text: str, *, today: date | None = None
+) -> list[str]:
+    """Fail closed when the volatile-facts ledger is stale or ambiguous."""
+    issues: list[str] = []
+    current_date = today or date.today()
+    match = VOLATILE_METADATA_RE.search(text)
+    location = rel(path) if path.is_relative_to(ROOT) else str(path)
+    if match is None:
+        return [f"{location}: missing or malformed volatile-facts metadata"]
+    verified_raw, expires_raw, ttl_raw, conflict_status = match.groups()
+    try:
+        verified = datetime.strptime(verified_raw, "%Y-%m-%d").date()
+        expires = datetime.strptime(expires_raw, "%Y-%m-%d").date()
+    except ValueError:
+        return [f"{location}: invalid volatile-facts date"]
+    ttl_days = int(ttl_raw)
+    if ttl_days != 30 or expires - verified != timedelta(days=30):
+        issues.append(f"{location}: volatile-facts TTL must be exactly 30 days")
+    if verified > current_date:
+        issues.append(
+            f"{location}: volatile-facts verified_at is in the future ({verified_raw})"
+        )
+    if current_date > expires:
+        issues.append(f"{location}: volatile-facts ledger expired on {expires_raw}")
+    if conflict_status != "resolved-conflict":
+        issues.append(
+            f"{location}: volatile-facts conflict state must be resolved-conflict"
+        )
+    return issues
+
+
 def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser = argparse.ArgumentParser(
         description="Run lightweight Markdown checks for this book."
@@ -266,6 +316,8 @@ def main(argv: list[str] | None = None) -> int:
         issues.extend(check_fences(path, text))
         issues.extend(check_headings(path, text))
         issues.extend(check_links(path, text))
+        if path == ROOT / "appendix" / "a5_volatile_facts.md":
+            issues.extend(check_volatile_facts(path, text))
     issues.extend(check_summary_links())
     summary = ROOT / "SUMMARY.md"
     if summary.exists():
@@ -277,7 +329,9 @@ def main(argv: list[str] | None = None) -> int:
 
     if issues:
         print("\n".join(sorted(set(issues))))
-        print(f"\n{len(set(issues))} issue(s) found across {len(files)} Markdown files.")
+        print(
+            f"\n{len(set(issues))} issue(s) found across {len(files)} Markdown files."
+        )
         return 1
     print(f"All {len(files)} Markdown files passed project checks.")
     return 0

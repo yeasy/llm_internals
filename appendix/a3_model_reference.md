@@ -1,6 +1,6 @@
 ## A.3 主流模型参数速查表
 
-> 核验日期：2026-06-17。高漂移模型条目（如 GPT、Claude、Gemini、Llama 的上下文窗口、价格和发布时间）应以官方模型页、价格页和发布说明为准；本表只作为阅读时的技术快照。
+> 核验日期：2026-07-10。高漂移模型条目（如 GPT、Claude、Gemini、Llama 的上下文窗口、价格和发布时间）应以官方模型页、价格页和发布说明为准；本表只作为阅读时的技术快照，30 天核验门禁见 [A.5](a5_volatile_facts.md)。
 
 | 模型 | 发布时间 | 架构类型 | 参数量 | 层数 | 隐藏维度 | 注意力头 | 上下文长度 | 关键特性 |
 |------|---------|---------|-------|------|---------|---------|-----------|---------|
@@ -30,13 +30,15 @@
 | Gemini 2.5 Pro | 2025.03.25 Experimental；2025.06.17 stable GA | 多模态 | 未公开 | - | - | - | 1M | 原生多模态 |
 | Gemini 3 Pro Preview | 2025.11.18 | 多模态 | 未公开 | - | - | - | 1M | 官方文档标记已于 2026-03-09 关闭 |
 | Gemini 3.1 Pro Preview | 2026.02.19 | 多模态 | 未公开 | - | - | - | 1M | 当前预览代际 |
-| Gemini 3.5 Flash | 2026.05.19 | 多模态 | 未公开 | - | - | - | 1M | 智能体、编码、多模态；64K 输出 |
+| Gemini 3.5 Flash | 2026.05.19 | 多模态 | 未公开 | - | - | - | 1,048,576 | 稳定 ID `gemini-3.5-flash`；65,536 最大输出；智能体、编码、多模态 |
 | o3 | 2025.04 | Decoder | 未公开 | - | - | - | 200K | 推理模型 |
 | Claude Opus 4.6 | 2026.02.05 | Decoder | 未公开 | - | - | - | 1M | 增强推理 |
 | Claude Sonnet 4.6 | 2026.02.17 | Decoder | 未公开 | - | - | - | 1M | 长上下文能力 |
 | Claude Opus 4.7 | 2026.04.16 | Decoder | 未公开 | - | - | - | 以官方模型页为准 | 软件工程、视觉理解和复杂多步任务 |
 | Claude Opus 4.8 | 2026.05.28 | Decoder | 未公开 | - | - | - | 1M | 当前 Opus 代际；128K 输出、Adaptive Thinking、fast mode |
-| Claude Fable 5 | 2026.06.09 | Decoder | 未公开 | - | - | - | 1M | 新一代命名体系；能力最强的广泛发布模型，128K 输出、Adaptive Thinking 常开（\$10/\$50）；曾于 2026-06-12 与 Mythos 5 一同因出口管制暂停访问，截至 2026-07-09 官方模型页已恢复列为正常提供 |
+| Claude Fable 5 | 2026.06.09 | Decoder | 未公开 | - | - | - | 1M | 能力最强的广泛发布模型；128K 输出、Adaptive Thinking 常开、\$10/\$50；2026-07-01 与 Mythos 5 一同恢复访问 |
+| Claude Mythos 5 | 2026.06.09 | Decoder | 未公开 | - | - | - | 1M | 与 Fable 5 同规格和价格，Adaptive Thinking 常开；仅限 Project Glasswing 获批客户；2026-07-01 恢复访问 |
+| Claude Sonnet 5 | 2026.06.30 | Decoder | 未公开 | - | - | - | 1M | 128K 输出；Adaptive Thinking 默认开启；模型 ID `claude-sonnet-5` |
 | Llama 4 Scout | 2025.04 | MoE-Dec | 109B total / 17B active | - | - | - | 10M | MoE 架构 |
 | Llama 4 Maverick | 2025.04 | MoE-Dec | 400B total / 17B active | - | - | - | 1M | MoE 架构 |
 | GPT-5 | 2025.08.07 | Decoder | 未公开 | - | - | - | 400,000 | 文本/图像输入推理 |
@@ -47,6 +49,9 @@
 | GPT-5.4 mini | 2026.03 | Decoder | 未公开 | - | - | - | 400,000 | 极致性价比 |
 | GPT-5.4 nano | 2026.03 | Decoder | 未公开 | - | - | - | 400,000 | 超轻量级 |
 | GPT-5.5 | 2026.04.23 | Decoder | 未公开 | - | - | - | 1,050,000 | 官方旗舰；标准短上下文 \$5/\$30，>272K 输入按长上下文加价 |
+| GPT-5.6 Sol | 2026.07.09 | Decoder | 未公开 | - | - | - | 1,050,000 | 前沿能力层；128K 最大输出；`gpt-5.6` 别名指向 Sol；Responses/Chat Completions/Batch |
+| GPT-5.6 Terra | 2026.07.09 | Decoder | 未公开 | - | - | - | 1,050,000 | 智能与成本平衡层；128K 最大输出；Responses/Chat Completions/Batch |
+| GPT-5.6 Luna | 2026.07.09 | Decoder | 未公开 | - | - | - | 1,050,000 | 高吞吐成本敏感层；128K 最大输出；Responses/Chat Completions/Batch |
 
 表 A-1：主流 Transformer 模型参数速查表
 

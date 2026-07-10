@@ -74,28 +74,39 @@
 ## 学习路线图
 
 ```mermaid
-graph LR
-    Start[LLM 学习入口] --> Ch1[第1-2章：基础理论]
+graph TD
+    Start["LLM 学习入口"] --> Ch1["第1章：序列建模基础"]
+    Ch1 --> Ch2["第2章：注意力机制"]
+    Ch2 --> Ch3["第3章：Transformer 组件"]
+    Ch3 --> Ch4["第4章：位置编码"]
+    Ch4 --> Beginner["AI 初学者终点：解释核心机制"]
 
-    Ch1 --> Role1["AI 初学者<br/>第1-4章"]
-    Ch1 --> Role2["算法工程师<br/>第1-8章"]
-    Ch1 --> Role3["系统工程师<br/>第1-2章 → 3.7 → 5.1 → 第9-11章"]
-    Ch1 --> Role4["研究人员<br/>第1-6章 → 第13-14章"]
+    Ch3 --> Ch5["第5章：预训练目标"]
+    Ch5 --> Ch6["第6章：训练技术"]
+    Ch6 --> Ch7["第7章：分布式训练"]
+    Ch7 --> Ch8["第8章：对齐"]
+    Ch8 --> Algorithm["算法工程师终点：设计训练方案"]
 
-    Role1 --> End1["理解 LLM 核心"]
-    Role2 --> End2["掌握架构与训练"]
-    Role3 --> End3["优化推理部署"]
-    Role4 --> End4["探索前沿创新"]
+    Ch5 --> Ch9["第9章：解码"]
+    Ch9 --> Ch10["第10章：推理优化"]
+    Ch10 --> Ch11["第11章：服务系统"]
+    Ch11 --> Systems["系统工程师终点：验收部署方案"]
+
+    Ch6 --> Ch13["第13章：主流模型"]
+    Ch13 --> Ch14["第14章：前沿方向"]
+    Ch14 --> Research["研究人员终点：形成可证伪假设"]
 ```
 
 图 0-1：本书学习路线图。
 
-| 读者角色 | 学习重点 | 核心成果 |
-|---------|---------|---------|
-| **AI 初学者** | 第1-4章 | 深入理解 Transformer 的工作原理 |
-| **算法工程师** | 第1-8章 | 掌握 LLM 架构设计和训练优化 |
-| **系统工程师** | 第1-2章 → 3.7 → 5.1 → 第9-11章 | 实现高效的推理和部署方案 |
-| **研究人员** | 第1-6章 → 第13-14章 | 探索 LLM 前沿技术与创新方向 |
+路线图是有向无环图：箭头表示前置知识，不是可任意跳过的推荐顺序。每个角色终点都需要同时通过推导、定量计算和可运行代码三类验收；“读完章节”本身不算完成。
+
+| 读者角色 | 前置路线 | 推导验收 | 计算验收 | 代码验收 |
+| --- | --- | --- | --- | --- |
+| **AI 初学者** | [第1章](01_introduction/README.md) → [第2章](02_attention/README.md) → [第3章](03_components/README.md) → [第4章](04_position_encoding/README.md) | 独立写出[缩放点积注意力](02_attention/2.2_scaled_dot_product.md)并解释缩放因子 | 手算[正弦位置编码](04_position_encoding/4.1_sinusoidal.md)的一组二维旋转 | 运行并核对[附录 PyTorch 示例](appendix/a2_pytorch_examples.md)的 attention、RoPE、RMSNorm |
+| **算法工程师** | [第1-4章](04_position_encoding/README.md) → [第5章](05_pretraining/README.md) → [第6章](06_training_techniques/README.md) → [第7章](07_distributed_training/README.md) → [第8章](08_alignment/README.md) | 从目标函数推导[自回归预训练](05_pretraining/5.1_autoregressive.md)与[DPO](08_alignment/8.3_dpo.md)的优化对象 | 重算[ZeRO 分片](07_distributed_training/7.2_zero.md)在 64 卡下的单卡状态显存 | 运行[混合精度](07_distributed_training/7.6_mixed_precision.md)与[检查点](07_distributed_training/7.7_checkpoint.md)示例并验证恢复一致性 |
+| **系统工程师** | [第1-5章](05_pretraining/README.md) → [第9章](09_decoding/README.md) → [第10章](10_inference_optimization/README.md) → [第11章](11_serving/README.md) | 解释[Prefill/Decode 瓶颈](10_inference_optimization/10.1_bottleneck.md)如何决定调度策略 | 重算[KV cache](10_inference_optimization/10.2_kv_cache.md)和[权重显存](11_serving/11.4_hardware.md)是否能放入目标 GPU | 以[持续批处理](11_serving/11.2_continuous_batching.md)为基线实现微型调度实验并检查延迟分位数 |
+| **研究人员** | [第1-6章](06_training_techniques/README.md) → [第13章](13_decoder_models/README.md) → [第14章](14_future_trends/README.md) | 为[推理时计算扩展](14_future_trends/14.6_test_time_scaling.md)写出可证伪机制假设 | 对[批量与序列长度](06_training_techniques/6.4_batch_sequence.md)的计算预算做敏感性分析 | 在[高效注意力](14_future_trends/14.1_efficient_attention.md)基线上实现对照实验，固定种子并报告误差 |
 
 ## 在线阅读
 
