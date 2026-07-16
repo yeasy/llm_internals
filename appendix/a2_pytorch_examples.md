@@ -142,7 +142,7 @@ def rope_frequencies(d, max_len, base=10000.0, device=None):
     if d % 2 != 0:
         raise ValueError("RoPE requires an even head dimension")
     i = torch.arange(0, d, 2, dtype=torch.float32, device=device)   # 0, 2, ..., d-2
-    theta = base ** (-i / d)                         # (d/2,)，即 10000^(-2i/d)
+    theta = base ** (-i / d)                         # (d/2,)，即 10000^(-2j/d)（i = 2j）
     m = torch.arange(max_len, dtype=torch.float32, device=device)   # 位置 0, 1, ..., max_len-1
     angles = torch.outer(m, theta)                   # (max_len, d/2)
     return angles.cos(), angles.sin()
