@@ -26,13 +26,13 @@ class VolatileFactsTests(unittest.TestCase):
         self.checker = load_checker()
         self.text = LEDGER.read_text(encoding="utf-8")
 
-    def issues(self, text: str, today: date = date(2026, 7, 10)) -> list[str]:
+    def issues(self, text: str, today: date = date(2026, 7, 22)) -> list[str]:
         return self.checker.check_volatile_facts(LEDGER, text, today=today)
 
     def test_current_ledger_has_exact_thirty_day_ttl_and_resolved_conflict(self):
         self.assertEqual(self.issues(self.text), [])
-        self.assertIn("verified_at=2026-07-10", self.text)
-        self.assertIn("expires_at=2026-08-09", self.text)
+        self.assertIn("verified_at=2026-07-22", self.text)
+        self.assertIn("expires_at=2026-08-21", self.text)
         self.assertIn("ttl_days=30", self.text)
         self.assertIn("conflict_status=resolved-conflict", self.text)
         self.assertIn("GPT-5.6 Sol", self.text)
@@ -42,19 +42,19 @@ class VolatileFactsTests(unittest.TestCase):
 
     def test_future_verification_date_fails_closed(self):
         changed = self.text.replace(
-            "verified_at=2026-07-10", "verified_at=2026-07-11", 1
-        ).replace("expires_at=2026-08-09", "expires_at=2026-08-10", 1)
+            "verified_at=2026-07-22", "verified_at=2026-07-23", 1
+        ).replace("expires_at=2026-08-21", "expires_at=2026-08-22", 1)
         self.assertTrue(any("future" in issue for issue in self.issues(changed)))
 
     def test_non_exact_ttl_and_expired_ledger_fail_closed(self):
-        changed = self.text.replace("expires_at=2026-08-09", "expires_at=2026-08-08", 1)
+        changed = self.text.replace("expires_at=2026-08-21", "expires_at=2026-08-20", 1)
         self.assertTrue(
             any("exactly 30 days" in issue for issue in self.issues(changed))
         )
         self.assertTrue(
             any(
                 "expired" in issue
-                for issue in self.issues(self.text, today=date(2026, 8, 10))
+                for issue in self.issues(self.text, today=date(2026, 8, 22))
             )
         )
 
