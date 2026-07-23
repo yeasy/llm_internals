@@ -125,3 +125,4 @@
 100. Nie, S., et al. (2025). [Large Language Diffusion Models](https://arxiv.org/abs/2502.09992).
 101. Arriola, M., et al. (2025). [Block Diffusion: Interpolating Between Autoregressive and Diffusion Language Models](https://arxiv.org/abs/2503.09573).
 102. Chen, Y., et al. (2025). [Reasoning Models Don't Always Say What They Think](https://arxiv.org/abs/2505.05410). *Anthropic*.
+103. Google DeepMind (2026). [DiffusionGemma Model Card](https://ai.google.dev/gemma/docs/diffusiongemma/model_card).
