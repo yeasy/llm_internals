@@ -117,3 +117,11 @@
 92. Qwen Team. [Qwen1.5-MoE: Matching 7B Model Performance with 1/3 Activated Parameters](https://qwenlm.github.io/blog/qwen-moe/).
 93. Qwen. [Qwen2-57B-A14B Model Card](https://huggingface.co/Qwen/Qwen2-57B-A14B).
 94. Qwen Team. [Qwen2.5 Technical Report](https://arxiv.org/abs/2412.15115).
+95. Chen, J., Liang, Y. & Liu, Z. (2026). [DFlash: Block Diffusion for Flash Speculative Decoding](https://arxiv.org/abs/2602.06036). *ICML 2026*.
+96. Cheng, X., et al. (2026). [DSpark: Confidence-Scheduled Speculative Decoding with Semi-Autoregressive Generation](https://arxiv.org/abs/2607.05147). *DeepSeek*.
+97. Austin, J., et al. (2021). [Structured Denoising Diffusion Models in Discrete State-Spaces](https://arxiv.org/abs/2107.03006). *NeurIPS 2021*.
+98. Lou, A., Meng, C. & Ermon, S. (2024). [Discrete Diffusion Modeling by Estimating the Ratios of the Data Distribution](https://arxiv.org/abs/2310.16834). *ICML 2024*.
+99. Sahoo, S., et al. (2024). [Simple and Effective Masked Diffusion Language Models](https://arxiv.org/abs/2406.07524).
+100. Nie, S., et al. (2025). [Large Language Diffusion Models](https://arxiv.org/abs/2502.09992).
+101. Arriola, M., et al. (2025). [Block Diffusion: Interpolating Between Autoregressive and Diffusion Language Models](https://arxiv.org/abs/2503.09573).
+102. Chen, Y., et al. (2025). [Reasoning Models Don't Always Say What They Think](https://arxiv.org/abs/2505.05410). *Anthropic*.

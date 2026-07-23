@@ -78,6 +78,7 @@
   * [9.3 采样策略：温度、Top-k 与 Top-p 的设计直觉](09_decoding/9.3_sampling.md)
   * [9.4 结构化输出与约束解码](09_decoding/9.4_constrained.md)
   * [9.5 解码侧的推理时扩展：生成、搜索与验证](09_decoding/9.5_test_time_scaling.md)
+  * [9.6 扩散语言模型：另一种生成范式](09_decoding/9.6_diffusion_lm.md)
   * [本章小结](09_decoding/summary.md)
 
 * [第十章：推理优化：第一性原理的分析](10_inference_optimization/README.md)
