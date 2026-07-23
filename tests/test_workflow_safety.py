@@ -124,7 +124,7 @@ class WorkflowSafetyTests(unittest.TestCase):
         for name in PUBLICATION_WORKFLOWS:
             text = self.text(name)
             for marker in (
-                "MDPRESS_SHA256",
+                "checksums.txt",
                 "PANDOC_SHA256",
                 "sha256sum -c -",
                 "npm ci --prefix tools/mermaid --ignore-scripts",
