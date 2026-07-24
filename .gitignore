@@ -4,7 +4,7 @@ _site*
 
 # Node.js
 node_modules/
-package-lock.json
+/package-lock.json
 
 # OS files
 .DS_Store
