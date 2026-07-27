@@ -72,57 +72,59 @@
 
 ### 前沿架构
 
-59. Gu, A. & Dao, T. (2023; revised 2024). [Mamba: Linear-Time Sequence Modeling with Selective State Spaces](https://arxiv.org/abs/2312.00752).
-60. DeepSeek-AI. (2024). [DeepSeek-V2: A Strong, Economical, and Efficient Mixture-of-Experts Language Model](https://arxiv.org/abs/2405.04434).
-61. DeepSeek-AI. (2024). [DeepSeek-V3 Technical Report](https://arxiv.org/abs/2412.19437).
-62. Fedus, W., et al. (2021). [Switch Transformers: Scaling to Trillion Parameter Models with Simple and Efficient Sparsity](https://arxiv.org/abs/2101.03961). *JMLR 2022*.
-63. Wei, J., et al. (2022). [Chain-of-Thought Prompting Elicits Reasoning in Large Language Models](https://arxiv.org/abs/2201.11903). *NeurIPS 2022*.
-64. Yao, S., et al. (2022). [ReAct: Synergizing Reasoning and Acting in Language Models](https://arxiv.org/abs/2210.03629). *ICLR 2023*.
-65. Yao, S., et al. (2023). [Tree of Thoughts: Deliberate Problem Solving with Large Language Models](https://arxiv.org/abs/2305.10601).
-66. Besta, M., et al. (2023). [Graph of Thoughts: Solving Elaborate Problems with Large Language Models](https://arxiv.org/abs/2308.09687).
-67. Shazeer, N., et al. (2017). [Outrageously Large Neural Networks: The Sparsely-Gated Mixture-of-Experts Layer](https://arxiv.org/abs/1701.06538). *ICLR 2017*.
-68. Jiang, A. Q., et al. (2024). [Mixtral of Experts](https://arxiv.org/abs/2401.04088).
-69. Kojima, T., et al. (2022). [Large Language Models are Zero-Shot Reasoners](https://arxiv.org/abs/2205.11916). *NeurIPS 2022*.
-70. Lightman, H., et al. (2023). [Let's Verify Step by Step](https://arxiv.org/abs/2305.20050).
-71. Hao, S., et al. (2024). [Training Large Language Models to Reason in a Continuous Latent Space (Coconut)](https://arxiv.org/abs/2412.06769).
-72. Alayrac, J.-B., et al. (2022). [Flamingo: a Visual Language Model for Few-Shot Learning](https://arxiv.org/abs/2204.14198). *NeurIPS 2022*.
-73. Li, J., et al. (2023). [BLIP-2: Bootstrapping Language-Image Pre-training with Frozen Image Encoders and Large Language Models](https://arxiv.org/abs/2301.12597). *ICML 2023*.
-74. Liu, H., et al. (2023). [Visual Instruction Tuning (LLaVA)](https://arxiv.org/abs/2304.08485). *NeurIPS 2023*.
-75. Hsieh, C.-P., et al. (2024). [RULER: What's the Real Context Size of Your Long-Context Language Models?](https://arxiv.org/abs/2404.06654).
-76. Bai, Y., et al. (2023). [LongBench: A Bilingual, Multitask Benchmark for Long Context Understanding](https://arxiv.org/abs/2308.14508). *ACL 2024*.
-77. Zhang, X., et al. (2024). [InfiniteBench: Extending Long Context Evaluation Beyond 100K Tokens](https://arxiv.org/abs/2402.13718). *ACL 2024*.
-78. Liu, N. F., et al. (2023). [Lost in the Middle: How Language Models Use Long Contexts](https://arxiv.org/abs/2307.03172). *TACL 2024*.
+59. Brandon, W., et al. (2024). [Reducing Transformer Key-Value Cache Size with Cross-Layer Attention](https://arxiv.org/abs/2405.12981).
+60. Gu, A. & Dao, T. (2023; revised 2024). [Mamba: Linear-Time Sequence Modeling with Selective State Spaces](https://arxiv.org/abs/2312.00752).
+61. DeepSeek-AI. (2024). [DeepSeek-V2: A Strong, Economical, and Efficient Mixture-of-Experts Language Model](https://arxiv.org/abs/2405.04434).
+62. DeepSeek-AI. (2024). [DeepSeek-V3 Technical Report](https://arxiv.org/abs/2412.19437).
+63. Fedus, W., et al. (2021). [Switch Transformers: Scaling to Trillion Parameter Models with Simple and Efficient Sparsity](https://arxiv.org/abs/2101.03961). *JMLR 2022*.
+64. Wei, J., et al. (2022). [Chain-of-Thought Prompting Elicits Reasoning in Large Language Models](https://arxiv.org/abs/2201.11903). *NeurIPS 2022*.
+65. Yao, S., et al. (2022). [ReAct: Synergizing Reasoning and Acting in Language Models](https://arxiv.org/abs/2210.03629). *ICLR 2023*.
+66. Yao, S., et al. (2023). [Tree of Thoughts: Deliberate Problem Solving with Large Language Models](https://arxiv.org/abs/2305.10601).
+67. Besta, M., et al. (2023). [Graph of Thoughts: Solving Elaborate Problems with Large Language Models](https://arxiv.org/abs/2308.09687).
+68. Shazeer, N., et al. (2017). [Outrageously Large Neural Networks: The Sparsely-Gated Mixture-of-Experts Layer](https://arxiv.org/abs/1701.06538). *ICLR 2017*.
+69. Jiang, A. Q., et al. (2024). [Mixtral of Experts](https://arxiv.org/abs/2401.04088).
+70. Kojima, T., et al. (2022). [Large Language Models are Zero-Shot Reasoners](https://arxiv.org/abs/2205.11916). *NeurIPS 2022*.
+71. Lightman, H., et al. (2023). [Let's Verify Step by Step](https://arxiv.org/abs/2305.20050).
+72. Hao, S., et al. (2024). [Training Large Language Models to Reason in a Continuous Latent Space (Coconut)](https://arxiv.org/abs/2412.06769).
+73. Alayrac, J.-B., et al. (2022). [Flamingo: a Visual Language Model for Few-Shot Learning](https://arxiv.org/abs/2204.14198). *NeurIPS 2022*.
+74. Li, J., et al. (2023). [BLIP-2: Bootstrapping Language-Image Pre-training with Frozen Image Encoders and Large Language Models](https://arxiv.org/abs/2301.12597). *ICML 2023*.
+75. Liu, H., et al. (2023). [Visual Instruction Tuning (LLaVA)](https://arxiv.org/abs/2304.08485). *NeurIPS 2023*.
+76. Hsieh, C.-P., et al. (2024). [RULER: What's the Real Context Size of Your Long-Context Language Models?](https://arxiv.org/abs/2404.06654).
+77. Bai, Y., et al. (2023). [LongBench: A Bilingual, Multitask Benchmark for Long Context Understanding](https://arxiv.org/abs/2308.14508). *ACL 2024*.
+78. Zhang, X., et al. (2024). [InfiniteBench: Extending Long Context Evaluation Beyond 100K Tokens](https://arxiv.org/abs/2402.13718). *ACL 2024*.
+79. Liu, N. F., et al. (2023). [Lost in the Middle: How Language Models Use Long Contexts](https://arxiv.org/abs/2307.03172). *TACL 2024*.
 
 ### 教程与可视化
 
-79. Jay Alammar. [The Illustrated Transformer](https://jalammar.github.io/illustrated-transformer/).
-80. Lilian Weng. [The Transformer Family](https://lilianweng.github.io/posts/2023-01-27-the-transformer-family-v2/).
-81. HuggingFace. [Transformers Documentation](https://huggingface.co/docs/transformers/).
+80. Jay Alammar. [The Illustrated Transformer](https://jalammar.github.io/illustrated-transformer/).
+81. Lilian Weng. [The Transformer Family](https://lilianweng.github.io/posts/2023-01-27-the-transformer-family-v2/).
+82. HuggingFace. [Transformers Documentation](https://huggingface.co/docs/transformers/).
+83. Sebastian Raschka. [LLMs-from-scratch](https://github.com/rasbt/LLMs-from-scratch)（*Build a Large Language Model (From Scratch)*, Manning, 2024 的官方配套代码，Apache-2.0）。本书讲原理，该仓库提供可逐步运行的 PyTorch 实现，二者互补；其 `ch04` 下的 GQA、MLA、SWA、跨层 KV 共享等对照实现，可与[第 10.2 节](../10_inference_optimization/10.2_kv_cache.md)的四条压缩轴对读。
 
 ### 推荐书籍
 
-82. Jurafsky, D. & Martin, J.H. *Speech and Language Processing* (3rd ed.). 第10章 Transformer 部分。
-83. 邱锡鹏. 《神经网络与深度学习》. 第15章注意力机制与 Transformer。
+84. Jurafsky, D. & Martin, J.H. *Speech and Language Processing* (3rd ed.). 第10章 Transformer 部分。
+85. 邱锡鹏. 《神经网络与深度学习》. 第15章注意力机制与 Transformer。
 
 ### 官方模型、硬件与工程资料
 
-84. OpenAI. [GPT-5 Model Documentation](https://developers.openai.com/api/docs/models/gpt-5).
-85. OpenAI. [Retiring GPT-4o and other ChatGPT models](https://help.openai.com/en/articles/20001051).
-86. Meta AI. [The Llama 4 herd](https://ai.meta.com/blog/llama-4-multimodal-intelligence/).
-87. Google. [Introducing Gemini 1.5](https://blog.google/innovation-and-ai/products/google-gemini-next-generation-model-february-2024/).
-88. Google Cloud. [Our eighth generation TPUs: TPU 8t and TPU 8i](https://blog.google/innovation-and-ai/infrastructure-and-cloud/google-cloud/eighth-generation-tpu-agentic-era/).
-89. NVIDIA. [H100 GPU Product Specifications](https://www.nvidia.com/en-us/data-center/h100/).
-90. PyTorch. [DistributedDataParallel Documentation](https://docs.pytorch.org/docs/stable/generated/torch.nn.parallel.DistributedDataParallel.html).
-91. DeepSpeed. [ZeRO Documentation](https://deepspeed.readthedocs.io/en/stable/zero3.html).
-92. Qwen Team. [Qwen1.5-MoE: Matching 7B Model Performance with 1/3 Activated Parameters](https://qwenlm.github.io/blog/qwen-moe/).
-93. Qwen. [Qwen2-57B-A14B Model Card](https://huggingface.co/Qwen/Qwen2-57B-A14B).
-94. Qwen Team. [Qwen2.5 Technical Report](https://arxiv.org/abs/2412.15115).
-95. Chen, J., Liang, Y. & Liu, Z. (2026). [DFlash: Block Diffusion for Flash Speculative Decoding](https://arxiv.org/abs/2602.06036). *ICML 2026*.
-96. Cheng, X., et al. (2026). [DSpark: Confidence-Scheduled Speculative Decoding with Semi-Autoregressive Generation](https://arxiv.org/abs/2607.05147). *DeepSeek*.
-97. Austin, J., et al. (2021). [Structured Denoising Diffusion Models in Discrete State-Spaces](https://arxiv.org/abs/2107.03006). *NeurIPS 2021*.
-98. Lou, A., Meng, C. & Ermon, S. (2024). [Discrete Diffusion Modeling by Estimating the Ratios of the Data Distribution](https://arxiv.org/abs/2310.16834). *ICML 2024*.
-99. Sahoo, S., et al. (2024). [Simple and Effective Masked Diffusion Language Models](https://arxiv.org/abs/2406.07524).
-100. Nie, S., et al. (2025). [Large Language Diffusion Models](https://arxiv.org/abs/2502.09992).
-101. Arriola, M., et al. (2025). [Block Diffusion: Interpolating Between Autoregressive and Diffusion Language Models](https://arxiv.org/abs/2503.09573).
-102. Chen, Y., et al. (2025). [Reasoning Models Don't Always Say What They Think](https://arxiv.org/abs/2505.05410). *Anthropic*.
-103. Google DeepMind (2026). [DiffusionGemma Model Card](https://ai.google.dev/gemma/docs/diffusiongemma/model_card).
+86. OpenAI. [GPT-5 Model Documentation](https://developers.openai.com/api/docs/models/gpt-5).
+87. OpenAI. [Retiring GPT-4o and other ChatGPT models](https://help.openai.com/en/articles/20001051).
+88. Meta AI. [The Llama 4 herd](https://ai.meta.com/blog/llama-4-multimodal-intelligence/).
+89. Google. [Introducing Gemini 1.5](https://blog.google/innovation-and-ai/products/google-gemini-next-generation-model-february-2024/).
+90. Google Cloud. [Our eighth generation TPUs: TPU 8t and TPU 8i](https://blog.google/innovation-and-ai/infrastructure-and-cloud/google-cloud/eighth-generation-tpu-agentic-era/).
+91. NVIDIA. [H100 GPU Product Specifications](https://www.nvidia.com/en-us/data-center/h100/).
+92. PyTorch. [DistributedDataParallel Documentation](https://docs.pytorch.org/docs/stable/generated/torch.nn.parallel.DistributedDataParallel.html).
+93. DeepSpeed. [ZeRO Documentation](https://deepspeed.readthedocs.io/en/stable/zero3.html).
+94. Qwen Team. [Qwen1.5-MoE: Matching 7B Model Performance with 1/3 Activated Parameters](https://qwenlm.github.io/blog/qwen-moe/).
+95. Qwen. [Qwen2-57B-A14B Model Card](https://huggingface.co/Qwen/Qwen2-57B-A14B).
+96. Qwen Team. [Qwen2.5 Technical Report](https://arxiv.org/abs/2412.15115).
+97. Chen, J., Liang, Y. & Liu, Z. (2026). [DFlash: Block Diffusion for Flash Speculative Decoding](https://arxiv.org/abs/2602.06036). *ICML 2026*.
+98. Cheng, X., et al. (2026). [DSpark: Confidence-Scheduled Speculative Decoding with Semi-Autoregressive Generation](https://arxiv.org/abs/2607.05147). *DeepSeek*.
+99. Austin, J., et al. (2021). [Structured Denoising Diffusion Models in Discrete State-Spaces](https://arxiv.org/abs/2107.03006). *NeurIPS 2021*.
+100. Lou, A., Meng, C. & Ermon, S. (2024). [Discrete Diffusion Modeling by Estimating the Ratios of the Data Distribution](https://arxiv.org/abs/2310.16834). *ICML 2024*.
+101. Sahoo, S., et al. (2024). [Simple and Effective Masked Diffusion Language Models](https://arxiv.org/abs/2406.07524).
+102. Nie, S., et al. (2025). [Large Language Diffusion Models](https://arxiv.org/abs/2502.09992).
+103. Arriola, M., et al. (2025). [Block Diffusion: Interpolating Between Autoregressive and Diffusion Language Models](https://arxiv.org/abs/2503.09573).
+104. Chen, Y., et al. (2025). [Reasoning Models Don't Always Say What They Think](https://arxiv.org/abs/2505.05410). *Anthropic*.
+105. Google DeepMind (2026). [DiffusionGemma Model Card](https://ai.google.dev/gemma/docs/diffusiongemma/model_card).
