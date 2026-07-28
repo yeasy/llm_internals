@@ -1,6 +1,6 @@
 ## A.3 主流模型参数速查表
 
-> 核验日期：2026-07-10。高漂移模型条目（如 GPT、Claude、Gemini、Llama 的上下文窗口、价格和发布时间）应以官方模型页、价格页和发布说明为准；本表只作为阅读时的技术快照，30 天核验门禁见 [A.5](a5_volatile_facts.md)。
+> 核验日期：2026-07-28。高漂移模型条目（如 GPT、Claude、Gemini、Llama 的上下文窗口、价格和发布时间）应以官方模型页、价格页和发布说明为准；本表只作为阅读时的技术快照，30 天核验门禁见 [A.5](a5_volatile_facts.md)。
 
 | 模型 | 发布时间 | 架构类型 | 参数量 | 层数 | 隐藏维度 | 注意力头 | 上下文长度 | 关键特性 |
 |------|---------|---------|-------|------|---------|---------|-----------|---------|
@@ -35,7 +35,7 @@
 | Claude Opus 4.6 | 2026.02.05 | Decoder | 未公开 | - | - | - | 1M | 增强推理 |
 | Claude Sonnet 4.6 | 2026.02.17 | Decoder | 未公开 | - | - | - | 1M | 长上下文能力 |
 | Claude Opus 4.7 | 2026.04.16 | Decoder | 未公开 | - | - | - | 以官方模型页为准 | 软件工程、视觉理解和复杂多步任务 |
-| Claude Opus 4.8 | 2026.05.28 | Decoder | 未公开 | - | - | - | 1M | 当前 Opus 代际；128K 输出、Adaptive Thinking、fast mode |
+| Claude Opus 4.8 | 2026.05.28 | Decoder | 未公开 | - | - | - | 1M | 发布时为最新 Opus 代际，2026-07 起由 Opus 5 接替，官方模型页已列入 legacy；128K 输出、Adaptive Thinking、fast mode |
 | Claude Fable 5 | 2026.06.09 | Decoder | 未公开 | - | - | - | 1M | 能力最强的广泛发布模型；128K 输出、Adaptive Thinking 常开、\$10/\$50；2026-07-01 与 Mythos 5 一同恢复访问 |
 | Claude Mythos 5 | 2026.06.09 | Decoder | 未公开 | - | - | - | 1M | 与 Fable 5 同规格和价格，Adaptive Thinking 常开；仅限 Project Glasswing 获批客户；2026-07-01 恢复访问 |
 | Claude Sonnet 5 | 2026.06.30 | Decoder | 未公开 | - | - | - | 1M | 128K 输出；Adaptive Thinking 默认开启；模型 ID `claude-sonnet-5` |
