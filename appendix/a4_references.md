@@ -128,3 +128,5 @@
 103. Arriola, M., et al. (2025). [Block Diffusion: Interpolating Between Autoregressive and Diffusion Language Models](https://arxiv.org/abs/2503.09573).
 104. Chen, Y., et al. (2025). [Reasoning Models Don't Always Say What They Think](https://arxiv.org/abs/2505.05410). *Anthropic*.
 105. Google DeepMind (2026). [DiffusionGemma Model Card](https://ai.google.dev/gemma/docs/diffusiongemma/model_card).
+106. Lei, Y., et al. (2026). [The Energy Cost of Execution-Idle in GPU Clusters](https://arxiv.org/abs/2604.04745).
+107. Zhong, T., et al. (2026). [Diagnosing Training Inference Mismatch in LLM Reinforcement Learning](https://arxiv.org/abs/2605.14220). *ByteDance & University of Virginia*.
