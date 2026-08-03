@@ -2,7 +2,7 @@
 
 <!-- volatile-facts: verified_at=2026-07-28 expires_at=2026-08-27 ttl_days=30 conflict_status=resolved-conflict -->
 
-> 核验日期：2026-07-30；到期日期：2026-08-29。这里的模型时间线、价格、上下文、硬件可用性和 serving 生态均属于快变事实。30 天到期后，项目检查会拒绝通过，必须重新访问权威入口并更新核验元数据。
+> 核验日期：2026-07-28；到期日期：2026-08-27。这里的模型时间线、价格、上下文、硬件可用性和 serving 生态均属于快变事实。30 天到期后，项目检查会拒绝通过，必须重新访问权威入口并更新核验元数据。**这两个日期必须与本节源文件顶部 `volatile-facts` 注释里的 `verified_at` / `expires_at` 逐字一致**——注释是项目检查唯一读取的真值，散文这份是给读者看的副本，改一处忘改另一处即为失配（已由测试断言）。
 >
 > **上一轮预留的检查已完成**：Kimi K3 的权重已于 **2026-07-27** 实际开放。按上一轮定下的判据实测：`moonshotai/Kimi-K3` 的 `resolve/main/config.json` 返回 **200**、仓库含 118 个文件、`gated: false`。注意仓库名只有 `moonshotai/Kimi-K3` 一个，`-Instruct` / `-Base` 两个名字返回 401（不存在或不公开），不要照抄。技术报告见 [arXiv:2607.24653](https://arxiv.org/abs/2607.24653)（2026-07-27，Kimi Team，402 位作者）。
 
@@ -14,6 +14,6 @@
 | 推理引擎 | vLLM、TensorRT-LLM、SGLang、TGI 等部署状态以项目文档和 release 为准。 | 项目官方文档 / release | 避免写“某厂商已大规模使用”，除非有公开证据。 |
 | 硬件 | Google 已公开 TPU 8t（训练，216 GB HBM、6528 GB/s）与 TPU 8i（推理，288 GB HBM、8601 GB/s），但 Cloud TPU 当前目录仍标为 **Coming soon**；Ironwood TPU7x 已于 2026-03-31 GA。NVIDIA Vera Rubin 已进入 full production，但实际云区域和实例可用性仍需单独核验。 | [TPU 8t/8i technical deep dive](https://cloud.google.com/blog/products/compute/tpu-8t-and-tpu-8i-technical-deep-dive), [Cloud TPU](https://cloud.google.com/tpu), [Cloud TPU release notes](https://docs.cloud.google.com/tpu/docs/release-notes), [Vera Rubin production](https://nvidianews.nvidia.com/news/vera-rubin-full-production-agentic-ai-factory) | 把“发布/量产”“Cloud SKU 可申请”和“特定区域有库存”分开写；Coming soon 不得写成已可用。 |
 | Benchmark | SWE-bench、GPQA、MMLU、long-context eval 等只作为 dated snapshot。 | benchmark 官方站点、论文、仓库 | 说明评测集、版本、是否使用工具和污染风险。 |
-| 新近论文快照数字 | 正文引用的 2026 年新近研究（3.5.5 AttnRes 的基准增益、8.3.4 IH-Challenge 的 +10.0% 等）按论文当时版本记录。 | [AttnRes](https://arxiv.org/abs/2603.15031), [IH-Challenge](https://arxiv.org/abs/2603.10521), [Making Claude a chemist](https://www.anthropic.com/research/making-claude-a-chemist) | 复核时对照 arXiv/官方页当前版本；数字变动则更新正文快照口径。 |
+| 新近论文快照数字 | 正文引用的 2026 年新近研究（3.5.5 AttnRes 的基准增益、8.3.4 IH-Challenge 的 +10.0%、10.1.4 execution-idle 的 19.7%/10.7% 与三档负载比例、8.2.3 训练—推理失配 TIM 等）按论文当时版本记录。 | [AttnRes](https://arxiv.org/abs/2603.15031), [IH-Challenge](https://arxiv.org/abs/2603.10521), [Making Claude a chemist](https://www.anthropic.com/research/making-claude-a-chemist), [Execution-Idle](https://arxiv.org/abs/2604.04745), [TIM 诊断](https://arxiv.org/abs/2605.14220) | 复核时对照 arXiv/官方页当前版本；数字变动则更新正文快照口径。TIM 一条只写论文确证的缓解手段（TIS、拒绝采样、批次不变算子）——社区二手转述里常见的 FP16 dtype、SIS、GSPO 等说法**不在该论文正文中**，未经一手核实不得补入。execution-idle 的比例**必须连同集群构成与负载类型引用**，不得写成通用结论——论文自己报告跨五组回放的能耗区间是 7%–65%；另注意 `BurstGPT Chat` 是公开 trace 的名字，不要转述成某家厂商的线上请求。 |
 
 `conflict_status=resolved-conflict` 不是“来源永远一致”的声明，而是记录本轮已发现的 GPT-5.6 预览/已发布冲突已有明确裁决。若权威来源再次互相冲突，应先把状态改为 `open-conflict`；项目检查会失败，直到正文、附录和来源链完成重新核验并改回 `resolved-conflict`。

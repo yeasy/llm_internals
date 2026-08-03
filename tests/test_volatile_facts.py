@@ -45,6 +45,30 @@ class VolatileFactsTests(unittest.TestCase):
             LEDGER, text, today=today or self._stamped()
         )
 
+    def test_prose_dates_match_the_machine_readable_metadata(self):
+        """The ledger states its dates twice; only one of them is enforced.
+
+        `check_volatile_facts` parses the `volatile-facts` HTML comment, so a
+        stale date in the human-readable line silently disagrees with the gate.
+        That is exactly what happened in 83549c5, which advanced the prose to
+        2026-07-30 while leaving the comment at 2026-07-28 — the checker stayed
+        green because it never reads the prose. Assert the two agree.
+        """
+        comment = re.search(
+            r"verified_at=(\d{4}-\d{2}-\d{2})\s+expires_at=(\d{4}-\d{2}-\d{2})",
+            self.text,
+        )
+        self.assertIsNotNone(comment, "ledger must carry the volatile-facts comment")
+        prose = re.search(
+            r"核验日期：(\d{4}-\d{2}-\d{2})；到期日期：(\d{4}-\d{2}-\d{2})", self.text
+        )
+        self.assertIsNotNone(prose, "ledger must state its dates in prose too")
+        self.assertEqual(
+            (prose.group(1), prose.group(2)),
+            (comment.group(1), comment.group(2)),
+            "prose dates drifted from the machine-readable verified_at/expires_at",
+        )
+
     def test_current_ledger_has_exact_thirty_day_ttl_and_resolved_conflict(self):
         self.assertEqual(self.issues(self.text), [])
         self.assertIn("verified_at=2026-07-28", self.text)
