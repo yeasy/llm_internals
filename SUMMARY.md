@@ -68,6 +68,7 @@
   * [8.2 RLHF：为什么需要人类反馈参与训练](08_alignment/8.2_rlhf.md)
   * [8.3 DPO 与新型对齐：从复杂到简洁的演化](08_alignment/8.3_dpo.md)
   * [8.4 参数高效微调：为什么不必更新所有参数](08_alignment/8.4_peft.md)
+  * [8.5 微调会怎么坏：四种失败模式与一条共同判据](08_alignment/8.5_practice.md)
   * [本章小结](08_alignment/summary.md)
 
 ## 第三部分：推理与部署篇
