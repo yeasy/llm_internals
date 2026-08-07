@@ -290,6 +290,139 @@ def check_volatile_facts(
     return issues
 
 
+SECTION_FILE_RE = re.compile(r"^\d+\.\d+")
+MIN_INTRO_CHARS = 40
+
+# 关门句：把某项技术说成终局，会让后面的小节显得毫无理由。
+# 只在末段命中且同段没有任何限定词时报错——精度优先，宁可漏报。
+CLOSING_CLAIM_RE = re.compile(
+    r"(标配|事实标准|主流选择|默认选择|已成为|关键技术之一)"
+)
+HEDGE_RE = re.compile(
+    r"(但|然而|不过|除非|前提|边界|代价|局限|仅|只在|尚未|还没|之外|另一方面|随之"
+    r"|不能|并非|未必|不再|取决于|强相关|视.{0,4}而定)"
+)
+
+# 先用后定义会当场制造无效认知负荷。表里每个术语的定义处由
+# tests/test_prereq_terms.py 校验，改表必须改代码，必然过 review。
+PREREQ_TERMS = {
+    "Pre-Norm": "03_components/3.6_layer_norm.md",
+    "TTFT": "11_serving/11.5_best_practices.md",
+    "TPOT": "11_serving/11.5_best_practices.md",
+    # 书里 11.3 写小写 goodput、11.5 写大写 Goodput，匹配一律大小写不敏感。
+    "Goodput": "11_serving/11.5_best_practices.md",
+}
+
+
+def summary_ordered_targets() -> list[str]:
+    """SUMMARY.md 里出现的本地 Markdown 目标，保持出现顺序。"""
+    summary = ROOT / "SUMMARY.md"
+    if not summary.exists():
+        return []
+    seen: list[str] = []
+    body = summary.read_text(encoding="utf-8", errors="ignore")
+    for match in LINK_RE.finditer(body):
+        raw = match.group(2).strip()
+        target = normalize_target(raw)
+        if not is_local_target(raw):
+            continue
+        path_part, _ = split_target(target)
+        if path_part.endswith(".md") and path_part not in seen:
+            seen.append(path_part)
+    return seen
+
+
+def is_numbered_section(path: Path) -> bool:
+    return bool(SECTION_FILE_RE.match(path.name))
+
+
+def check_section_intro(path: Path, text: str) -> list[str]:
+    """编号小节在第一个 H3 之前必须有引入段。
+
+    没有引入段意味着读者从 `## X.Y` 直接掉进 `### X.Y.1`，既拿不到本节的
+    自足定位（跳读者），也接不上前一节留下的缺口（顺读者）。
+    """
+    if not is_numbered_section(path):
+        return []
+    body = strip_fenced_blocks(text)
+    h2 = re.search(r"^##\s+.+$", body, re.MULTILINE)
+    h3 = re.search(r"^###\s", body, re.MULTILINE)
+    if not h2 or not h3 or h3.start() < h2.end():
+        return []
+    intro = body[h2.end() : h3.start()].strip()
+    # 只算实际散文：跳过引用块标记、注释和空行。
+    prose = "\n".join(
+        line
+        for line in intro.splitlines()
+        if line.strip() and not line.lstrip().startswith(("<!--", "|", "```"))
+    ).strip()
+    if len(prose) >= MIN_INTRO_CHARS:
+        return []
+    return [
+        f"{rel(path)}: 缺少引入段（`## ` 与第一个 `### ` 之间只有 {len(prose)} 字符，"
+        f"至少需要 {MIN_INTRO_CHARS}）。第一句给跳读者定位，第二句接上一节留下的缺口。"
+    ]
+
+
+def check_closing_claim(path: Path, text: str) -> list[str]:
+    """末段不得用无限定的「标配/事实标准」把门焊死。"""
+    if not is_numbered_section(path):
+        return []
+    body = strip_fenced_blocks(text)
+    paragraphs = [p.strip() for p in body.split("\n\n") if p.strip()]
+    if not paragraphs:
+        return []
+    last = paragraphs[-1]
+    if not CLOSING_CLAIM_RE.search(last) or HEDGE_RE.search(last):
+        return []
+    claim = CLOSING_CLAIM_RE.search(last).group(1)
+    return [
+        f"{rel(path)}: 末段用「{claim}」收尾且不带任何限定，"
+        f"读者会认为问题已经解决，下一节因此显得没有理由。"
+        f"补一条它没覆盖的边界即可。"
+    ]
+
+
+def check_prereq_terms(files: list[Path]) -> list[str]:
+    """术语不得在其定义小节之前裸用。
+
+    修法是就地补一句括注（`10_inference_optimization/10.1_bottleneck.md` 里的
+    「TPOT（每输出词元时间）」就是标准写法），或在同段给出指向定义处的链接。
+    """
+    order = summary_ordered_targets()
+    position = {target: index for index, target in enumerate(order)}
+    issues: list[str] = []
+    for path in files:
+        if not is_numbered_section(path):
+            continue
+        here = position.get(rel(path))
+        if here is None:
+            continue
+        body = strip_fenced_blocks(path.read_text(encoding="utf-8", errors="ignore"))
+        for term, definition in PREREQ_TERMS.items():
+            defined_at = position.get(definition)
+            if defined_at is None or here >= defined_at:
+                continue
+            term_re = re.compile(re.escape(term), re.IGNORECASE)
+            # 只看**首次**出现：术语第一次露面时交代清楚即可，
+            # 后续复用再逐处括注反而会把正文写成词汇表。
+            for paragraph in body.split("\n\n"):
+                if not term_re.search(paragraph):
+                    continue
+                # 就地括注或指向定义处的链接，二者有其一即可。
+                glossed = re.search(
+                    re.escape(term) + r"\s*[（(]", paragraph, re.IGNORECASE
+                )
+                linked = Path(definition).name in paragraph
+                if not glossed and not linked:
+                    issues.append(
+                        f"{rel(path)}: 「{term}」在其定义处（{definition}）之前就被裸用，"
+                        f"读者此时无法理解。就地补一句括注，或在同段链接到定义处。"
+                    )
+                break  # 首次出现已判定，无论通过与否都不再往后看
+    return issues
+
+
 def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser = argparse.ArgumentParser(
         description="Run lightweight Markdown checks for this book."
@@ -316,8 +449,11 @@ def main(argv: list[str] | None = None) -> int:
         issues.extend(check_fences(path, text))
         issues.extend(check_headings(path, text))
         issues.extend(check_links(path, text))
+        issues.extend(check_section_intro(path, text))
+        issues.extend(check_closing_claim(path, text))
         if path == ROOT / "appendix" / "a5_volatile_facts.md":
             issues.extend(check_volatile_facts(path, text))
+    issues.extend(check_prereq_terms(files))
     issues.extend(check_summary_links())
     summary = ROOT / "SUMMARY.md"
     if summary.exists():
