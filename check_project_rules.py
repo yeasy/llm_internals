@@ -21,6 +21,9 @@ SKIP_DIRS = {
     "dist",
     "node_modules",
 }
+# 这些目录下的 Markdown 是工具说明而非书稿章节：不要求出现在 SUMMARY.md 中，
+# 但仍参与链接、围栏、标题等全部其余检查。
+NON_CHAPTER_DIRS = {"tools", "tests"}
 LINK_RE = re.compile(r"(!?)\[[^\]]*\]\(([^)\s]+(?:\s+\"[^\"]*\")?)\)")
 FENCE_RE = re.compile(r"^\s*(`{3,}|~{3,})")
 HEADING_RE = re.compile(r"^(#{1,6})\s+(.+?)\s*$")
@@ -243,6 +246,10 @@ def check_summary_coverage(summary_text: str, files: list[Path]) -> list[str]:
     for path in files:
         relative = rel(path)
         if relative == "SUMMARY.md":
+            continue
+        # 工具目录的说明文档不是书的章节，不该出现在目录里；但它仍然参与本文件
+        # 其余各项检查（链接、围栏、标题），所以只在这一项上豁免。
+        if relative.split("/", 1)[0] in NON_CHAPTER_DIRS:
             continue
         if relative not in targets:
             issues.append(f"SUMMARY.md: missing Markdown file from summary: {relative}")

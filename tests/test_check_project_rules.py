@@ -74,6 +74,27 @@ class CheckProjectRulesTest(unittest.TestCase):
 
         self.assertIn("SUMMARY.md: missing Markdown file from summary: unlisted.md", issues)
 
+    def test_summary_coverage_exempts_tooling_docs_but_not_chapters(self):
+        """`tools/` 与 `tests/` 下的说明文档不必进目录；章节文件必须进。"""
+        checker = load_checker()
+        files = [
+            ROOT / "README.md",
+            ROOT / "tools" / "figures" / "README.md",
+            ROOT / "tests" / "notes.md",
+            ROOT / "06_training_techniques" / "6.9_new.md",
+        ]
+        summary_text = "* [Home](README.md)\n"
+
+        issues = checker.check_summary_coverage(summary_text, files)
+
+        self.assertEqual(
+            issues,
+            [
+                "SUMMARY.md: missing Markdown file from summary: "
+                "06_training_techniques/6.9_new.md"
+            ],
+        )
+
 
 if __name__ == "__main__":
     unittest.main()
