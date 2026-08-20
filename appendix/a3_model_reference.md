@@ -39,6 +39,7 @@
 | Claude Fable 5 | 2026.06.09 | Decoder | 未公开 | - | - | - | 1M | 能力最强的广泛发布模型；128K 输出、Adaptive Thinking 常开、\$10/\$50；2026-07-01 与 Mythos 5 一同恢复访问 |
 | Claude Mythos 5 | 2026.06.09 | Decoder | 未公开 | - | - | - | 1M | 与 Fable 5 同规格和价格，Adaptive Thinking 常开；仅限 Project Glasswing 获批客户；2026-07-01 恢复访问 |
 | Claude Sonnet 5 | 2026.06.30 | Decoder | 未公开 | - | - | - | 1M | 128K 输出；Adaptive Thinking 默认开启；模型 ID `claude-sonnet-5` |
+| Claude Opus 5 | 2026.07.24 | Decoder | 未公开 | - | - | - | 1M | 当前 Opus 代际，接替 Opus 4.8；128K 输出、Adaptive Thinking 默认开启；模型 ID `claude-opus-5` |
 | Llama 4 Scout | 2025.04 | MoE-Dec | 109B total / 17B active | - | - | - | 10M | MoE 架构 |
 | Llama 4 Maverick | 2025.04 | MoE-Dec | 400B total / 17B active | - | - | - | 1M | MoE 架构 |
 | GPT-5 | 2025.08.07 | Decoder | 未公开 | - | - | - | 400,000 | 文本/图像输入推理 |
