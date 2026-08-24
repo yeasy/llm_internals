@@ -11,18 +11,18 @@
 | T5-Large | 2019.10 | Enc-Dec | 770M | 24 | 1024 | 16 | 512 | 文本到文本；2019.10 为 arXiv 预印本时间，正式发表于 2020 年 |
 | GPT-3 | 2020.05 | Decoder | 175B | 96 | 12288 | 96 | 2048 | 少样本学习 |
 | Llama 2-7B | 2023.07 | Decoder | 7B | 32 | 4096 | 32 | 4096 | RoPE |
-| Llama 2-70B | 2023.07 | Decoder | 70B | 80 | 8192 | 64 | 4096 | GQA(8KV头) |
-| Llama 3-8B | 2024.04 | Decoder | 8B | 32 | 4096 | 32 | 8192 | 128K词汇表 |
+| Llama 2-70B | 2023.07 | Decoder | 70B | 80 | 8192 | 64 | 4096 | GQA（8KV 头）|
+| Llama 3-8B | 2024.04 | Decoder | 8B | 32 | 4096 | 32 | 8192 | 128K 词汇表 |
 | Llama 3-70B | 2024.04 | Decoder | 70B | 80 | 8192 | 64 | 8192 | GQA |
-| Llama 3.1-405B | 2024.07 | Decoder | 405B | 126 | 16384 | 128 | 128K | GQA(8KV头)；开放权重追近 GPT-4 |
+| Llama 3.1-405B | 2024.07 | Decoder | 405B | 126 | 16384 | 128 | 128K | GQA（8KV 头）；开放权重追近 GPT-4 |
 | GPT-4o mini | 2024.07 | Decoder | 未公开 | - | - | - | 128K | 极致性价比 |
 | Claude 3.5 Sonnet | 2024.06 | Decoder | 未公开 | - | - | - | 200K | Artifacts；Computer Use（2024.10 升级版起） |
 | o1 | 2024.12 | Decoder | 未公开 | - | - | - | 200K | 推理时计算扩展 |
 | o1-mini | 2024.09.12 | Decoder | 未公开 | - | - | - | 128K | 轻量级推理；o3-mini 已进入弃用表，新项目优先看当前 GPT-5.x |
 | Qwen 2.5-72B | 2024.09 | Decoder | 72B | 80 | 8192 | 64 | 128K | 多语言、代码、数学 |
 | Mistral 7B | 2023.09 | Decoder | 7B | 32 | 4096 | 32 | 32K | 滑动窗口注意力 |
-| DeepSeek-V3 | 2024.12 | MoE-Dec | 671B(37B激活) | 61 | 7168 | 128 | 128K | MoE + FP8 |
-| DeepSeek-R1 | 2025.01.20 | MoE-Dec | 671B(37B激活) | 61 | 7168 | 128 | 128K | cold-start + 多阶段训练 |
+| DeepSeek-V3 | 2024.12 | MoE-Dec | 671B（37B 激活）| 61 | 7168 | 128 | 128K | MoE + FP8 |
+| DeepSeek-R1 | 2025.01.20 | MoE-Dec | 671B（37B 激活）| 61 | 7168 | 128 | 128K | cold-start + 多阶段训练 |
 | Claude 3.7 Sonnet | 2025.02.24 | Decoder | 未公开 | - | - | - | 200K | 混合推理能力 |
 | Claude Opus 4 | 2025.05 | Decoder | 未公开 | - | - | - | 200K | 多模态和智能体能力 |
 | Claude Sonnet 4.5 | 2025.09.29 | Decoder | 未公开 | - | - | - | 200K | 高性能推理 |

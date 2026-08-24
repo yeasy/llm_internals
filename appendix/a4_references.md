@@ -109,8 +109,8 @@
 
 ### 推荐书籍
 
-90. Jurafsky, D. & Martin, J.H. *Speech and Language Processing* (3rd ed.). 第10章 Transformer 部分。
-91. 邱锡鹏. 《神经网络与深度学习》. 第15章注意力机制与 Transformer。
+90. Jurafsky, D. & Martin, J.H. *Speech and Language Processing* (3rd ed.). 第 10 章 Transformer 部分。
+91. 邱锡鹏. 《神经网络与深度学习》. 第 15 章注意力机制与 Transformer。
 
 ### 官方模型、硬件与工程资料
 
