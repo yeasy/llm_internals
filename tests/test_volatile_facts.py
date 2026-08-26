@@ -4,7 +4,7 @@ import importlib.util
 import sys
 import re
 import unittest
-from datetime import date
+from datetime import date, timedelta
 from pathlib import Path
 
 
@@ -71,8 +71,12 @@ class VolatileFactsTests(unittest.TestCase):
 
     def test_current_ledger_has_exact_thirty_day_ttl_and_resolved_conflict(self):
         self.assertEqual(self.issues(self.text), [])
-        self.assertIn("verified_at=2026-07-28", self.text)
-        self.assertIn("expires_at=2026-08-27", self.text)
+        # Assert the SHAPE of the stamps, not their literal values: pinning the
+        # dates here makes every honest re-verification break this test, which is
+        # the opposite of what the TTL is for. Exactness of the 30-day window is
+        # checked by check_volatile_facts() against the ledger's own verified_at.
+        self.assertRegex(self.text, r"verified_at=\d{4}-\d{2}-\d{2}")
+        self.assertRegex(self.text, r"expires_at=\d{4}-\d{2}-\d{2}")
         self.assertIn("`claude-opus-5`", self.text)
         self.assertNotIn("与 Opus 4.8（Opus 档）", self.text)
         self.assertIn("ttl_days=30", self.text)
@@ -83,20 +87,34 @@ class VolatileFactsTests(unittest.TestCase):
             self.assertIn(endpoint, self.text)
 
     def test_future_verification_date_fails_closed(self):
+        # Mutate relative to whatever the ledger currently says, so the mutation
+        # keeps biting after a refresh instead of silently becoming a no-op.
+        stamped = self._stamped()
         changed = self.text.replace(
-            "verified_at=2026-07-28", "verified_at=2026-07-29", 1
-        ).replace("expires_at=2026-08-27", "expires_at=2026-08-28", 1)
+            f"verified_at={stamped.isoformat()}",
+            f"verified_at={(stamped + timedelta(days=1)).isoformat()}",
+            1,
+        ).replace(
+            f"expires_at={(stamped + timedelta(days=30)).isoformat()}",
+            f"expires_at={(stamped + timedelta(days=31)).isoformat()}",
+            1,
+        )
         self.assertTrue(any("future" in issue for issue in self.issues(changed)))
 
     def test_non_exact_ttl_and_expired_ledger_fail_closed(self):
-        changed = self.text.replace("expires_at=2026-08-27", "expires_at=2026-08-26", 1)
+        expires = self._stamped() + timedelta(days=30)
+        changed = self.text.replace(
+            f"expires_at={expires.isoformat()}",
+            f"expires_at={(expires - timedelta(days=1)).isoformat()}",
+            1,
+        )
         self.assertTrue(
             any("exactly 30 days" in issue for issue in self.issues(changed))
         )
         self.assertTrue(
             any(
                 "expired" in issue
-                for issue in self.issues(self.text, today=date(2026, 8, 28))
+                for issue in self.issues(self.text, today=expires + timedelta(days=1))
             )
         )
 
