@@ -70,7 +70,12 @@ class VolatileFactsTests(unittest.TestCase):
         )
 
     def test_current_ledger_has_exact_thirty_day_ttl_and_resolved_conflict(self):
-        self.assertEqual(self.issues(self.text), [])
+        # Check the real ledger as of TODAY, not its own verified_at. Using the
+        # stamped date made today == verified_at, so the TTL window was always a
+        # full 30 days and this assertion could never see an expired ledger. The
+        # synthetic-text calls below still default to _stamped(), because their
+        # fixtures are written relative to the ledger's own dates.
+        self.assertEqual(self.issues(self.text, today=date.today()), [])
         # Assert the SHAPE of the stamps, not their literal values: pinning the
         # dates here makes every honest re-verification break this test, which is
         # the opposite of what the TTL is for. Exactness of the 30-day window is
