@@ -28,6 +28,7 @@
   * [3.5 残差连接：梯度为什么能流过百层网络](03_components/3.5_residual.md)
   * [3.6 层归一化：为什么选择 LayerNorm 而非 BatchNorm](03_components/3.6_layer_norm.md)
   * [3.7 编码器-解码器：完整架构如何协同工作](03_components/3.7_full_architecture.md)
+  * [3.8 GPT 式仅解码器：一次回答如何生成](03_components/3.8_gpt_inference_flow.md)
   * [本章小结](03_components/summary.md)
 
 * [第四章：位置编码的设计哲学](04_position_encoding/README.md)
