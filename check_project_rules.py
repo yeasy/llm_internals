@@ -314,10 +314,10 @@ HEDGE_RE = re.compile(
 # tests/test_prereq_terms.py 校验，改表必须改代码，必然过 review。
 PREREQ_TERMS = {
     "Pre-Norm": "03_components/3.6_layer_norm.md",
-    "TTFT": "11_serving/11.5_best_practices.md",
-    "TPOT": "11_serving/11.5_best_practices.md",
+    "TTFT": "11_serving/11.13_best_practices.md",
+    "TPOT": "11_serving/11.13_best_practices.md",
     # 书里 11.3 写小写 goodput、11.5 写大写 Goodput，匹配一律大小写不敏感。
-    "Goodput": "11_serving/11.5_best_practices.md",
+    "Goodput": "11_serving/11.13_best_practices.md",
 }
 
 

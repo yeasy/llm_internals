@@ -84,7 +84,7 @@ class NumericClaimsTests(unittest.TestCase):
 
     def test_weight_memory_and_single_gpu_fit_flags_recompute(self):
         rows = table_after(
-            ROOT / "11_serving" / "11.4_hardware.md",
+            ROOT / "11_serving" / "11.12_hardware.md",
             "<!-- numeric-claim: weight-memory -->",
         )
         capacities = {
