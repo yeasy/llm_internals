@@ -1,4 +1,4 @@
-"""生成图 3-8：回答“5。”的三次前向计算。
+"""生成图 3-10：回答“5。”的三次前向计算。
 
 正文位置：03_components/3.8_gpt_inference_flow.md
 输出：03_components/_images/inference_timeline.png

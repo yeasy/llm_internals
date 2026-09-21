@@ -1,11 +1,11 @@
-"""生成图 3-11：一轮 Decode 怎样对着 KV 缓存只算一行。
+"""生成图 3-13：一轮 Decode 怎样对着 KV 缓存只算一行。
 
 正文位置：03_components/3.8_gpt_inference_flow.md
 输出：03_components/_images/decode_with_cache.png
 
 上半幅用教学模型头 1 在第 1 轮 Decode（位置 7，词元 5）的真实数值：新位置只产生一行
 q、k、v；k、v 追加到缓存第 7 行，q 与缓存的 7 行 K 逐行打分，Softmax 后按权重混合
-7 行 V，得到 context。数值与正文表 3-9 及第 1 轮 Decode 的算式一致。
+7 行 V，得到 context。数值与正文表 3-21 及第 1 轮 Decode 的算式一致。
 下半幅示意真实模型：新位置自左向右穿过 L 层，每层读写的是本层自己的缓存。
 """
 

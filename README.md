@@ -70,6 +70,7 @@
 3. **Transformer 核心组件**（第 3 章）：理解前馈网络、残差连接、层归一化等模块如何协同工作
 4. **位置编码与训练演进**（第 4-8 章）：学习位置编码、预训练、训练技巧、分布式训练与对齐方法如何逐步推动模型能力提升
 5. **工程实践**（第 9-11 章）：理解解码、推理优化和部署的底层逻辑
+6. **模型与前沿**（第 12-14 章）：对照编码器与解码器两条技术路线，再看前沿架构在改哪一处
 
 ## 学习路线图
 
@@ -92,7 +93,9 @@ graph TD
     Ch10 --> Ch11["第11章：服务系统"]
     Ch11 --> Systems["系统工程师终点：验收部署方案"]
 
+    Ch5 --> Ch12["第12章：编码器系列模型"]
     Ch6 --> Ch13["第13章：主流模型"]
+    Ch12 --> Ch13
     Ch13 --> Ch14["第14章：前沿方向"]
     Ch14 --> Research["研究人员终点：形成可证伪假设"]
 ```
@@ -106,7 +109,7 @@ graph TD
 | **AI 初学者** | [第 1 章](01_introduction/README.md) → [第 2 章](02_attention/README.md) → [第 3 章](03_components/README.md) → [第 4 章](04_position_encoding/README.md) | 独立写出[缩放点积注意力](02_attention/2.2_scaled_dot_product.md)并解释缩放因子 | 手算[正弦位置编码](04_position_encoding/4.1_sinusoidal.md)的一组二维旋转 | 运行并核对[附录 PyTorch 示例](appendix/a2_pytorch_examples.md)的 attention、RoPE、RMSNorm |
 | **算法工程师** | [第 1-4 章](04_position_encoding/README.md) → [第 5 章](05_pretraining/README.md) → [第 6 章](06_training_techniques/README.md) → [第 7 章](07_distributed_training/README.md) → [第 8 章](08_alignment/README.md) | 从目标函数推导[自回归预训练](05_pretraining/5.1_autoregressive.md)与[DPO](08_alignment/8.3_dpo.md)的优化对象 | 重算[ZeRO 分片](07_distributed_training/7.2_zero.md)在 64 卡下的单卡状态显存 | 运行[混合精度](07_distributed_training/7.6_mixed_precision.md)与[检查点](07_distributed_training/7.7_checkpoint.md)示例并验证恢复一致性 |
 | **系统工程师** | [第 1-5 章](05_pretraining/README.md) → [第 9 章](09_decoding/README.md) → [第 10 章](10_inference_optimization/README.md) → [第 11 章](11_serving/README.md) | 解释[Prefill/Decode 瓶颈](10_inference_optimization/10.1_bottleneck.md)如何决定调度策略 | 重算[KV cache](10_inference_optimization/10.2_kv_cache.md)和[权重显存](11_serving/11.12_hardware.md)是否能放入目标 GPU | 以[持续批处理](11_serving/11.2_continuous_batching.md)为基线实现微型调度实验并检查延迟分位数 |
-| **研究人员** | [第 1-6 章](06_training_techniques/README.md) → [第 13 章](13_decoder_models/README.md) → [第 14 章](14_future_trends/README.md) | 为[推理时计算扩展](14_future_trends/14.6_test_time_scaling.md)写出可证伪机制假设 | 对[批量与序列长度](06_training_techniques/6.4_batch_sequence.md)的计算预算做敏感性分析 | 在[高效注意力](14_future_trends/14.1_efficient_attention.md)基线上实现对照实验，固定种子并报告误差 |
+| **研究人员** | [第 1-6 章](06_training_techniques/README.md) → [第 12 章](12_encoder_models/README.md) → [第 13 章](13_decoder_models/README.md) → [第 14 章](14_future_trends/README.md) | 为[推理时计算扩展](14_future_trends/14.6_test_time_scaling.md)写出可证伪机制假设 | 对[批量与序列长度](06_training_techniques/6.4_batch_sequence.md)的计算预算做敏感性分析 | 在[高效注意力](14_future_trends/14.1_efficient_attention.md)基线上实现对照实验，固定种子并报告误差 |
 
 ## 在线阅读
 

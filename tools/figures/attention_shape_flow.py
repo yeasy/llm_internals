@@ -1,4 +1,4 @@
-"""生成图 3-10：一层注意力计算中各矩阵的形状怎样一步步变化。
+"""生成图 3-12：一层注意力计算中各矩阵的形状怎样一步步变化。
 
 正文位置：03_components/3.8_gpt_inference_flow.md
 输出：03_components/_images/attention_shape_flow.png

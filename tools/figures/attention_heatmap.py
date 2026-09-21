@@ -1,4 +1,4 @@
-"""生成图 2-1：缩放点积注意力权重热力图。
+"""生成图 2-2：缩放点积注意力权重热力图。
 
 正文位置：02_attention/2.2_scaled_dot_product.md
 输出：02_attention/_images/attention_heatmap.png

@@ -1,4 +1,4 @@
-"""生成图 3-12：真实 GPT 中一层 Transformer 的结构与各处的形状。
+"""生成图 3-14：真实 GPT 中一层 Transformer 的结构与各处的形状。
 
 正文位置：03_components/3.8_gpt_inference_flow.md
 输出：03_components/_images/transformer_layer_blocks.png

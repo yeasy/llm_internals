@@ -1,11 +1,11 @@
-"""生成图 3-9：一条消息怎样变成初始表示 X⁽⁰⁾。
+"""生成图 3-11：一条消息怎样变成初始表示 X⁽⁰⁾。
 
 正文位置：03_components/3.8_gpt_inference_flow.md
 输出：03_components/_images/input_pipeline.png
 
 从上到下四步：聊天模板把消息排成一串文字，分词器切成 6 个词元并给出 ID，
 按 ID 从词嵌入矩阵 E 里各取一行，再加上该位置的位置向量，得到 [6, 4] 的 X⁽⁰⁾。
-图中的数值与正文表 3-3 完全一致。
+图中的数值与正文表 3-15 完全一致。
 """
 
 from __future__ import annotations

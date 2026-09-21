@@ -3,7 +3,7 @@
 正文位置：06_training_techniques/6.4_batch_sequence.md
 输出：06_training_techniques/_images/ch06_memory_stack.png
 
-算例是 GPT-3 6.7B（L = 32、h = 4096、a = 32，micro-batch 1），与 3.8.6 的表 3-11 同一配置。
+算例是 GPT-3 6.7B（L = 32、h = 4096、a = 32，micro-batch 1），与 3.8.6 的表 3-24 同一配置。
 模型状态按混合精度 AdamW 的 16 字节/参数：16 x 6.7e9 = 107 GB，与序列长度无关。
 激活按 Korthikanti 等人的每层 sbh(34 + 5as/h) 字节：
 - 朴素：两项都留；

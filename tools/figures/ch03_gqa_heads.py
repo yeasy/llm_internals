@@ -1,4 +1,4 @@
-"""生成图 3-15：MHA、GQA 与 MQA 中 Query 头与 K/V 头的对应关系。
+"""生成图 3-9：MHA、GQA 与 MQA 中 Query 头与 K/V 头的对应关系。
 
 正文位置：03_components/3.7_full_architecture.md
 输出：03_components/_images/ch03_gqa_heads.png

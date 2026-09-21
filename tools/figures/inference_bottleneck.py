@@ -1,9 +1,9 @@
-"""生成图 3-13：Prefill 与 Decode 各自落在哪一种瓶颈里。
+"""生成图 3-15：Prefill 与 Decode 各自落在哪一种瓶颈里。
 
 正文位置：03_components/3.8_gpt_inference_flow.md
 输出：03_components/_images/inference_bottleneck.png
 
-横轴是“每从显存读 1 字节，做多少次浮点运算”（对数刻度）。数值按正文表 3-14 的
+横轴是“每从显存读 1 字节，做多少次浮点运算”（对数刻度）。数值按正文表 3-26 的
 口径算出：GPT-3 Small，FP16 权重，上下文 1,000 个词元；访存只数权重和 KV 缓存。
 分界线取 10.1 节给出的 H100 拐点（约 295 次/字节）。
 """

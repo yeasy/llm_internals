@@ -33,13 +33,13 @@ def main() -> None:
         kind = "new" if j == CUR_J else "data"
         box(ax, gx + j * c + 0.08, gtop + 0.35, c - 0.16, 0.9, f"$K_{j + 1}, V_{j + 1}$", kind,
             fontsize=FS, rounded=False)
-    label(ax, gx + N * c / 2, gtop + 1.65, "K/V 的列块，每块 [$B_c$, d]，驻留显存", fontsize=FS)
+    label(ax, gx + N * c / 2, gtop + 1.65, "K/V 的列块，每块 [$B_c$, $d_h$]，驻留显存", fontsize=FS)
     # Q 行块（显存）
     for i in range(N):
         kind = "new" if i == CUR_I else "data"
         box(ax, gx - 1.75, gtop - (i + 1) * c + 0.08, 1.45, c - 0.16, f"$Q_{i + 1}$", kind,
             fontsize=FS, rounded=False)
-    label(ax, gx - 1.05, gtop + 0.85, "Q 的行块\n每块 [$B_r$, d]", fontsize=FS)
+    label(ax, gx - 1.05, gtop + 0.85, "Q 的行块\n每块 [$B_r$, $d_h$]", fontsize=FS)
 
     # 分数矩阵的块
     for i in range(N):
@@ -59,7 +59,7 @@ def main() -> None:
                         color=MUTED if txt == "跳过" else "black", zorder=3, linespacing=1.3)
     ax.add_patch(Rectangle((gx, gtop - N * c), N * c, N * c, fill=False, edgecolor=DATA_EDGE,
                            linewidth=1.8, zorder=4))
-    label(ax, gx + N * c / 2, gtop - N * c - 0.55, "分数矩阵 [N, N] 只在逻辑上存在，从不整张写入显存",
+    label(ax, gx + N * c / 2, gtop - N * c - 0.55, "分数矩阵 [T, T] 只在逻辑上存在，从不整张写入显存",
           fontsize=FS, color=ACCENT)
     label(ax, gx + N * c / 2, gtop - N * c - 1.25, "外层 i 遍历行块，内层 j 遍历列块", fontsize=FS, color=MUTED)
 
@@ -68,11 +68,11 @@ def main() -> None:
     box(ax, sx, sy, sw, sh, "", "neutral")
     label(ax, sx + sw / 2, sy + sh - 0.5, "片上 SRAM：一次只放一对块", fontsize=FS_TEXT, bold=True)
     rows = [
-        ("$Q_3$  [$B_r$, d]", "data"),
-        ("$K_2, V_2$  [$B_c$, d]", "new"),
-        ("$S_{32} = Q_3 K_2^{\\top}/\\sqrt{d}$  [$B_r$, $B_c$]", "new"),
+        ("$Q_3$  [$B_r$, $d_h$]", "data"),
+        ("$K_2, V_2$  [$B_c$, $d_h$]", "new"),
+        ("$S_{32} = Q_3 K_2^{\\top}/\\sqrt{d_h}$  [$B_r$, $B_c$]", "new"),
         ("逐行状态 m、$\\ell$  [$B_r$]", "plain"),
-        ("未归一化输出 $\\tilde{O}_3$  [$B_r$, d]", "plain"),
+        ("未归一化输出 $\\tilde{O}_3$  [$B_r$, $d_h$]", "plain"),
     ]
     for k, (text, kind) in enumerate(rows):
         box(ax, sx + 0.4, sy + sh - 1.95 - k * 1.12, sw - 0.8, 0.92, text, kind, fontsize=FS)
@@ -81,7 +81,7 @@ def main() -> None:
 
     # 写回
     box(ax, 12.6, 1.0, 7.6, 2.2,
-        "内层循环走完后写回显存：\n$O_3 = \\tilde{O}_3 / \\ell$   [$B_r$, d]\n"
+        "内层循环走完后写回显存：\n$O_3 = \\tilde{O}_3 / \\ell$   [$B_r$, $d_h$]\n"
         "$\\mathrm{LSE}_3 = m + \\ln \\ell$   [$B_r$]", "data", fontsize=FS)
     arrow(ax, (sx + sw / 2, sy), (sx + sw / 2, 3.2))
 

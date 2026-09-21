@@ -1,4 +1,4 @@
-"""生成图 3-14：归一化放在哪里——Post-Norm、Pre-Norm 与前后双归一化。
+"""生成图 3-6：归一化放在哪里——Post-Norm、Pre-Norm 与前后双归一化。
 
 正文位置：03_components/3.6_layer_norm.md
 输出：03_components/_images/ch03_norm_placement.png
