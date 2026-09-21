@@ -35,7 +35,7 @@ def main() -> None:
     use_cjk_font()
     fig, ax = plt.subplots(figsize=(12.6, 10.0))
 
-    label(ax, CX, 30.6, "第 $\ell$ 层：输入和输出都是 [T, d_model]，所以可以一层接一层",
+    label(ax, CX, 30.6, "第 $\ell$ 层的六个步骤：输入和输出同形状，所以输出能当下一层的输入",
           fontsize=FS_TITLE, bold=True)
 
     # 输入
@@ -44,7 +44,7 @@ def main() -> None:
     arrow(ax, (CX, 1.45), (CX, 2.95))
 
     # 归一化 1
-    box(ax, CX - 3, 3.0, 6, 1.1, "归一化", "neutral")
+    box(ax, CX - 3, 3.0, 6, 1.1, "① 归一化", "neutral")
     arrow(ax, (CX, 4.15), (CX, 5.0))
 
     # 分给各个头
@@ -68,7 +68,7 @@ def main() -> None:
     label(ax, heads_x[2] + HW + 0.9, 6.75, "各头的 K、V\n写入本层缓存", ha="left",
           fontsize=FS_SMALL, color=ACCENT)
     arrow(ax, (heads_x[2] + HW + 0.05, 6.75), (heads_x[2] + HW + 0.8, 6.75), color=ACCENT, lw=1.2)
-    label(ax, CX + 3.2, 4.55, "n_h 个头并行，各用各的权重", ha="left", fontsize=FS_SMALL,
+    label(ax, CX + 3.2, 4.55, "② 因果自注意力：n_h 个头并行，各用各的权重", ha="left", fontsize=FS_SMALL,
           color=MUTED)
 
     # 拼接
@@ -79,7 +79,7 @@ def main() -> None:
     shape(ax, CX + 3.3, 15.45, "[T, d_model]")
     arrow(ax, (CX, 16.05), (CX, 16.9))
     plus(ax, CX, 17.4)
-    label(ax, CX + 0.8, 17.4, "残差相加", ha="left", fontsize=FS_SMALL, color=MUTED)
+    label(ax, CX + 0.8, 17.4, "③ 残差相加", ha="left", fontsize=FS_SMALL, color=MUTED)
 
     # 残差旁路 1：从输入绕到第一个加号
     ax.plot([CX - 4, CX - 13.4, CX - 13.4], [0.8, 0.8, 17.4], color=INK, lw=1.5)
@@ -88,7 +88,7 @@ def main() -> None:
 
     # MLP 子层
     arrow(ax, (CX, 17.9), (CX, 19.35))
-    box(ax, CX - 3, 19.4, 6, 1.1, "归一化", "neutral")
+    box(ax, CX - 3, 19.4, 6, 1.1, "④ 归一化", "neutral")
     arrow(ax, (CX, 20.55), (CX, 21.35))
     box(ax, CX - 4.5, 21.4, 9, 1.1, "乘 W_1，扩到约 4 倍宽", "weight")
     shape(ax, CX + 4.8, 21.95, "[T, 4 × d_model]")
@@ -99,8 +99,8 @@ def main() -> None:
     shape(ax, CX + 4.8, 25.45, "[T, d_model]")
     arrow(ax, (CX, 26.05), (CX, 26.9))
     plus(ax, CX, 27.4)
-    label(ax, CX + 0.8, 27.4, "残差相加", ha="left", fontsize=FS_SMALL, color=MUTED)
-    label(ax, CX - 5.0, 22.9, "MLP：\n每个位置\n各算各的", ha="right", fontsize=FS_SMALL,
+    label(ax, CX + 0.8, 27.4, "⑥ 残差相加", ha="left", fontsize=FS_SMALL, color=MUTED)
+    label(ax, CX - 5.0, 22.9, "⑤ MLP：\n每个位置\n各算各的", ha="right", fontsize=FS_SMALL,
           color=MUTED)
 
     # 残差旁路 2
@@ -111,7 +111,10 @@ def main() -> None:
     # 输出
     arrow(ax, (CX, 27.9), (CX, 28.65))
     box(ax, CX - 4, 28.7, 8, 1.2, "第 $\ell$ 层的输出", "data", fontsize=FS_TEXT, bold=True)
-    shape(ax, CX + 4.3, 29.3, "[T, d_model]")
+    # 输出与输入同形状，原样成为下一层的输入
+    label(ax, CX + 9.6, 28.4, "与输入同形状，\n原样成为第 $\ell$ + 1 层的输入，\n这六步重复 L 次",
+          ha="left", fontsize=FS_SMALL, color=ACCENT)
+    arrow(ax, (CX + 9.3, 29.3), (CX + 4.2, 29.3), color=ACCENT, lw=1.4)
 
     # 右侧：重复 L 层，再进 LM head
     rx = CX + 18.6
