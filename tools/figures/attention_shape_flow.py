@@ -17,8 +17,8 @@ from dataclasses import dataclass
 import matplotlib.pyplot as plt
 from matplotlib.patches import Circle, Polygon, Rectangle
 
-from _diagram import (ACCENT as MATCH, DATA_EDGE, DATA_FACE, DATA_STRONG as LAST_ROW_FACE,
-                      INK, MASK_FACE, MUTED, WEIGHT_EDGE, WEIGHT_FACE)
+from _diagram import (ACCENT, ACCENT as MATCH, DATA_EDGE, DATA_FACE, DATA_STRONG as LAST_ROW_FACE,
+                      INK, MASK_FACE, MUTED, WEIGHT_EDGE, WEIGHT_FACE, arrow, box, label)
 from _style import image_path, use_cjk_font
 
 OUTPUT = image_path("03_components", "attention_shape_flow.png")
@@ -164,9 +164,16 @@ def main() -> None:
     c = Canvas(ax)
     x0 = X0
 
-    # ---- 第 2 步：投影 ----
+    # ---- 层第 1 步：归一化 ----
     top = 0.0
-    c.step(top, 6, "第 2 步 投影", "每个头做三次，\n得到 Q、K、V")
+    c.step(top, 1, "层第 1 步 归一化", "逐位置缩放，形状不变\n（教学模型取恒等）")
+    x = c.matrix(x0, top, T6, D_MODEL, "第 $\\ell$ 层的输入 X", "教学模型 [6, 4]")
+    label(ax, x + 1.6, top - 0.5, "→ 归一化后仍是同样的形状，进入注意力", ha="left",
+          fontsize=FS_NOTE, color=MUTED)
+    top -= 6 + ROW_GAP
+
+    # ---- 层第 2 步（内部）：投影 ----
+    c.step(top, 6, "投影出 Q、K、V", "每个头做三次\n（3.8.4 第 2 步）")
     x = c.matrix(x0, top, T6, D_MODEL, "输入 X", "教学模型 [6, 4]", match_cols=True)
     x = c.op(x, top, 6, "×")
     x = c.matrix(x, top, D_MODEL, D_HEAD, "权重 W_Q", "教学模型 [4, 2]",
@@ -177,7 +184,7 @@ def main() -> None:
 
     # ---- 第 3 到 5 步：打分、掩码、Softmax ----
     top -= 6 + ROW_GAP
-    c.step(top, 6, "第 3 到 5 步 打分", "64 在相乘时消掉，\n结果只和词元数有关")
+    c.step(top, 6, "打分、掩码、Softmax", "64 在相乘时消掉\n（3.8.4 第 3 到 5 步）")
     x = c.matrix(x0, top, T6, D_HEAD, "Q", "教学模型 [6, 2]", match_cols=True)
     x = c.op(x, top, 6, "×")
     x = c.matrix(x, top, D_HEAD, T6, "K 的转置", "教学模型 [2, 6]", match_rows=True)
@@ -189,7 +196,7 @@ def main() -> None:
 
     # ---- 第 6 步：读取 Value ----
     top -= 6 + ROW_GAP
-    c.step(top, 6, "第 6 步 读取", "按权重混合\n各位置的 Value")
+    c.step(top, 6, "权重乘 V", "按权重混合各位置的 Value\n（3.8.4 第 6 步）")
     x = c.matrix(x0, top, T6, T6, "注意力权重", "教学模型 [6, 6]",
                  lower_tri=True, match_cols=True)
     x = c.op(x, top, 6, "×", gap_after=3.7)
@@ -220,9 +227,27 @@ def main() -> None:
                  highlight_last_row=True)
     c.note(x + 1.0, top - 3, "与输入 X\n同形状，\n才能做\n残差相加")
 
-    # ---- LM head ----
+    # ---- 层第 3 到 6 步：残差、归一化、MLP、残差 ----
     top -= 6 + ROW_GAP
-    c.step(top, 5, "LM head", "残差、MLP 不改形状；\n只取最后一行去打分")
+    c.step(top, 3, "层第 3 到 6 步", "残差、归一化、\nMLP、残差")
+    bw, gap = 8.6, 1.8
+    steps = [("③ 残差相加", "加回进入\n第 1 步之前的 X", "data"),
+             ("④ 归一化", "另一组\n参数", "weight"),
+             ("⑤ 逐位置 MLP", "真实模型\n先扩再压回", "weight"),
+             ("⑥ 残差相加", "加回进入\n第 4 步之前的向量", "data")]
+    bx = x0
+    for k, (name, note, kind) in enumerate(steps):
+        box(ax, bx, top - 2.0, bw, 2.0, name, kind, fontsize=FS_NOTE)
+        label(ax, bx + bw / 2, top - 3.0, note, fontsize=FS_TOY, color=MUTED, linespacing=1.4)
+        if k < len(steps) - 1:
+            arrow(ax, (bx + bw, top - 1.0), (bx + bw + gap, top - 1.0))
+        bx += bw + gap
+    label(ax, x0, top - 5.1, "这四步都不改变形状：教学模型始终 [6, 4]，GPT-3 Small 始终 [6, 768]",
+          ha="left", fontsize=FS_NOTE, color=ACCENT)
+
+    # ---- LM head ----
+    top -= 5.4 + ROW_GAP
+    c.step(top, 5, "LM head", "只在最后一层之后；\n取最后一行去打分")
     x = c.matrix(x0, top - 2, ONE, D_MODEL, "最后位置的表示", "教学模型 [1, 4]",
                  highlight_last_row=True, match_cols=True)
     x = c.op(x, top, 5, "×")
