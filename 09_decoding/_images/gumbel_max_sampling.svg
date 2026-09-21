@@ -14,11 +14,11 @@
     </marker>
   </defs>
   <rect x="0" y="0" width="1120" height="540" fill="#f8fafc"/>
-  <text class="title" x="60" y="54">Sampling the next token: serial multinomial vs. parallel Gumbel-Max</text>
+  <text class="title" x="60" y="54">Sampling the next token: textbook prefix-sum vs. parallel Gumbel-Max</text>
   <text class="sub" x="60" y="82">Both draw from the same categorical distribution p; Gumbel-Max trades the serial prefix-sum for element-wise ops plus one argmax.</text>
 
   <!-- Lane A: multinomial -->
-  <text class="label" x="60" y="140">Multinomial: cumulative-sum + search</text>
+  <text class="label" x="60" y="140">Prefix-sum (textbook): cumulative-sum + search</text>
   <rect class="box" x="60"  y="158" width="160" height="68" fill="#e2e8f0" stroke="#64748b"/>
   <text class="text" x="80" y="190">softmax</text>
   <text class="small" x="80" y="212">logits &#8594; p</text>

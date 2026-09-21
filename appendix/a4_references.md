@@ -138,3 +138,97 @@
 113. Google DeepMind (2026). [DiffusionGemma Model Card](https://ai.google.dev/gemma/docs/diffusiongemma/model_card).
 114. Lei, Y., et al. (2026). [The Energy Cost of Execution-Idle in GPU Clusters](https://arxiv.org/abs/2604.04745).
 115. Zhong, T., et al. (2026). [Diagnosing Training Inference Mismatch in LLM Reinforcement Learning](https://arxiv.org/abs/2605.14220). *ByteDance & University of Virginia*.
+
+### 本轮加深新增
+
+以下条目在第 7、9、10、11 章加深时引入，题目与作者经 arXiv API 核对。
+
+116. Santurkar, S., et al. (2018). [How Does Batch Normalization Help Optimization?](https://arxiv.org/abs/1805.11604). *NeurIPS*
+117. Grattafiori, A., et al. (2024). [The Llama 3 Herd of Models](https://arxiv.org/abs/2407.21783).
+118. Abbas, A., et al. (2023). [SemDeDup: Data-efficient learning at web-scale through semantic deduplication](https://arxiv.org/abs/2303.09540).
+119. Muennighoff, N., et al. (2023). [Scaling Data-Constrained Language Models](https://arxiv.org/abs/2305.16264).
+120. Shumailov, I., et al. (2023). [The Curse of Recursion: Training on Generated Data Makes Models Forget](https://arxiv.org/abs/2305.17493).
+121. Shi, W., et al. (2023). [Detecting Pretraining Data from Large Language Models](https://arxiv.org/abs/2310.16789).
+122. McCandlish, S., et al. (2018). [An Empirical Model of Large-Batch Training](https://arxiv.org/abs/1812.06162).
+123. Zoph, B., et al. (2022). [ST-MoE: Designing Stable and Transferable Sparse Expert Models](https://arxiv.org/abs/2202.08906).
+124. Dehghani, M., et al. (2023). [Scaling Vision Transformers to 22 Billion Parameters](https://arxiv.org/abs/2302.05442).
+125. Team, C. (2024). [Chameleon: Mixed-Modal Early-Fusion Foundation Models](https://arxiv.org/abs/2405.09818).
+126. Team, G., et al. (2024). [Gemma 2: Improving Open Language Models at a Practical Size](https://arxiv.org/abs/2408.00118).
+127. Liu, J., et al. (2025). [Muon is Scalable for LLM Training](https://arxiv.org/abs/2502.16982).
+128. Team, G., et al. (2025). [Gemma 3 Technical Report](https://arxiv.org/abs/2503.19786).
+129. Team, K., et al. (2025). [Kimi K2: Open Agentic Intelligence](https://arxiv.org/abs/2507.20534).
+130. Wang, S., et al. (2026). [Why Muon Outperforms Adam: A Curvature Perspective](https://arxiv.org/abs/2606.04662).
+131. Team, K., et al. (2026). [Kimi K3: Open Frontier Intelligence](https://arxiv.org/abs/2607.24653).
+132. Chen, T., et al. (2016). [Training Deep Nets with Sublinear Memory Cost](https://arxiv.org/abs/1604.06174).
+133. Micikevicius, P., et al. (2017). [Mixed Precision Training](https://arxiv.org/abs/1710.03740). *ICLR 2018*
+134. Harlap, A., et al. (2018). [PipeDream: Fast and Efficient Pipeline Parallel DNN Training](https://arxiv.org/abs/1806.03377).
+135. Shazeer, N., et al. (2018). [Mesh-TensorFlow: Deep Learning for Supercomputers](https://arxiv.org/abs/1811.02084).
+136. Huang, Y., et al. (2018). [GPipe: Efficient Training of Giant Neural Networks using Pipeline Parallelism](https://arxiv.org/abs/1811.06965).
+137. Narayanan, D., et al. (2020). [Memory-Efficient Pipeline-Parallel DNN Training](https://arxiv.org/abs/2006.09503). *ICML 2021*
+138. Li, S., et al. (2020). [PyTorch Distributed: Experiences on Accelerating Data Parallel Training](https://arxiv.org/abs/2006.15704).
+139. Ren, J., et al. (2021). [ZeRO-Offload: Democratizing Billion-Scale Model Training](https://arxiv.org/abs/2101.06840).
+140. Narayanan, D., et al. (2021). [Efficient Large-Scale Language Model Training on GPU Clusters Using Megatron-LM](https://arxiv.org/abs/2104.04473).
+141. Rajbhandari, S., et al. (2021). [ZeRO-Infinity: Breaking the GPU Memory Wall for Extreme Scale Deep Learning](https://arxiv.org/abs/2104.07857).
+142. Korthikanti, V., et al. (2022). [Reducing Activation Recomputation in Large Transformer Models](https://arxiv.org/abs/2205.05198).
+143. Micikevicius, P., et al. (2022). [FP8 Formats for Deep Learning](https://arxiv.org/abs/2209.05433).
+144. Zhao, Y., et al. (2023). [PyTorch FSDP: Experiences on Scaling Fully Sharded Data Parallel](https://arxiv.org/abs/2304.11277).
+145. Qi, P., et al. (2023). [Zero Bubble Pipeline Parallelism](https://arxiv.org/abs/2401.10241).
+146. NVIDIA, N., et al. (2025). [Pretraining Large Language Models with NVFP4](https://arxiv.org/abs/2509.25149).
+147. DeepSeek-AI, D., et al. (2026). [DeepSeek-V4: Towards Highly Efficient Million-Token Context Intelligence](https://arxiv.org/abs/2606.19348).
+148. Touvron, H., et al. (2023). [Llama 2: Open Foundation and Fine-Tuned Chat Models](https://arxiv.org/abs/2307.09288).
+149. Sheng, G., et al. (2024). [HybridFlow: A Flexible and Efficient RLHF Framework](https://arxiv.org/abs/2409.19256).
+150. Yu, Q., et al. (2025). [DAPO: An Open-Source LLM Reinforcement Learning System at Scale](https://arxiv.org/abs/2503.14476).
+151. Liu, Z., et al. (2025). [Understanding R1-Zero-Like Training: A Critical Perspective](https://arxiv.org/abs/2503.20783).
+152. Vijayakumar, A., et al. (2016). [Diverse Beam Search: Decoding Diverse Solutions from Neural Sequence Models](https://arxiv.org/abs/1610.02424). *AAAI 2018*
+153. Koehn, P., et al. (2017). [Six Challenges for Neural Machine Translation](https://arxiv.org/abs/1706.03872).
+154. Fan, A., et al. (2018). [Hierarchical Neural Story Generation](https://arxiv.org/abs/1805.04833).
+155. Holtzman, A., et al. (2019). [The Curious Case of Neural Text Degeneration](https://arxiv.org/abs/1904.09751). *ICLR 2020*
+156. Stahlberg, F., et al. (2019). [On NMT Search Errors and Model Errors: Cat Got Your Tongue?](https://arxiv.org/abs/1908.10090). *EMNLP 2019*
+157. Basu, S., et al. (2020). [Mirostat: A Neural Text Decoding Algorithm that Directly Controls Perplexity](https://arxiv.org/abs/2007.14966).
+158. Meister, C., et al. (2022). [Locally Typical Sampling](https://arxiv.org/abs/2202.00666). *TACL 2022*
+159. Wang, X., et al. (2022). [Self-Consistency Improves Chain of Thought Reasoning in Language Models](https://arxiv.org/abs/2203.11171). *ICLR 2023*
+160. Gao, L., et al. (2022). [Scaling Laws for Reward Model Overoptimization](https://arxiv.org/abs/2210.10760).
+161. Hewitt, J., et al. (2022). [Truncation Sampling as Language Model Desmoothing](https://arxiv.org/abs/2210.15191). *EMNLP*
+162. Kirchenbauer, J., et al. (2023). [A Watermark for Large Language Models](https://arxiv.org/abs/2301.10226). *ICML 2023*
+163. Park, K., et al. (2024). [Grammar-Aligned Decoding](https://arxiv.org/abs/2405.21047). *NeurIPS 2024*
+164. Brown, B., et al. (2024). [Large Language Monkeys: Scaling Inference Compute with Repeated Sampling](https://arxiv.org/abs/2407.21787).
+165. Snell, C., et al. (2024). [Scaling LLM Test-Time Compute Optimally can be More Effective than Scaling Model Parameters](https://arxiv.org/abs/2408.03314).
+166. Muennighoff, N., et al. (2025). [s1: Simple test-time scaling](https://arxiv.org/abs/2501.19393).
+167. Ma, X., et al. (2025). [dKV-Cache: The Cache for Diffusion Language Models](https://arxiv.org/abs/2505.15781).
+168. Wu, C., et al. (2025). [Fast-dLLM: Training-free Acceleration of Diffusion LLM by Enabling KV Cache and Parallel Decoding](https://arxiv.org/abs/2505.22618).
+169. Hinton, G., et al. (2015). [Distilling the Knowledge in a Neural Network](https://arxiv.org/abs/1503.02531).
+170. Kim, Y., et al. (2016). [Sequence-Level Knowledge Distillation](https://arxiv.org/abs/1606.07947). *EMNLP 2016*
+171. Mirzadeh, S., et al. (2019). [Improved Knowledge Distillation via Teacher Assistant](https://arxiv.org/abs/1902.03393). *AAAI 2020*
+172. Mishra, A., et al. (2021). [Accelerating Sparse Deep Neural Networks](https://arxiv.org/abs/2104.08378).
+173. Dettmers, T., et al. (2022). [LLM.int8(): 8-bit Matrix Multiplication for Transformers at Scale](https://arxiv.org/abs/2208.07339). *NeurIPS 2022*
+174. Frantar, E., et al. (2022). [GPTQ: Accurate Post-Training Quantization for Generative Pre-trained Transformers](https://arxiv.org/abs/2210.17323). *ICLR 2023*
+175. Frantar, E., et al. (2023). [SparseGPT: Massive Language Models Can Be Accurately Pruned in One-Shot](https://arxiv.org/abs/2301.00774).
+176. Chen, C., et al. (2023). [Accelerating Large Language Model Decoding with Speculative Sampling](https://arxiv.org/abs/2302.01318).
+177. Lin, J., et al. (2023). [AWQ: Activation-aware Weight Quantization for LLM Compression and Acceleration](https://arxiv.org/abs/2306.00978). *MLSys 2024*
+178. Gu, Y., et al. (2023). [MiniLLM: On-Policy Distillation of Large Language Models](https://arxiv.org/abs/2306.08543). *ICLR 2024*
+179. Sun, M., et al. (2023). [A Simple and Effective Pruning Approach for Large Language Models](https://arxiv.org/abs/2306.11695). *ICLR 2024*
+180. Agarwal, R., et al. (2023). [On-Policy Distillation of Language Models: Learning from Self-Generated Mistakes](https://arxiv.org/abs/2306.13649). *ICLR 2024*
+181. Dao, T. (2023). [FlashAttention-2: Faster Attention with Better Parallelism and Work Partitioning](https://arxiv.org/abs/2307.08691).
+182. Jacobs, S., et al. (2023). [DeepSpeed Ulysses: System Optimizations for Enabling Training of Extreme Long Sequence Transformer Models](https://arxiv.org/abs/2309.14509).
+183. Rouhani, B., et al. (2023). [Microscaling Data Formats for Deep Learning](https://arxiv.org/abs/2310.10537).
+184. Brandon, W., et al. (2023). [Striped Attention: Faster Ring Attention for Causal Transformers](https://arxiv.org/abs/2311.09431).
+185. Fu, Y., et al. (2024). [Break the Sequential Dependency of LLM Inference Using Lookahead Decoding](https://arxiv.org/abs/2402.02057).
+186. Liu, Z., et al. (2024). [KIVI: A Tuning-Free Asymmetric 2bit Quantization for KV Cache](https://arxiv.org/abs/2402.02750).
+187. Gromov, A., et al. (2024). [The Unreasonable Ineffectiveness of the Deeper Layers](https://arxiv.org/abs/2403.17887). *ICLR*
+188. Shah, J., et al. (2024). [FlashAttention-3: Fast and Accurate Attention with Asynchrony and Low-precision](https://arxiv.org/abs/2407.08608).
+189. Muralidharan, S., et al. (2024). [Compact Language Models via Pruning and Knowledge Distillation](https://arxiv.org/abs/2407.14679).
+190. Zhao, C., et al. (2025). [Insights into DeepSeek-V3: Scaling Challenges and Reflections on Hardware for AI Architectures](https://arxiv.org/abs/2505.09343).
+191. Willard, B., et al. (2023). [Efficient Guided Generation for Large Language Models](https://arxiv.org/abs/2307.09702).
+192. Chen, L., et al. (2023). [Punica: Multi-Tenant LoRA Serving](https://arxiv.org/abs/2310.18547).
+193. Sheng, Y., et al. (2023). [S-LoRA: Serving Thousands of Concurrent LoRA Adapters](https://arxiv.org/abs/2311.03285).
+194. Zheng, L., et al. (2023). [SGLang: Efficient Execution of Structured Language Model Programs](https://arxiv.org/abs/2312.07104).
+195. Sheng, Y., et al. (2023). [Fairness in Serving Large Language Models](https://arxiv.org/abs/2401.00588).
+196. Holmes, C., et al. (2024). [DeepSpeed-FastGen: High-throughput Text Generation for LLMs via MII and DeepSpeed-Inference](https://arxiv.org/abs/2401.08671).
+197. Beurer-Kellner, L., et al. (2024). [Guiding LLMs The Right Way: Fast, Non-Invasive Constrained Generation](https://arxiv.org/abs/2403.06988).
+198. Srivatsa, V., et al. (2024). [Preble: Efficient Distributed Prompt Scheduling for LLM Serving](https://arxiv.org/abs/2407.00023).
+199. Tam, Z., et al. (2024). [Let Me Speak Freely? A Study on the Impact of Format Restrictions on Performance of Large Language Models](https://arxiv.org/abs/2408.02442).
+200. Fu, Y., et al. (2024). [Efficient LLM Scheduling by Learning to Rank](https://arxiv.org/abs/2408.15792).
+201. Dong, Y., et al. (2024). [XGrammar: Flexible and Efficient Structured Generation Engine for Large Language Models](https://arxiv.org/abs/2411.15100). *MLSys*
+202. Team, K., et al. (2025). [Kimi Linear: An Expressive, Efficient Attention Architecture](https://arxiv.org/abs/2510.26692).
+203. Pakhomov, E., et al. (2025). [Convomem Benchmark: Why Your First 150 Conversations Don't Need RAG](https://arxiv.org/abs/2511.10523).
+204. Lai, X., et al. (2026). [MiniMax Sparse Attention](https://arxiv.org/abs/2606.13392).
