@@ -27,8 +27,8 @@ Linux 的 Noto Sans CJK 任一即可）；各脚本已按此顺序自动挑选�
 | `causal_mask_heatmap.py` | 图 2-4 因果掩码前后的注意力权重对比 | [2.4](../../02_attention/2.4_self_cross_causal.md) |
 | `inference_timeline.py` | 图 3-10 回答“5 | [3.8](../../03_components/3.8_gpt_inference_flow.md) |
 | `input_pipeline.py` | 图 3-11 一条消息怎样变成初始表示 | [3.8](../../03_components/3.8_gpt_inference_flow.md) |
-| `attention_shape_flow.py` | 图 3-12 一层注意力计算中各矩阵的形状变化 | [3.8](../../03_components/3.8_gpt_inference_flow.md) |
-| `decode_with_cache.py` | 图 3-13 一轮 Decode 怎样对着 KV 缓存只算一行 | [3.8](../../03_components/3.8_gpt_inference_flow.md) |
+| `attention_shape_flow.py` | 图 3-13 一层注意力计算中各矩阵的形状变化 | [3.8](../../03_components/3.8_gpt_inference_flow.md) |
+| `decode_with_cache.py` | 图 3-14 一轮 Decode 怎样对着 KV 缓存只算一行 | [3.8](../../03_components/3.8_gpt_inference_flow.md) |
 | `transformer_layer_blocks.py` | 图 3-14 真实 GPT 中一层 Transformer 的结构与形状 | [3.8](../../03_components/3.8_gpt_inference_flow.md) |
 | `inference_bottleneck.py` | 图 3-15 Prefill 与 Decode 各自落在哪一种瓶颈里 | [3.8](../../03_components/3.8_gpt_inference_flow.md) |
 | `sinusoidal_pe.py` | 图 4-1 正弦位置编码的频率分解 | [4.1](../../04_position_encoding/4.1_sinusoidal.md) |
