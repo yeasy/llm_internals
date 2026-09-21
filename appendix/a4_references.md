@@ -232,3 +232,43 @@
 202. Team, K., et al. (2025). [Kimi Linear: An Expressive, Efficient Attention Architecture](https://arxiv.org/abs/2510.26692).
 203. Pakhomov, E., et al. (2025). [Convomem Benchmark: Why Your First 150 Conversations Don't Need RAG](https://arxiv.org/abs/2511.10523).
 204. Lai, X., et al. (2026). [MiniMax Sparse Attention](https://arxiv.org/abs/2606.13392).
+205. Jain, S., et al. (2019). [Attention is not Explanation](https://arxiv.org/abs/1902.10186). *NAACL 2019*
+206. Dong, L., et al. (2019). [Unified Language Model Pre-training for Natural Language Understanding and Generation](https://arxiv.org/abs/1905.03197). *NeurIPS*
+207. Voita, E., et al. (2019). [Analyzing Multi-Head Self-Attention: Specialized Heads Do the Heavy Lifting, the Rest Can Be Pruned](https://arxiv.org/abs/1905.09418). *ACL 2019*
+208. Michel, P., et al. (2019). [Are Sixteen Heads Really Better than One?](https://arxiv.org/abs/1905.10650). *NeurIPS 2019*
+209. Kitaev, N., et al. (2020). [Reformer: The Efficient Transformer](https://arxiv.org/abs/2001.04451). *ICLR 2020*
+210. Bhojanapalli, S., et al. (2020). [Low-Rank Bottleneck in Multi-head Attention Models](https://arxiv.org/abs/2002.07028).
+211. Dong, Y., et al. (2021). [Attention is Not All You Need: Pure Attention Loses Rank Doubly Exponentially with Depth](https://arxiv.org/abs/2103.03404).
+212. Sennrich, R., et al. (2015). [Neural Machine Translation of Rare Words with Subword Units](https://arxiv.org/abs/1508.07909). *ACL 2016*
+213. He, K., et al. (2015). [Deep Residual Learning for Image Recognition](https://arxiv.org/abs/1512.03385).
+214. Veit, A., et al. (2016). [Residual Networks Behave Like Ensembles of Relatively Shallow Networks](https://arxiv.org/abs/1605.06431).
+215. Ethayarajh, K. (2019). [How Contextual are Contextualized Word Representations? Comparing the Geometry of BERT, ELMo, and GPT-2 Embeddings](https://arxiv.org/abs/1909.00512). *EMNLP 2019*
+216. Zhang, B., et al. (2019). [Root Mean Square Layer Normalization](https://arxiv.org/abs/1910.07467). *NeurIPS 2019*
+217. Xiong, R., et al. (2020). [On Layer Normalization in the Transformer Architecture](https://arxiv.org/abs/2002.04745).
+218. Shazeer, N. (2020). [GLU Variants Improve Transformer](https://arxiv.org/abs/2002.05202).
+219. Shen, S., et al. (2020). [PowerNorm: Rethinking Batch Normalization in Transformers](https://arxiv.org/abs/2003.07845).
+220. Meng, K., et al. (2022). [Locating and Editing Factual Associations in GPT](https://arxiv.org/abs/2202.05262). *NeurIPS 2022*
+221. Wang, T., et al. (2022). [What Language Model Architecture and Pretraining Objective Work Best for Zero-Shot Generalization?](https://arxiv.org/abs/2204.05832).
+222. Hase, P., et al. (2023). [Does Localization Inform Editing? Surprising Differences in Causality-Based Localization vs. Knowledge Editing in Language Models](https://arxiv.org/abs/2301.04213). *NeurIPS 2023*
+223. Land, S., et al. (2024). [Fishing for Magikarp: Automatically Detecting Under-trained Tokens in Large Language Models](https://arxiv.org/abs/2405.05417). *EMNLP 2024*
+224. Chen, S., et al. (2023). [Extending Context Window of Large Language Models via Positional Interpolation](https://arxiv.org/abs/2306.15595).
+225. Rozière, B., et al. (2023). [Code Llama: Open Foundation Models for Code](https://arxiv.org/abs/2308.12950).
+226. Joshi, M., et al. (2019). [SpanBERT: Improving Pre-training by Representing and Predicting Spans](https://arxiv.org/abs/1907.10529). *TACL*
+227. Lee, K., et al. (2021). [Deduplicating Training Data Makes Language Models Better](https://arxiv.org/abs/2107.06499). *ACL 2022*
+228. Tay, Y., et al. (2022). [UL2: Unifying Language Learning Paradigms](https://arxiv.org/abs/2205.05131).
+229. Xie, S., et al. (2023). [DoReMi: Optimizing Data Mixtures Speeds Up Language Model Pretraining](https://arxiv.org/abs/2305.10429). *NeurIPS 2023*
+230. Berglund, L., et al. (2023). [The Reversal Curse: LLMs trained on "A is B" fail to learn "B is A"](https://arxiv.org/abs/2309.12288).
+231. Sardana, N., et al. (2023). [Beyond Chinchilla-Optimal: Accounting for Inference in Language Model Scaling Laws](https://arxiv.org/abs/2401.00448).
+232. Besiroglu, T., et al. (2024). [Chinchilla Scaling: A replication attempt](https://arxiv.org/abs/2404.10102).
+233. Penedo, G., et al. (2024). [The FineWeb Datasets: Decanting the Web for the Finest Text Data at Scale](https://arxiv.org/abs/2406.17557).
+234. Shazeer, N., et al. (2018). [Adafactor: Adaptive Learning Rates with Sublinear Memory Cost](https://arxiv.org/abs/1804.04235).
+235. Zhang, J., et al. (2019). [Why are Adaptive Methods Good for Attention Models?](https://arxiv.org/abs/1912.03194).
+236. Dettmers, T., et al. (2021). [8-bit Optimizers via Block-wise Quantization](https://arxiv.org/abs/2110.02861).
+237. Yang, G., et al. (2022). [Tensor Programs V: Tuning Large Neural Networks via Zero-Shot Hyperparameter Transfer](https://arxiv.org/abs/2203.03466). *NeurIPS 2021*
+238. Hu, S., et al. (2024). [MiniCPM: Unveiling the Potential of Small Language Models with Scalable Training Strategies](https://arxiv.org/abs/2404.06395).
+239. Qi, X., et al. (2023). [Fine-tuning Aligned Language Models Compromises Safety, Even When Users Do Not Intend To!](https://arxiv.org/abs/2310.03693).
+240. Azar, M., et al. (2023). [A General Theoretical Paradigm to Understand Learning from Human Preferences](https://arxiv.org/abs/2310.12036).
+241. Meng, Y., et al. (2024). [SimPO: Simple Preference Optimization with a Reference-Free Reward](https://arxiv.org/abs/2405.14734). *NeurIPS 2024*
+242. Razin, N., et al. (2024). [Unintentional Unalignment: Likelihood Displacement in Direct Preference Optimization](https://arxiv.org/abs/2410.08847). *ICLR 2025*
+243. Lambert, N., et al. (2024). [Tulu 3: Pushing Frontiers in Open Language Model Post-Training](https://arxiv.org/abs/2411.15124).
+244. Zheng, C., et al. (2025). [Group Sequence Policy Optimization](https://arxiv.org/abs/2507.18071).

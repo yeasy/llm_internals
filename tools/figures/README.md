@@ -23,14 +23,14 @@ Linux 的 Noto Sans CJK 任一即可）；各脚本已按此顺序自动挑选�
 
 | 脚本 | 生成 | 正文位置 |
 |---|---|---|
-| `attention_heatmap.py` | 图 2-1 缩放点积注意力权重热力图 | [2.2](../../02_attention/2.2_scaled_dot_product.md) |
+| `attention_heatmap.py` | 图 2-2 缩放点积注意力权重热力图 | [2.2](../../02_attention/2.2_scaled_dot_product.md) |
 | `causal_mask_heatmap.py` | 图 2-4 因果掩码前后的注意力权重对比 | [2.4](../../02_attention/2.4_self_cross_causal.md) |
-| `inference_timeline.py` | 图 3-8 回答“5 | [3.8](../../03_components/3.8_gpt_inference_flow.md) |
-| `input_pipeline.py` | 图 3-9 一条消息怎样变成初始表示 | [3.8](../../03_components/3.8_gpt_inference_flow.md) |
-| `attention_shape_flow.py` | 图 3-10 一层注意力计算中各矩阵的形状变化 | [3.8](../../03_components/3.8_gpt_inference_flow.md) |
-| `decode_with_cache.py` | 图 3-11 一轮 Decode 怎样对着 KV 缓存只算一行 | [3.8](../../03_components/3.8_gpt_inference_flow.md) |
-| `transformer_layer_blocks.py` | 图 3-12 真实 GPT 中一层 Transformer 的结构与形状 | [3.8](../../03_components/3.8_gpt_inference_flow.md) |
-| `inference_bottleneck.py` | 图 3-13 Prefill 与 Decode 各自落在哪一种瓶颈里 | [3.8](../../03_components/3.8_gpt_inference_flow.md) |
+| `inference_timeline.py` | 图 3-10 回答“5 | [3.8](../../03_components/3.8_gpt_inference_flow.md) |
+| `input_pipeline.py` | 图 3-11 一条消息怎样变成初始表示 | [3.8](../../03_components/3.8_gpt_inference_flow.md) |
+| `attention_shape_flow.py` | 图 3-12 一层注意力计算中各矩阵的形状变化 | [3.8](../../03_components/3.8_gpt_inference_flow.md) |
+| `decode_with_cache.py` | 图 3-13 一轮 Decode 怎样对着 KV 缓存只算一行 | [3.8](../../03_components/3.8_gpt_inference_flow.md) |
+| `transformer_layer_blocks.py` | 图 3-14 真实 GPT 中一层 Transformer 的结构与形状 | [3.8](../../03_components/3.8_gpt_inference_flow.md) |
+| `inference_bottleneck.py` | 图 3-15 Prefill 与 Decode 各自落在哪一种瓶颈里 | [3.8](../../03_components/3.8_gpt_inference_flow.md) |
 | `sinusoidal_pe.py` | 图 4-1 正弦位置编码的频率分解 | [4.1](../../04_position_encoding/4.1_sinusoidal.md) |
 | `rope_phase.py` | 图 4-2 RoPE 注意力分数随相对距离的相位变化 | [4.3](../../04_position_encoding/4.3_rope.md) |
 | `lr_schedule_comparison.py` | 图 6-1 三种学习率调度策略对比 | [6.2](../../06_training_techniques/6.2_lr_schedule.md) |
@@ -78,6 +78,33 @@ Linux 的 Noto Sans CJK 任一即可）；各脚本已按此顺序自动挑选�
 | `ch11_11_sglang_overlap_loop.py` | 图 11-24 调度主循环的两种排法 | [11.11](../../11_serving/11.11_sglang_internals.md) |
 | `ch11b_decode_batch_limit.py` | 图 11-25 批处理对 Decode 的作用与极限 | [11.12](../../11_serving/11.12_hardware.md) |
 | `ch11b_goodput_curve.py` | 图 11-26 到达率升高时 TTFT 达标率与 P90 的变化 | [11.13](../../11_serving/11.13_best_practices.md) |
+
+| `ch02_qkv_roles.py` | 图 2-1 三路投影各自流向哪里 | [2.1](../../02_attention/2.1_qkv_intuition.md) |
+| `ch02_multihead_reshape.py` | 图 2-3 多头在实现里是“一次大投影 | [2.3](../../02_attention/2.3_multi_head.md) |
+| `ch02_mask_family.py` | 图 2-5 五种掩码都是同一张 `[T, T]` 矩阵 | [2.4](../../02_attention/2.4_self_cross_causal.md) |
+| `ch02_flops_crossover.py` | 图 2-6 $$d = 4096$$ 时 | [2.5](../../02_attention/2.5_complexity_limits.md) |
+| `ch03_bpe_pipeline.py` | 图 3-1 一段文本怎样经预分词、字节化与合并变成词元 ID | [3.1](../../03_components/3.1_tokenization.md) |
+| `ch03_ffn_shapes.py` | 图 3-3 两矩阵 FFN 与三矩阵 SwiGLU 的形状对照 | [3.4](../../03_components/3.4_feedforward.md) |
+| `ch03_residual_stream.py` | 图 3-4 残差流——各子层从同一条通路读、向同一条通路写 | [3.5](../../03_components/3.5_residual.md) |
+| `ch03_norm_axes.py` | 图 3-5 同一张 `[B, T, d]` 上 | [3.6](../../03_components/3.6_layer_norm.md) |
+| `ch03_norm_placement.py` | 图 3-6 归一化放在哪里——Post-Norm、Pre-Norm 与前后双归一化 | [3.6](../../03_components/3.6_layer_norm.md) |
+| `ch03_gqa_heads.py` | 图 3-9 8 个 Query 头共用几组 K/V | [3.7](../../03_components/3.7_full_architecture.md) |
+| `ch04_rope_wavelength.py` | 图 4-3 左图是 64 对频率的波长谱 | [4.3](../../04_position_encoding/4.3_rope.md) |
+| `ch04_alibi_decay.py` | 图 4-4 8 个头的 ALiBi 偏置换算成 Softmax 权重乘子后的衰减曲线 | [4.4](../../04_position_encoding/4.4_alibi_others.md) |
+| `ch05_shift_labels.py` | 图 5-1 一条序列怎样错一位变成 T−1 个训练样本 | [5.1](../../05_pretraining/5.1_autoregressive.md) |
+| `ch05_mlm_masking.py` | 图 5-2 一条句子经 80/10/10 改写后 | [5.2](../../05_pretraining/5.2_masked_lm.md) |
+| `ch05_mask_shapes.py` | 图 5-3 全可见、因果、前缀三种注意力掩码形状 | [5.3](../../05_pretraining/5.3_encoder_decoder.md) |
+| `ch05_scaling_curves.py` | 图 5-4 左为同一条幂律的两种画法 | [5.4](../../05_pretraining/5.4_data_scaling.md) |
+| `ch05_data_pipeline.py` | 图 5-5 FineWeb 管线的逐步保留量 | [5.5](../../05_pretraining/5.5_data_pipeline.md) |
+| `ch05_minhash_scurve.py` | 图 5-6 三组 $$(b, r)$$ 下的候选概率曲线 | [5.5](../../05_pretraining/5.5_data_pipeline.md) |
+| `ch06_logit_guards.py` | 图 6-2 四类约束落在三个互不相同的位置 | [6.3](../../06_training_techniques/6.3_regularization.md) |
+| `ch06_batch_tradeoff.py` | 图 6-3 批量在「步数」与「词元数」之间的取舍 | [6.4](../../06_training_techniques/6.4_batch_sequence.md) |
+| `ch06_memory_stack.py` | 图 6-4 GPT-3 6.7B | [6.4](../../06_training_techniques/6.4_batch_sequence.md) |
+| `ch08_sft_loss_mask.py` | 图 8-1 一条 SFT 样本怎样变成带掩码的损失 | [8.1](../../08_alignment/8.1_sft.md) |
+| `ch08_ppo_iteration.py` | 图 8-2 一轮 PPO 迭代里四个模型谁读谁写 | [8.2](../../08_alignment/8.2_rlhf.md) |
+| `ch08_reward_overopt.py` | 图 8-3 优化得越远 | [8.2](../../08_alignment/8.2_rlhf.md) |
+| `ch08_lora_bypass.py` | 图 8-5 一个线性层加上 LoRA 旁路后的形状与显存去向 | [8.4](../../08_alignment/8.4_peft.md) |
+| `ch08_tradeoff_curves.py` | 图 8-6 同一次微调里两条曲线与每轮的交换比 | [8.5](../../08_alignment/8.5_practice.md) |
 
 `tests/test_figure_scripts.py` 保证这张表与正文引用、磁盘文件三者不脱节：正文引用的脚本
 必须存在，本目录的每个脚本必须被正文引用，且每个脚本声明的输出图必须已提交。

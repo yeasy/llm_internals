@@ -27,8 +27,8 @@ def sinusoidal_pe(d_model: int = D_MODEL, max_pos: int = MAX_POS) -> torch.Tenso
     position = torch.arange(0, max_pos).unsqueeze(1).float()
     div_term = torch.exp(torch.arange(0, d_model, 2).float() *
                          -(math.log(10000.0) / d_model))
-    pe[:, 0::2] = torch.sin(position * div_term)  # 偶数维度
-    pe[:, 1::2] = torch.cos(position * div_term)  # 奇数维度
+    pe[:, 0::2] = torch.sin(position * div_term)  # 偶数列
+    pe[:, 1::2] = torch.cos(position * div_term)  # 奇数列
     return pe
 
 
@@ -42,7 +42,7 @@ def main() -> None:
     im = axes[0].imshow(pe.numpy().T, aspect="auto", cmap="RdBu_r",
                         origin="lower")
     axes[0].set_xlabel("位置 (pos)")
-    axes[0].set_ylabel("维度 (i)")
+    axes[0].set_ylabel("列号")
     axes[0].set_title("正弦位置编码热力图（PE 矩阵）")
     plt.colorbar(im, ax=axes[0])
 
@@ -51,7 +51,7 @@ def main() -> None:
     for ch in channels:
         freq = 1.0 / (10000 ** (ch / D_MODEL))
         axes[1].plot(pe[:, ch].numpy(),
-                     label=f"维度 {ch}（频率 {freq:.4f}）")
+                     label=f"列 {ch}（频率 {freq:.4f}）")
     axes[1].set_xlabel("位置 (pos)")
     axes[1].set_ylabel("编码值")
     axes[1].set_title("不同频率通道的波形对比")

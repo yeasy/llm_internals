@@ -57,7 +57,7 @@ def main() -> None:
     plt.plot(distances.numpy(), scores, linewidth=0.8, alpha=0.8)
     plt.xlabel("相对距离")
     plt.ylabel("注意力分数（点积）")
-    plt.title("RoPE 注意力分数随相对距离的相位变化示例")
+    plt.title("RoPE 注意力分数随相对距离的相位变化（并非单调衰减）")
     plt.axhline(y=0, color="gray", linestyle="--", alpha=0.5)
     plt.grid(True, alpha=0.3)
     plt.tight_layout()

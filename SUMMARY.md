@@ -45,6 +45,7 @@
   * [5.2 掩码语言模型：完形填空的智慧](05_pretraining/5.2_masked_lm.md)
   * [5.3 编码器-解码器预训练：两种范式的统一](05_pretraining/5.3_encoder_decoder.md)
   * [5.4 预训练数据：规模定律与数据质量的博弈](05_pretraining/5.4_data_scaling.md)
+  * [5.5 预训练数据管线：从原始网页到一份配比](05_pretraining/5.5_data_pipeline.md)
   * [本章小结](05_pretraining/summary.md)
 
 * [第六章：训练技术的底层逻辑](06_training_techniques/README.md)
@@ -70,6 +71,7 @@
   * [8.3 DPO 与新型对齐：从复杂到简洁的演化](08_alignment/8.3_dpo.md)
   * [8.4 参数高效微调：为什么不必更新所有参数](08_alignment/8.4_peft.md)
   * [8.5 微调会怎么坏：四种失败模式与一条共同判据](08_alignment/8.5_practice.md)
+  * [8.6 后训练评测：分数是怎么算出来的](08_alignment/8.6_evaluation.md)
   * [本章小结](08_alignment/summary.md)
 
 ## 第三部分：推理与部署篇
