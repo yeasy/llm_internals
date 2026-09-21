@@ -272,3 +272,33 @@
 242. Razin, N., et al. (2024). [Unintentional Unalignment: Likelihood Displacement in Direct Preference Optimization](https://arxiv.org/abs/2410.08847). *ICLR 2025*
 243. Lambert, N., et al. (2024). [Tulu 3: Pushing Frontiers in Open Language Model Post-Training](https://arxiv.org/abs/2411.15124).
 244. Zheng, C., et al. (2025). [Group Sequence Policy Optimization](https://arxiv.org/abs/2507.18071).
+245. Pascanu, R., et al. (2012). [On the difficulty of training Recurrent Neural Networks](https://arxiv.org/abs/1211.5063).
+246. Mikolov, T., et al. (2013). [Efficient Estimation of Word Representations in Vector Space](https://arxiv.org/abs/1301.3781).
+247. Bahdanau, D., et al. (2014). [Neural Machine Translation by Jointly Learning to Align and Translate](https://arxiv.org/abs/1409.0473). *ICLR 2015*
+248. Cho, K., et al. (2014). [On the Properties of Neural Machine Translation: Encoder-Decoder Approaches](https://arxiv.org/abs/1409.1259).
+249. Sutskever, I., et al. (2014). [Sequence to Sequence Learning with Neural Networks](https://arxiv.org/abs/1409.3215).
+250. Luong, M., et al. (2015). [Effective Approaches to Attention-based Neural Machine Translation](https://arxiv.org/abs/1508.04025). *EMNLP 2015*
+251. Gehring, J., et al. (2017). [Convolutional Sequence to Sequence Learning](https://arxiv.org/abs/1705.03122).
+252. Tenney, I., et al. (2019). [BERT Rediscovers the Classical NLP Pipeline](https://arxiv.org/abs/1905.05950). *ACL 2019*
+253. Dosovitskiy, A., et al. (2020). [An Image is Worth 16x16 Words: Transformers for Image Recognition at Scale](https://arxiv.org/abs/2010.11929).
+254. Touvron, H., et al. (2023). [LLaMA: Open and Efficient Foundation Language Models](https://arxiv.org/abs/2302.13971).
+255. Yang, Z., et al. (2019). [XLNet: Generalized Autoregressive Pretraining for Language Understanding](https://arxiv.org/abs/1906.08237).
+256. Reimers, N., et al. (2019). [Sentence-BERT: Sentence Embeddings using Siamese BERT-Networks](https://arxiv.org/abs/1908.10084). *EMNLP 2019*
+257. Karpukhin, V., et al. (2020). [Dense Passage Retrieval for Open-Domain Question Answering](https://arxiv.org/abs/2004.04906). *EMNLP 2020*
+258. He, P., et al. (2020). [DeBERTa: Decoding-enhanced BERT with Disentangled Attention](https://arxiv.org/abs/2006.03654).
+259. Xiong, L., et al. (2020). [Approximate Nearest Neighbor Negative Contrastive Learning for Dense Text Retrieval](https://arxiv.org/abs/2007.00808).
+260. He, P., et al. (2021). [DeBERTaV3: Improving DeBERTa using ELECTRA-Style Pre-Training with Gradient-Disentangled Embedding Sharing](https://arxiv.org/abs/2111.09543).
+261. Wettig, A., et al. (2022). [Should You Mask 15% in Masked Language Modeling?](https://arxiv.org/abs/2202.08005).
+262. OpenAI, O., et al. (2023). [GPT-4 Technical Report](https://arxiv.org/abs/2303.08774).
+263. Schaeffer, R., et al. (2023). [Are Emergent Abilities of Large Language Models a Mirage?](https://arxiv.org/abs/2304.15004).
+264. Team, G., et al. (2024). [Gemini 1.5: Unlocking multimodal understanding across millions of tokens of context](https://arxiv.org/abs/2403.05530).
+265. OpenAI, O., et al. (2025). [gpt-oss-120b &amp; gpt-oss-20b Model Card](https://arxiv.org/abs/2508.10925).
+266. Katharopoulos, A., et al. (2020). [Transformers are RNNs: Fast Autoregressive Transformers with Linear Attention](https://arxiv.org/abs/2006.16236). *ICML 2020*
+267. Merrill, W., et al. (2023). [The Expressive Power of Transformers with Chain of Thought](https://arxiv.org/abs/2310.07923). *ICLR*
+268. Lieber, O., et al. (2024). [Jamba: A Hybrid Transformer-Mamba Language Model](https://arxiv.org/abs/2403.19887).
+269. Allen-Zhu, Z., et al. (2024). [Physics of Language Models: Part 3.3, Knowledge Capacity Scaling Laws](https://arxiv.org/abs/2404.05405).
+270. Dao, T., et al. (2024). [Transformers are SSMs: Generalized Models and Efficient Algorithms Through Structured State Space Duality](https://arxiv.org/abs/2405.21060). *ICML 2024*
+271. Gao, L., et al. (2024). [Scaling and evaluating sparse autoencoders](https://arxiv.org/abs/2406.04093).
+272. Lieberum, T., et al. (2024). [Gemma Scope: Open Sparse Autoencoders Everywhere All At Once on Gemma 2](https://arxiv.org/abs/2408.05147).
+273. Kalai, A., et al. (2025). [Why Language Models Hallucinate](https://arxiv.org/abs/2509.04664).
+274. Jiralerspong, T., et al. (2026). [Cross-Architecture Model Diffing with Crosscoders: Unsupervised Discovery of Differences Between LLMs](https://arxiv.org/abs/2602.11729).

@@ -106,6 +106,24 @@ Linux 的 Noto Sans CJK 任一即可）；各脚本已按此顺序自动挑选�
 | `ch08_lora_bypass.py` | 图 8-5 一个线性层加上 LoRA 旁路后的形状与显存去向 | [8.4](../../08_alignment/8.4_peft.md) |
 | `ch08_tradeoff_curves.py` | 图 8-6 同一次微调里两条曲线与每轮的交换比 | [8.5](../../08_alignment/8.5_practice.md) |
 
+| `ch01_gradient_paths.py` | 图 1-4 一步回传各要乘什么 | [1.2](../../01_introduction/1.2_rnn_cnn_limits.md) |
+| `ch01_bahdanau_step.py` | 图 1-6 解码第 $$t$$ 步的五个动作 | [1.3](../../01_introduction/1.3_attention_birth.md) |
+| `ch01_path_and_steps.py` | 图 1-8 同一段长度 $$n = 8$$ 的序列 | [1.4](../../01_introduction/1.4_transformer_idea.md) |
+| `ch12_bert_io.py` | 图 12-2 BERT 的输入怎样构造 | [12.1](../../12_encoder_models/12.1_bert.md) |
+| `ch12_electra_flow.py` | 图 12-3 ELECTRA 的生成器、采样与判别器数据流 | [12.2](../../12_encoder_models/12.2_roberta_albert.md) |
+| `ch12_sparse_patterns.py` | 图 12-4 四种注意力模式在同一张 `[n, n]` 矩阵上的形状 | [12.3](../../12_encoder_models/12.3_longformer_bigbird.md) |
+| `ch12_retrieval_shapes.py` | 图 12-5 三种检索结构的形状与在线前向次数 | [12.3](../../12_encoder_models/12.3_longformer_bigbird.md) |
+| `ch13_block_diff.py` | 图 13-1 GPT-2 块与 Llama 3 8B 块的逐项对照 | [13.2](../../13_decoder_models/13.2_llama.md) |
+| `ch13_tokens_per_param.py` | 图 13-2 参数量 $$N$$ 与训练词元数 $$D$$ 的对数图 | [13.2](../../13_decoder_models/13.2_llama.md) |
+| `ch14a_linear_state.py` | 图 14-1 同一个式子的两种相乘顺序 | [14.1](../../14_future_trends/14.1_efficient_attention.md) |
+| `ch14a_moe_forward.py` | 图 14-2 一次 MoE 前向的六步 | [14.2](../../14_future_trends/14.2_moe.md) |
+| `ch14a_mamba_block.py` | 图 14-4 Mamba 块的形状流 | [14.3](../../14_future_trends/14.3_ssm_hybrid.md) |
+| `ch14a_visual_tokens.py` | 图 14-7 一张 336×336 的图怎样变成 576 行 | [14.4](../../14_future_trends/14.4_multimodal.md) |
+| `ch14a_agent_context.py` | 图 14-10 Agent 循环里上下文怎样逐轮变长 | [14.5](../../14_future_trends/14.5_agent_tool_use.md) |
+| `ch14b_r1_pipeline.py` | 图 14-12 DeepSeek-R1 的四阶段训练流程与各阶段的数据来源 | [14.6](../../14_future_trends/14.6_test_time_scaling.md) |
+| `ch14b_causal_shard_balance.py` | 图 14-14 把序列切成 $$2P = 8$$ 块后 | [14.7](../../14_future_trends/14.7_long_context.md) |
+| `ch14b_superposition_2d.py` | 图 14-17 5 个特征挤进 2 维时的方向排布 | [14.8](../../14_future_trends/14.8_interpretability.md) |
+
 `tests/test_figure_scripts.py` 保证这张表与正文引用、磁盘文件三者不脱节：正文引用的脚本
 必须存在，本目录的每个脚本必须被正文引用，且每个脚本声明的输出图必须已提交。
 
