@@ -5,6 +5,7 @@
 ## 第一部分：基础篇
 
 * [第一章：从序列建模到 Transformer](01_introduction/README.md)
+  * [1.0 技术全景：从 GPU 到 Agent](01_introduction/1.0_technology_map.md)
   * [1.1 序列建模的根本挑战](01_introduction/1.1_seq_challenge.md)
   * [1.2 RNN 与 CNN：成就与瓶颈](01_introduction/1.2_rnn_cnn_limits.md)
   * [1.3 注意力的诞生：让模型学会“看哪里”](01_introduction/1.3_attention_birth.md)
@@ -108,6 +109,7 @@
   * [11.11 实例剖析：SGLang](11_serving/11.11_sglang_internals.md)
   * [11.12 硬件选型：GPU、TPU 与专用加速器](11_serving/11.12_hardware.md)
   * [11.13 生产部署最佳实践](11_serving/11.13_best_practices.md)
+  * [11.14 GPU 软件栈：从张量到内核与通信](11_serving/11.14_gpu_software.md)
   * [本章小结](11_serving/summary.md)
 
 ## 第四部分：模型与前沿篇

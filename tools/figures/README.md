@@ -8,6 +8,8 @@
 
 ## 用法
 
+`llm_technology_map.py` 生成 [1.0 技术全景](../../01_introduction/1.0_technology_map.md)中的图 1-0，展示系统依赖、训练与推理分支，以及基础设施内部组织关系。
+
 从**仓库根目录**运行，脚本会把图写回对应章节的 `_images/` 目录：
 
 ```bash
