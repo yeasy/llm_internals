@@ -11,3 +11,5 @@
 - [7.5 节](7.5_activation_checkpointing.md)：激活值还是装不下，能不能不存、用时再算？
 - [7.6 节](7.6_mixed_precision.md)：位宽减半就能提速，梯度下溢怎么办？
 - [7.7 节](7.7_checkpoint.md)：重启时卡数变了，落盘的状态还拼得回来吗？
+
+实践先完成 [A.6 的训练恢复实验](../appendix/a6_practice_path.md)，再按 [A.7](../appendix/a7_framework_recipes.md) 连接 DDP、FSDP2 与分布式框架。扩展卡数前，应先验证损失归一化、恢复状态和单卡基线。

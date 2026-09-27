@@ -1,13 +1,6 @@
-"""生成图 3-12：一层注意力计算中各矩阵的形状怎样一步步变化。
+"""生成图 3-13 及随文分图：教学模型的矩阵形状。
 
-正文位置：03_components/3.8_gpt_inference_flow.md
-输出：03_components/_images/attention_shape_flow.png
-
-各矩阵按 GPT-3 Small 的形状标注（d_model = 768，12 个头，每头 d_h = 64，
-词表 50,257）。词元数 6 这一维照实画出，所以 [6, 6] 的分数矩阵和因果掩码的阶梯
-是完整的；768、64、50257 这些太大的维度用省略号截断，只保持“64 < 768 < 50257”
-的相对宽窄。矩阵下方的灰色方括号是同一个矩阵在教学模型中的形状。矩阵相乘时，
-左边的列数必须等于右边的行数，这一对数字用同一种强调色标出。
+每个格子对应一个数；各面板与正文数值计算相邻。紫色标出乘法的匹配维。
 """
 
 from __future__ import annotations
@@ -158,130 +151,61 @@ def _staircase(x, top, rows, cols):
     return pts
 
 
+def product(filename, left, right, result, *, weight=False, triangular=False, note=""):
+    """单行乘法面板，所有尺寸使用教学模型的实际值。"""
+    fig, ax = plt.subplots(figsize=(9, 4.5))
+    c = Canvas(ax)
+    top = 0
+    lr, lc, lname = left
+    rr, rc, rname = right
+    ar, ac, aname = result
+    x = c.matrix(1, top, Dim(str(lr), lr), Dim(str(lc), lc), lname, "",
+                 match_cols=True, lower_tri=triangular)
+    x = c.op(x, top, 4, "×")
+    x = c.matrix(x, top, Dim(str(rr), rr), Dim(str(rc), rc), rname, "",
+                 weight=weight, match_rows=True)
+    x = c.op(x, top, 4, "=")
+    x = c.matrix(x, top, Dim(str(ar), ar), Dim(str(ac), ac), aname, "")
+    depth = max(lr, rr, ar)
+    ax.text((x + 1) / 2, -depth - 1.3, note, ha="center", va="top",
+            fontsize=FS_NOTE, color=MUTED)
+    ax.set(xlim=(-0.5, x + 1), ylim=(-depth - 3, 3.8), aspect="equal")
+    ax.axis("off")
+    fig.savefig(image_path("03_components", filename), dpi=150,
+                bbox_inches="tight", facecolor="white")
+    plt.close(fig)
+
+
 def main() -> None:
     use_cjk_font()
-    fig, ax = plt.subplots(figsize=(13.0, 17.4))
+    product("attention_shape_flow.png", (6, 4, "输入 X"), (4, 2, "投影权重 W_Q"),
+            (6, 2, "Query Q"), weight=True,
+            note="每行对应一个位置：完整的 4 维输入，经投影得到 2 维 Query。")
+    product("attention_scores_shape.png", (6, 2, "Query Q"), (2, 6, "Key 的转置 $K^T$"),
+            (6, 6, "点积分数"),
+            note="结果第 i 行、第 j 列 = 位置 i 的 Query 与位置 j 的 Key 的点积。\n随后每格除以 √2，形状仍为 [6, 6]。")
+    product("attention_read_shape.png", (6, 6, "注意力权重 A"), (6, 2, "Value V"),
+            (6, 2, "上下文 C"), triangular=True,
+            note="A 的一行给出 6 个权重；对 V 的 6 行加权求和，得到一个 2 维向量。")
+    product("attention_merge_shape.png", (6, 4, "拼接后的 C"), (4, 4, "输出投影 W_O"),
+            (6, 4, "注意力输出"), weight=True,
+            note="头 1、头 2 各输出 [6, 2]，沿列拼接为 [6, 4]；拼接不是相加。")
+    product("inference_lm_head_shape.png", (1, 4, "末层最后一行"), (4, 5, "词表投影 W_vocab"),
+            (1, 5, "词表分数 logits"), weight=True,
+            note="本例候选为 5、。、EOS、6、其他；选最大分数对应的词元。")
+
+    fig, ax = plt.subplots(figsize=(9, 4.5))
     c = Canvas(ax)
-    x0 = X0
-
-    # ---- 层第 1 步：归一化 ----
-    top = 0.0
-    c.step(top, 1, "层第 1 步 归一化", "逐位置缩放，形状不变\n（教学模型取恒等）")
-    x = c.matrix(x0, top, T6, D_MODEL, "第 $\\ell$ 层的输入 X", "教学模型 [6, 4]")
-    label(ax, x + 1.6, top - 0.5, "→ 归一化后仍是同样的形状，进入注意力", ha="left",
-          fontsize=FS_NOTE, color=MUTED)
-    top -= 6 + ROW_GAP
-
-    # ---- 层第 2 步（内部）：投影 ----
-    c.step(top, 6, "投影出 Q、K、V", "每个头做三次\n（3.8.4 第 2 步）")
-    x = c.matrix(x0, top, T6, D_MODEL, "输入 X", "教学模型 [6, 4]", match_cols=True)
-    x = c.op(x, top, 6, "×")
-    x = c.matrix(x, top, D_MODEL, D_HEAD, "权重 W_Q", "教学模型 [4, 2]",
-                 weight=True, match_rows=True)
-    x = c.op(x, top, 6, "=")
-    x = c.matrix(x, top, T6, D_HEAD, "Q", "教学模型 [6, 2]")
-    c.note(x + 1.6, top - 3, "K、V 同理，各用自己的\n权重 W_K、W_V；\n算出的 K、V 还会留作\nKV 缓存")
-
-    # ---- 第 3 到 5 步：打分、掩码、Softmax ----
-    top -= 6 + ROW_GAP
-    c.step(top, 6, "打分、掩码、Softmax", "64 在相乘时消掉\n（3.8.4 第 3 到 5 步）")
-    x = c.matrix(x0, top, T6, D_HEAD, "Q", "教学模型 [6, 2]", match_cols=True)
-    x = c.op(x, top, 6, "×")
-    x = c.matrix(x, top, D_HEAD, T6, "K 的转置", "教学模型 [2, 6]", match_rows=True)
-    x = c.op(x, top, 6, "=", gap_after=3.7)
-    x = c.matrix(x, top, T6, T6, "匹配分数", "教学模型 [6, 6]")
-    x = c.arrow(x, top, 6, "每格除以 √64 = 8、\n加掩码、\n逐行 Softmax\n（形状不变）")
-    x = c.matrix(x, top, T6, T6, "注意力权重", "教学模型 [6, 6]", lower_tri=True)
-    right_edge = x
-
-    # ---- 第 6 步：读取 Value ----
-    top -= 6 + ROW_GAP
-    c.step(top, 6, "权重乘 V", "按权重混合各位置的 Value\n（3.8.4 第 6 步）")
-    x = c.matrix(x0, top, T6, T6, "注意力权重", "教学模型 [6, 6]",
-                 lower_tri=True, match_cols=True)
-    x = c.op(x, top, 6, "×", gap_after=3.7)
-    x = c.matrix(x, top, T6, D_HEAD, "V", "教学模型 [6, 2]", match_rows=True)
-    x = c.op(x, top, 6, "=", gap_after=3.7)
-    x = c.matrix(x, top, T6, D_HEAD, "context", "教学模型 [6, 2]")
-    c.note(x + 1.6, top - 3, "12 个头各做一遍\n第 2 到 6 步，各交出\n一个 [6, 64] 的 context")
-
-    # ---- 拼接与输出投影 ----
-    top -= 6 + ROW_GAP
-    c.step(top, 6, "拼接与输出投影", "各头左右并排，\n再乘 W_O 回到 d_model")
-    x = c.matrix(x0, top, T6, D_HEAD, "头 1", "", show_cols=False)
-    x = c.matrix(x + 0.3, top, T6, D_HEAD, "头 2", "", show_rows=False, show_cols=False)
-    c.dots(x + 0.95, top - 3, horizontal=True, color=DATA_EDGE, spread=0.36)
-    x = c.matrix(x + 1.9, top, T6, D_HEAD, "头 12", "", show_rows=False, show_cols=False)
-    mid = (x0 + x) / 2
-    ax.text(mid + 0.9, top + 0.15, "12 × 64 = ", ha="right", va="bottom",
-            fontsize=FS_DIM, color=INK)
-    ax.text(mid + 0.9, top + 0.15, "768", ha="left", va="bottom",
-            fontsize=FS_DIM, color=MATCH, fontweight="bold")
-    ax.text(mid, top - 6 - 0.3, "教学模型：2 个 [6, 2] 拼成 [6, 4]", ha="center",
-            va="top", fontsize=FS_TOY, color=MUTED)
-    x = c.op(x, top, 6, "×")
-    x = c.matrix(x, top, D_MODEL, D_MODEL, "权重 W_O", "教学模型 [4, 4]",
-                 weight=True, match_rows=True)
-    x = c.op(x, top, 6, "=", gap_after=3.7)
-    x = c.matrix(x, top, T6, D_MODEL, "注意力输出", "教学模型 [6, 4]",
-                 highlight_last_row=True)
-    c.note(x + 1.0, top - 3, "与输入 X\n同形状，\n才能做\n残差相加")
-
-    # ---- 层第 3 到 6 步：残差、归一化、MLP、残差 ----
-    top -= 6 + ROW_GAP
-    c.step(top, 3, "层第 3 到 6 步", "残差、归一化、\nMLP、残差")
-    bw, gap = 8.6, 1.8
-    steps = [("③ 残差相加", "加回进入\n第 1 步之前的 X", "data"),
-             ("④ 归一化", "另一组\n参数", "weight"),
-             ("⑤ 逐位置 MLP", "真实模型\n先扩再压回", "weight"),
-             ("⑥ 残差相加", "加回进入\n第 4 步之前的向量", "data")]
-    bx = x0
-    for k, (name, note, kind) in enumerate(steps):
-        box(ax, bx, top - 2.0, bw, 2.0, name, kind, fontsize=FS_NOTE)
-        label(ax, bx + bw / 2, top - 3.0, note, fontsize=FS_TOY, color=MUTED, linespacing=1.4)
-        if k < len(steps) - 1:
-            arrow(ax, (bx + bw, top - 1.0), (bx + bw + gap, top - 1.0))
-        bx += bw + gap
-    label(ax, x0, top - 5.1, "这四步都不改变形状：教学模型始终 [6, 4]，GPT-3 Small 始终 [6, 768]",
-          ha="left", fontsize=FS_NOTE, color=ACCENT)
-
-    # ---- LM head ----
-    top -= 5.4 + ROW_GAP
-    c.step(top, 5, "LM head", "只在最后一层之后；\n取最后一行去打分")
-    x = c.matrix(x0, top - 2, ONE, D_MODEL, "最后位置的表示", "教学模型 [1, 4]",
-                 highlight_last_row=True, match_cols=True)
-    x = c.op(x, top, 5, "×")
-    x = c.matrix(x, top, D_MODEL, N_VOCAB, "权重 W_vocab", "教学模型 [4, 5]",
-                 weight=True, match_rows=True)
-    x = c.op(x, top, 5, "=", gap_after=3.7)
-    x = c.matrix(x, top - 2, ONE, N_VOCAB, "logits", "教学模型 [1, 5]")
-
-    # ---- 图例 ----
-    ly = top - 5 - 4.4
-    items = (
-        (DATA_FACE, DATA_EDGE, "数据：随输入变化"),
-        (LAST_ROW_FACE, DATA_EDGE, "最后位置（位置 6）那一行"),
-        (WEIGHT_FACE, WEIGHT_EDGE, "权重：训练好就固定"),
-        (MASK_FACE, "#8a8a8a", "被因果掩码屏蔽，权重为 0"),
-    )
-    for k, (face, edge, text) in enumerate(items):
-        lx, yy = x0 + (k % 2) * 17.0, ly - (k // 2) * 1.9
-        ax.add_patch(Rectangle((lx, yy), 1.1, 1.1, facecolor=face, edgecolor=edge, lw=1.3))
-        ax.text(lx + 1.6, yy + 0.55, text, ha="left", va="center", fontsize=FS_NOTE, color=INK)
-    ax.text(x0, ly - 3.5, "紫色数字：相乘时，左边的列数必须等于右边的行数，\n这个数在结果里消失。",
-            ha="left", va="center", fontsize=FS_NOTE, color=MATCH, linespacing=1.4)
-    ax.text(x0, ly - 6.4,
-            "黑色数字是 GPT-3 Small 的真实形状；三个点表示中间还有很多列或行没有画出。\n"
-            "词元数 6 这一维是照实画的。灰色方括号是同一个矩阵在教学模型中的形状，\n"
-            "后面手算用的就是它。",
-            ha="left", va="center", fontsize=FS_NOTE, color=MUTED, linespacing=1.4)
-
-    ax.set_xlim(x0 - 11.5, right_edge + 0.8)
-    ax.set_ylim(ly - 8.4, 3.8)
-    ax.set_aspect("equal")
+    x = c.matrix(1, 0, T6, T6, "缩放后的分数", "")
+    x = c.arrow(x, 0, 6, "加因果掩码\n逐行 Softmax", width=8)
+    x = c.matrix(x, 0, T6, T6, "注意力权重 A", "", lower_tri=True)
+    ax.text((x + 1) / 2, -7.5, "灰色格子：未来位置被屏蔽，Softmax 后权重为 0。\n每一行的权重之和为 1。",
+            ha="center", va="top", fontsize=FS_NOTE, color=MUTED)
+    ax.set(xlim=(-0.5, x + 1), ylim=(-10, 3.8), aspect="equal")
     ax.axis("off")
-    plt.savefig(OUTPUT, dpi=150, bbox_inches="tight", facecolor="white")
-    print(f"已写入 {OUTPUT}")
+    fig.savefig(image_path("03_components", "attention_weights_shape.png"),
+                dpi=150, bbox_inches="tight", facecolor="white")
+    plt.close(fig)
 
 
 if __name__ == "__main__":

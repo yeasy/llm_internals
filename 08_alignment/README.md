@@ -10,3 +10,5 @@
 - [8.4 节](8.4_peft.md)：训练目标不变，哪些参数才真的值得更新？
 - [8.5 节](8.5_practice.md)：训练损失一路向下，为什么模型可能已经坏了？
 - [8.6 节](8.6_evaluation.md)：用来判断好坏的那个准确率，本身是怎么算出来的？
+
+实践入口：[A.6](../appendix/a6_practice_path.md)用小张量核对标签掩码、LoRA、DPO 与组内优势；[A.7](../appendix/a7_framework_recipes.md)将这些机制接到 Transformers、PEFT 和 TRL，要求同时检查训练行为与保留集质量。

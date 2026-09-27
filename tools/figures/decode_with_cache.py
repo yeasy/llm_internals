@@ -1,4 +1,4 @@
-"""生成图 3-13：一轮 Decode 怎样对着 KV 缓存只算一行。
+"""生成图 3-15：一轮 Decode 怎样对着 KV 缓存只算一行。
 
 正文位置：03_components/3.8_gpt_inference_flow.md
 输出：03_components/_images/decode_with_cache.png
@@ -39,7 +39,7 @@ def f3(v):
 
 def left_panel(ax):
     top = 12.2
-    label(ax, 12.4, 18.3, "教学模型的头 1，第 1 轮 Decode：新位置 7，词元是 5",
+    label(ax, 12.4, 18.3, "教学模型的头 1，第 1 轮 Decode：位置 7 的词元为“5”",
           fontsize=FS_TITLE, bold=True)
 
     # 新位置的一行，以及它投影出的 q、k、v

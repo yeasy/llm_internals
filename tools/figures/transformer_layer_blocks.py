@@ -1,145 +1,64 @@
-"""生成图 3-14：真实 GPT 中一层 Transformer 的结构与各处的形状。
-
-正文位置：03_components/3.8_gpt_inference_flow.md
-输出：03_components/_images/transformer_layer_blocks.png
-
-自下而上画出预归一化（Pre-Norm）的一层：归一化 → n_h 个头并行的注意力 → 拼接 →
-输出投影 → 残差相加 → 归一化 → MLP → 残差相加；箭头旁标出数据的形状。右侧说明这一层
-重复 L 次，最后一层的最后一行经 LM head 得到 logits。
-"""
+"""图 3-14：串行 Pre-Norm 的两条计算分支与两条残差旁路。"""
 
 from __future__ import annotations
 
 import matplotlib.pyplot as plt
-from matplotlib.patches import Circle
 
-from _diagram import (ACCENT, DATA_EDGE, FS_NAME, FS_SMALL, FS_TEXT, FS_TITLE, INK, MUTED,
-                      arrow, box, dots, finish, label)
+from _diagram import ACCENT, MUTED, arrow, box, finish, label
 from _style import image_path, use_cjk_font
 
 OUTPUT = image_path("03_components", "transformer_layer_blocks.png")
 
-CX = 12.0  # 主干的中心线
-
-
-def plus(ax, x, y):
-    ax.add_patch(Circle((x, y), 0.45, facecolor="white", edgecolor=INK, lw=1.5, zorder=3))
-    label(ax, x, y, "+", fontsize=FS_NAME)
-
-
-def shape(ax, x, y, text):
-    label(ax, x, y, text, fontsize=FS_SMALL, color=DATA_EDGE, ha="left")
-
 
 def main() -> None:
     use_cjk_font()
-    fig, ax = plt.subplots(figsize=(12.6, 10.0))
+    fig, ax = plt.subplots(figsize=(8.4, 11.5))
+    cx = 10.0
 
-    label(ax, CX, 30.6, "第 $\ell$ 层的六个步骤：输入和输出同形状，所以输出能当下一层的输入",
-          fontsize=FS_TITLE, bold=True)
+    def block(y, h, text, kind="neutral"):
+        box(ax, 6, y, 8, h, text, kind, fontsize=13, linespacing=1.25)
 
-    # 输入
-    box(ax, CX - 4, 0.2, 8, 1.2, "第 $\ell$ 层的输入 X", "data", fontsize=FS_TEXT, bold=True)
-    shape(ax, CX + 4.3, 0.8, "[T, d_model]")
-    arrow(ax, (CX, 1.45), (CX, 2.95))
+    def down(y1, y2):
+        arrow(ax, (cx, y1), (cx, y2))
 
-    # 归一化 1
-    box(ax, CX - 3, 3.0, 6, 1.1, "① 归一化", "neutral")
-    arrow(ax, (CX, 4.15), (CX, 5.0))
+    label(ax, 8, -0.4, "一层的规律：分支先归一化，算完加回原输入",
+          fontsize=16, bold=True)
+    label(ax, 8, 0.4, "串行 Pre-Norm；n 是本轮输入位置数", fontsize=12, color=MUTED)
+    block(1.2, 1.4, "层输入 X\n[n, d_model]", "data")
+    down(2.6, 3.8)
+    block(3.8, 1.5, "Norm ①\n调整注意力分支的输入尺度", "weight")
+    down(5.3, 5.9)
+    block(5.9, 1.7, "多头注意力 + 输出投影\n输出 [n, d_model]", "weight")
+    down(7.6, 8.3)
+    block(8.3, 1.2, "X + 注意力输出")
+    down(9.5, 10.2)
+    block(10.2, 1.4, "中间结果 U\n[n, d_model]", "data")
+    down(11.6, 12.8)
+    block(12.8, 1.5, "Norm ②\n调整 MLP 分支的输入尺度", "weight")
+    down(14.3, 14.9)
+    block(14.9, 1.7, "MLP：加工后投回原宽度\n输出 [n, d_model]", "weight")
+    down(16.6, 17.3)
+    block(17.3, 1.2, "U + MLP 输出")
+    down(18.5, 19.2)
+    block(19.2, 1.4, "本层输出 Y\n[n, d_model]", "data")
 
-    # 分给各个头
-    HW = 7.0
-    heads_x = [CX - 11.6, CX - 3.9, CX + 4.6]
-    names = ["头 1", "头 2", "头 n_h"]
-    ax.plot([heads_x[0] + HW / 2, heads_x[2] + HW / 2], [5.0, 5.0], color=INK, lw=1.5)
-    for hx, name in zip(heads_x, names):
-        mid = hx + HW / 2
-        arrow(ax, (mid, 5.0), (mid, 5.85))
-        box(ax, hx, 5.9, HW, 1.7, "乘三个投影矩阵\n得到 Q、K、V", "weight", fontsize=FS_SMALL)
-        arrow(ax, (mid, 7.65), (mid, 8.45))
-        box(ax, hx, 8.5, HW, 2.6, f"{name}\n打分、掩码、\nSoftmax、读取 V", "neutral",
-            fontsize=FS_SMALL)
-        arrow(ax, (mid, 11.15), (mid, 12.75))
-    dots(ax, CX + 3.85, 8.4, horizontal=True, color=INK, spread=0.3, r=0.09)
-    label(ax, heads_x[0] + HW / 2 + 0.3, 8.05, "各为 [T, d_h]", fontsize=FS_SMALL,
-          color=DATA_EDGE, ha="left")
-    label(ax, heads_x[0] + HW / 2 + 0.3, 11.95, "context [T, d_h]", fontsize=FS_SMALL,
-          color=DATA_EDGE, ha="left")
-    label(ax, heads_x[2] + HW + 0.9, 6.75, "各头的 K、V\n写入本层缓存", ha="left",
-          fontsize=FS_SMALL, color=ACCENT)
-    arrow(ax, (heads_x[2] + HW + 0.05, 6.75), (heads_x[2] + HW + 0.8, 6.75), color=ACCENT, lw=1.2)
-    label(ax, CX + 3.2, 4.55, "② 因果自注意力：n_h 个头并行，各用各的权重", ha="left", fontsize=FS_SMALL,
-          color=MUTED)
-
-    # 拼接
-    box(ax, CX - 11.6, 12.8, 23.2, 1.1, "拼接各头的 context", "neutral", fontsize=FS_TEXT)
-    shape(ax, CX + 11.9, 13.35, "[T, n_h × d_h]")
-    arrow(ax, (CX, 13.95), (CX, 14.85))
-    box(ax, CX - 3, 14.9, 6, 1.1, "乘输出投影 W_O", "weight")
-    shape(ax, CX + 3.3, 15.45, "[T, d_model]")
-    arrow(ax, (CX, 16.05), (CX, 16.9))
-    plus(ax, CX, 17.4)
-    label(ax, CX + 0.8, 17.4, "③ 残差相加", ha="left", fontsize=FS_SMALL, color=MUTED)
-
-    # 残差旁路 1：从输入绕到第一个加号
-    ax.plot([CX - 4, CX - 13.4, CX - 13.4], [0.8, 0.8, 17.4], color=INK, lw=1.5)
-    arrow(ax, (CX - 13.4, 17.4), (CX - 0.5, 17.4))
-    label(ax, CX - 13.7, 9.0, "原样绕过\n注意力", ha="right", fontsize=FS_SMALL, color=MUTED)
-
-    # MLP 子层
-    arrow(ax, (CX, 17.9), (CX, 19.35))
-    box(ax, CX - 3, 19.4, 6, 1.1, "④ 归一化", "neutral")
-    arrow(ax, (CX, 20.55), (CX, 21.35))
-    box(ax, CX - 4.5, 21.4, 9, 1.1, "乘 W_1，扩到约 4 倍宽", "weight")
-    shape(ax, CX + 4.8, 21.95, "[T, 4 × d_model]")
-    arrow(ax, (CX, 22.55), (CX, 23.15))
-    box(ax, CX - 3, 23.2, 6, 1.0, "逐格激活", "neutral")
-    arrow(ax, (CX, 24.25), (CX, 24.85))
-    box(ax, CX - 4.5, 24.9, 9, 1.1, "乘 W_2，压回原宽", "weight")
-    shape(ax, CX + 4.8, 25.45, "[T, d_model]")
-    arrow(ax, (CX, 26.05), (CX, 26.9))
-    plus(ax, CX, 27.4)
-    label(ax, CX + 0.8, 27.4, "⑥ 残差相加", ha="left", fontsize=FS_SMALL, color=MUTED)
-    label(ax, CX - 5.0, 22.9, "⑤ MLP：\n每个位置\n各算各的", ha="right", fontsize=FS_SMALL,
-          color=MUTED)
-
-    # 残差旁路 2
-    ax.plot([CX, CX - 8.6, CX - 8.6], [18.6, 18.6, 27.4], color=INK, lw=1.5)
-    arrow(ax, (CX - 8.6, 27.4), (CX - 0.5, 27.4))
-    label(ax, CX - 8.9, 23.6, "原样绕过\nMLP", ha="right", fontsize=FS_SMALL, color=MUTED)
-
-    # 输出
-    arrow(ax, (CX, 27.9), (CX, 28.65))
-    box(ax, CX - 4, 28.7, 8, 1.2, "第 $\ell$ 层的输出", "data", fontsize=FS_TEXT, bold=True)
-    # 输出与输入同形状，原样成为下一层的输入
-    label(ax, CX + 9.6, 28.4, "与输入同形状，\n原样成为第 $\ell$ + 1 层的输入，\n这六步重复 L 次",
-          ha="left", fontsize=FS_SMALL, color=ACCENT)
-    arrow(ax, (CX + 9.3, 29.3), (CX + 4.2, 29.3), color=ACCENT, lw=1.4)
-
-    # 右侧：重复 L 层，再进 LM head
-    rx = CX + 18.6
-    label(ax, rx + 2.6, 26.5, "整个模型", fontsize=FS_NAME, bold=True)
-    box(ax, rx, 12.4, 5.2, 1.2, "初始表示 $X^{(0)}$", "data", fontsize=FS_SMALL)
-    ys = [14.6, 16.7, 20.2]
-    for y, name in zip(ys, ["第 1 层", "第 2 层", "第 L 层"]):
-        box(ax, rx, y, 5.2, 1.3, name, "weight", fontsize=FS_SMALL)
-    arrow(ax, (rx + 2.6, 13.65), (rx + 2.6, 14.55))
-    arrow(ax, (rx + 2.6, 15.95), (rx + 2.6, 16.65))
-    dots(ax, rx + 2.6, 19.1, horizontal=False, color=INK, spread=0.36, r=0.09)
-    arrow(ax, (rx + 2.6, 21.55), (rx + 2.6, 22.25))
-    box(ax, rx, 22.3, 5.2, 1.0, "最终归一化", "neutral", fontsize=FS_SMALL)
-    arrow(ax, (rx + 2.6, 23.35), (rx + 2.6, 24.05))
-    box(ax, rx, 24.1, 5.2, 1.5, "取最后一行\n→ LM head", "weight", fontsize=FS_SMALL)
-    label(ax, rx + 2.6, 11.5, "每层结构相同，\n权重各不相同", fontsize=FS_SMALL, color=MUTED)
-
-    # 图例
-    for i, (kind, text) in enumerate((("data", "数据"), ("weight", "含权重的运算"),
-                                      ("neutral", "不含权重的运算"))):
-        box(ax, rx, 4.4 - i * 1.5, 0.9, 0.8, "", kind, rounded=False, lw=1.2)
-        label(ax, rx + 1.3, 4.8 - i * 1.5, text, ha="left", fontsize=FS_SMALL)
-    label(ax, rx, 0.2, "蓝字：数据的形状", ha="left", fontsize=FS_SMALL, color=DATA_EDGE)
-
-    finish(fig, ax, OUTPUT, xlim=(-5.4, rx + 6.4), ylim=(-0.4, 31.6))
+    # 从各自归一化前的主干分叉，不从另一个子层的旧输入分叉。
+    for fork_y, add_y, name in ((3.0, 8.9, "X"), (12.0, 17.9, "U")):
+        ax.plot([cx, 1.7, 1.7], [fork_y, fork_y, add_y],
+                color=ACCENT, lw=1.7)
+        ax.plot(cx, fork_y, "o", color=ACCENT, markersize=4)
+        arrow(ax, (1.7, add_y), (6, add_y), color=ACCENT, lw=1.7)
+        label(ax, 3.5, fork_y + 2.9,
+              f"保留 {name}\n[n, d_model]\n不经过 Norm",
+              fontsize=12, color=ACCENT)
+    label(ax, 3.5, 18.9, "第二次加回 U，\n不是层输入 X", fontsize=12, color=ACCENT)
+    down(20.6, 21.3)
+    label(ax, cx, 21.9, "还有下一层：Y 成为下一层的 X", fontsize=12)
+    label(ax, 8, 23.2, "全部 L 层结束：最终 Norm → 取最后一行 → LM head",
+          fontsize=12, bold=True)
+    label(ax, 8, 24.1, "最终 Norm 不另加残差；Norm 的算法由模型决定",
+          fontsize=12, color=MUTED)
+    finish(fig, ax, OUTPUT, xlim=(0, 16), ylim=(25, -1.2))
 
 
 if __name__ == "__main__":

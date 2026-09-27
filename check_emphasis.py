@@ -9,9 +9,9 @@ mirror case (``是**“引号”**``) cannot open. This gate flags such non-rend
 emphasis so each book's own CI catches a regression — the per-book
 ``check_project_rules.py`` only checks fences and local links.
 
-This file is kept byte-for-byte identical across all book repos and mirrors
-check 6 of the workspace-level ``format_checker.py``. Fix a flagged span by
-inserting one space on the failing side (which book-rules 1.1 already asks for).
+The emphasis rules mirror check 6 of the workspace-level ``format_checker.py``.
+This book also excludes single-dollar math used by its rendering pipeline.
+Fix a flagged span by inserting one space on the failing side.
 """
 
 from __future__ import annotations
@@ -118,9 +118,15 @@ def _neutralize_code(line: str) -> str:
     def repl(match: re.Match) -> str:
         return match.group(0).replace("*", "+")
 
-    for pattern in (r"`[^`]*`", r"\$\$[^$]*\$\$", r"<[^>]+>"):
-        line = re.sub(pattern, repl, line)
-    return line
+    # Match whole code spans first: a literal '$' there must never pair with a
+    # delimiter in prose. Math edges cannot be whitespace; a closing '$' before
+    # a digit is a new price, not a formula terminator (e.g. $25 ... $30).
+    regions = (r"(?P<ticks>`+).*?(?P=ticks)"
+               r"|<[^>]+>"
+               r"|(?<![\\$])\$\$(?!\$)[^$`\n]*?(?<!\\)\$\$(?!\$)"
+               r"|(?<![\\$])\$(?![$\s])(?:\\.|[^$`\\\n])*?"
+               r"(?<![\\\s])\$(?![$\d])")
+    return re.sub(regions, repl, line)
 
 
 def _scan_runs(line: str) -> list[dict]:

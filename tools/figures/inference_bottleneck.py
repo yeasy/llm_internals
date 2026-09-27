@@ -1,10 +1,11 @@
-"""生成图 3-15：Prefill 与 Decode 各自落在哪一种瓶颈里。
+"""生成图 3-16：Prefill 与 Decode 各自落在哪一种瓶颈里。
 
 正文位置：03_components/3.8_gpt_inference_flow.md
 输出：03_components/_images/inference_bottleneck.png
 
-横轴是“每从显存读 1 字节，做多少次浮点运算”（对数刻度）。数值按正文表 3-26 的
-口径算出：GPT-3 Small，FP16 权重，上下文 1,000 个词元；访存只数权重和 KV 缓存。
+横轴是“每从显存读 1 字节，做多少次浮点运算”（对数刻度）。数值按正文表 3-27 的
+口径算出：借用 GPT-3 Small 尺寸，所有层按全因果注意力估算，FP16 权重，
+历史 1,000 个词元；Decode 还包含当前位置。访存只数权重和历史 KV 缓存。
 分界线取 10.1 节给出的 H100 拐点（约 295 次/字节）。
 """
 
@@ -24,7 +25,7 @@ WEIGHT_BYTES = PARAMS * 2
 KV_BYTES_PER_TOKEN = 2 * 12 * 64 * LAYERS * 2
 LM_HEAD = 2 * D * VOCAB
 PREFILL_FLOPS = 24 * CTX * D * D * LAYERS + 2 * CTX * CTX * D * LAYERS + LM_HEAD
-DECODE_FLOPS = 24 * D * D * LAYERS + 4 * CTX * D * LAYERS + LM_HEAD
+DECODE_FLOPS = 24 * D * D * LAYERS + 4 * (CTX + 1) * D * LAYERS + LM_HEAD
 RIDGE = 295
 
 
@@ -46,9 +47,9 @@ def main() -> None:
     ax.axvline(RIDGE, color=INK, lw=1.4, zorder=2)
     ax.text(RIDGE, 0.97, f"分界线：约 {RIDGE} 次/字节（H100）", ha="center", va="top",
             fontsize=FS_SMALL, color=INK, bbox=dict(facecolor="white", edgecolor="none", pad=2.5))
-    ax.text(11, 0.84, "显存带宽受限：运算单元在等数据", ha="center", va="center",
+    ax.text(11, 0.84, "带宽上限区域（理想模型）", ha="center", va="center",
             fontsize=FS_NAME, color=INK, fontweight="bold")
-    ax.text(930, 0.84, "算力受限", ha="center", va="center", fontsize=FS_NAME, color=INK,
+    ax.text(930, 0.84, "算力上限区域", ha="center", va="center", fontsize=FS_NAME, color=INK,
             fontweight="bold")
 
     # 基线与各个工作点

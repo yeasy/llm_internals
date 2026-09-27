@@ -4,8 +4,9 @@
 输出：12_encoder_models/_images/ch12_sparse_patterns.png
 
 取 n = 36（真实配置里 n 是 4,096，格子画不下），行是 Query 位置、列是 Key 位置，
-深蓝格表示这一对要算分数。窗口取 w = 7（每侧 3），全局词元取位置 1 和 2，
-BigBird 取块大小 3：每个查询块看左中右 3 个窗口块、1 个全局块、1 个随机块。
+深蓝格表示这一对要算分数。窗口每侧取 3 个位置，加自身共 7 个；全局词元取位置 1 和 2。
+BigBird 取块大小 3：普通查询块看左中右窗口块、1 个全局块、1 个随机块，
+第 0 个全局查询块读取全部位置。这是缩小的模式示意，不是正文的完整配置。
 每幅下方给出被算到的格子数与占满阵的比例，由脚本自己数出。
 """
 
@@ -24,7 +25,7 @@ OUTPUT = image_path("12_encoder_models", "ch12_sparse_patterns.png")
 
 N = 36
 CELL = 0.215
-HALF = 3          # 窗口每侧 3 个位置，总宽 w = 7
+HALF = 3          # 窗口每侧 3 个位置，加自身共 7 个
 GLOBAL = (1, 2)   # 全局词元所在的位置
 BLOCK = 3         # BigBird 的块大小
 RANDOM_BLOCKS = 1
@@ -44,11 +45,14 @@ def window_global(i, j):
 
 
 def build_bigbird():
-    """按块选中：3 个窗口块 + 第 0 个全局块 + 若干随机块。"""
+    """全局块双向可见；普通查询块读取窗口、全局与随机块。"""
     rng = random.Random(SEED)
     n_blocks = N // BLOCK
     chosen = {}
     for bi in range(n_blocks):
+        if bi == 0:
+            chosen[bi] = set(range(n_blocks))
+            continue
         picked = {0}
         picked |= {b for b in (bi - 1, bi, bi + 1) if 0 <= b < n_blocks}
         pool = [b for b in range(n_blocks) if b not in picked]
@@ -59,9 +63,9 @@ def build_bigbird():
 
 PANELS = [
     ("（a）全注意力", full, "BERT / RoBERTa"),
-    ("（b）滑动窗口", window, "每侧 3，总宽 w = 7"),
+    ("（b）滑动窗口", window, "每侧 3，加自身共 7 个位置"),
     ("（c）窗口 + 全局词元", window_global, "位置 1、2 走十字"),
-    ("（d）BigBird 块稀疏", build_bigbird(), "块 3：窗口 3 块 + 全局 1 块 + 随机 1 块"),
+    ("（d）BigBird 块稀疏", build_bigbird(), "块大小 3；第 0 块双向全局可见"),
 ]
 
 

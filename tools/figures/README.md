@@ -25,12 +25,13 @@ Linux 的 Noto Sans CJK 任一即可）；各脚本已按此顺序自动挑选�
 |---|---|---|
 | `attention_heatmap.py` | 图 2-2 缩放点积注意力权重热力图 | [2.2](../../02_attention/2.2_scaled_dot_product.md) |
 | `causal_mask_heatmap.py` | 图 2-4 因果掩码前后的注意力权重对比 | [2.4](../../02_attention/2.4_self_cross_causal.md) |
-| `inference_timeline.py` | 图 3-10 回答“5 | [3.8](../../03_components/3.8_gpt_inference_flow.md) |
-| `input_pipeline.py` | 图 3-11 一条消息怎样变成初始表示 | [3.8](../../03_components/3.8_gpt_inference_flow.md) |
-| `attention_shape_flow.py` | 图 3-13 一层注意力计算中各矩阵的形状变化 | [3.8](../../03_components/3.8_gpt_inference_flow.md) |
-| `decode_with_cache.py` | 图 3-14 一轮 Decode 怎样对着 KV 缓存只算一行 | [3.8](../../03_components/3.8_gpt_inference_flow.md) |
-| `transformer_layer_blocks.py` | 图 3-14 真实 GPT 中一层 Transformer 的结构与形状 | [3.8](../../03_components/3.8_gpt_inference_flow.md) |
-| `inference_bottleneck.py` | 图 3-15 Prefill 与 Decode 各自落在哪一种瓶颈里 | [3.8](../../03_components/3.8_gpt_inference_flow.md) |
+| `gpt_inference_overview.py` | 图 3-10 一次 Prefill：整个模型、一层、一个头的逐级展开 | [3.8](../../03_components/3.8_gpt_inference_flow.md) |
+| `inference_timeline.py` | 图 3-11 回答“5。”的三次前向计算 | [3.8](../../03_components/3.8_gpt_inference_flow.md) |
+| `input_pipeline.py` | 图 3-12 一条消息怎样变成初始表示 | [3.8](../../03_components/3.8_gpt_inference_flow.md) |
+| `attention_shape_flow.py` | 图 3-13 及随文分图：投影、打分、掩码、读取、合并与词表投影的矩阵形状 | [3.8](../../03_components/3.8_gpt_inference_flow.md) |
+| `decode_with_cache.py` | 图 3-15 一轮 Decode 怎样对着 KV 缓存只算一行 | [3.8](../../03_components/3.8_gpt_inference_flow.md) |
+| `transformer_layer_blocks.py` | 图 3-14 Pre-Norm 的两次归一化与两条残差旁路 | [3.8](../../03_components/3.8_gpt_inference_flow.md) |
+| `inference_bottleneck.py` | 图 3-16 Prefill 与 Decode 各自落在哪一种瓶颈里 | [3.8](../../03_components/3.8_gpt_inference_flow.md) |
 | `sinusoidal_pe.py` | 图 4-1 正弦位置编码的频率分解 | [4.1](../../04_position_encoding/4.1_sinusoidal.md) |
 | `rope_phase.py` | 图 4-2 RoPE 注意力分数随相对距离的相位变化 | [4.3](../../04_position_encoding/4.3_rope.md) |
 | `lr_schedule_comparison.py` | 图 6-1 三种学习率调度策略对比 | [6.2](../../06_training_techniques/6.2_lr_schedule.md) |
