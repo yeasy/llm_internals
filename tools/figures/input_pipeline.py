@@ -1,4 +1,4 @@
-"""生成图 3-12：一条消息怎样变成初始表示 X⁽⁰⁾。
+"""生成图 3-13：一条消息怎样变成初始表示 X⁽⁰⁾。
 
 正文位置：03_components/3.8_gpt_inference_flow.md
 输出：03_components/_images/input_pipeline.png

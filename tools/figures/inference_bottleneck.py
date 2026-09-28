@@ -1,4 +1,4 @@
-"""生成图 3-16：Prefill 与 Decode 各自落在哪一种瓶颈里。
+"""生成图 3-17：Prefill 与 Decode 各自落在哪一种瓶颈里。
 
 正文位置：03_components/3.8_gpt_inference_flow.md
 输出：03_components/_images/inference_bottleneck.png

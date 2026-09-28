@@ -1,4 +1,4 @@
-"""生成图 3-15：一轮 Decode 怎样对着 KV 缓存只算一行。
+"""生成图 3-16：一轮 Decode 怎样对着 KV 缓存只算一行。
 
 正文位置：03_components/3.8_gpt_inference_flow.md
 输出：03_components/_images/decode_with_cache.png

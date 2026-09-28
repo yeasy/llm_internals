@@ -1,4 +1,4 @@
-"""生成图 3-4：残差流——各子层从同一条通路读、向同一条通路写。
+"""生成图 3-5：残差流——各子层从同一条通路读、向同一条通路写。
 
 正文位置：03_components/3.5_residual.md
 输出：03_components/_images/ch03_residual_stream.png

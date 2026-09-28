@@ -1,4 +1,4 @@
-"""生成图 3-5：BatchNorm 与 LayerNorm 在 [B, T, d] 上沿哪个轴求统计量。
+"""生成图 3-6：BatchNorm 与 LayerNorm 在 [B, T, d] 上沿哪个轴求统计量。
 
 正文位置：03_components/3.6_layer_norm.md
 输出：03_components/_images/ch03_norm_axes.png

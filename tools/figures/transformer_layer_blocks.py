@@ -1,4 +1,4 @@
-"""图 3-14：串行 Pre-Norm 的两条计算分支与两条残差旁路。"""
+"""图 3-15：串行 Pre-Norm 的两条计算分支与两条残差旁路。"""
 
 from __future__ import annotations
 
