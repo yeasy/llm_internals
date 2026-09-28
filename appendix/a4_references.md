@@ -302,3 +302,5 @@
 272. Lieberum, T., et al. (2024). [Gemma Scope: Open Sparse Autoencoders Everywhere All At Once on Gemma 2](https://arxiv.org/abs/2408.05147).
 273. Kalai, A., et al. (2025). [Why Language Models Hallucinate](https://arxiv.org/abs/2509.04664).
 274. Jiralerspong, T., et al. (2026). [Cross-Architecture Model Diffing with Crosscoders: Unsupervised Discovery of Differences Between LLMs](https://arxiv.org/abs/2602.11729).
+275. Dauphin, Y. N., et al. (2016). [Language Modeling with Gated Convolutional Networks](https://arxiv.org/abs/1612.08083). *ICML 2017*
+276. Ramachandran, P., et al. (2017). [Searching for Activation Functions](https://arxiv.org/abs/1710.05941).
