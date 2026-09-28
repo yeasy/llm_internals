@@ -304,3 +304,6 @@
 274. Jiralerspong, T., et al. (2026). [Cross-Architecture Model Diffing with Crosscoders: Unsupervised Discovery of Differences Between LLMs](https://arxiv.org/abs/2602.11729).
 275. Dauphin, Y. N., et al. (2016). [Language Modeling with Gated Convolutional Networks](https://arxiv.org/abs/1612.08083). *ICML 2017*
 276. Ramachandran, P., et al. (2017). [Searching for Activation Functions](https://arxiv.org/abs/1710.05941).
+277. Qiu, Z., et al. (2025). [Gated Attention for Large Language Models: Non-linearity, Sparsity, and Attention-Sink-Free](https://arxiv.org/abs/2505.06708).
+278. Ziegler, D. M., et al. (2019). [Fine-Tuning Language Models from Human Preferences](https://arxiv.org/abs/1909.08593).
+279. Stiennon, N., et al. (2020). [Learning to Summarize from Human Feedback](https://arxiv.org/abs/2009.01325). *NeurIPS 2020*
