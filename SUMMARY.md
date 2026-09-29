@@ -147,3 +147,4 @@
   * [A.5 快变事实核验表](appendix/a5_volatile_facts.md)
   * [A.6 从原理到实验：训练与推理实践路径](appendix/a6_practice_path.md)
   * [A.7 开源框架工程实践](appendix/a7_framework_recipes.md)
+  * [A.8 常见面试题与本书对照](appendix/a8_interview_map.md)
