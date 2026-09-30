@@ -157,6 +157,8 @@ restored = PeftModel.from_pretrained(
 
 **排障。** loss 为零先查所有 labels 是否被屏蔽；OOM 先减长度与微批，再评估激活检查点；目标模块不匹配先打印模型模块名，不随意替换名字。若训练 loss 下降但保留集变差，回到 [8.5 节](../08_alignment/8.5_practice.md)检查遗忘、污染与风格模仿。本例关闭中间检查点，只适合短实验；正式长任务必须补齐并演练[训练状态恢复](../07_distributed_training/7.7_checkpoint.md)。
 
+<a id="distributed-frameworks"></a>
+
 ### A.7.3 从 DDP 到分片：由内存账单决定
 
 **目标与环境。** 先在单机多卡保持更新语义，再减少每卡模型状态。DDP 复制模型并同步梯度；FSDP2 分片参数、梯度与优化器状态。选择前先区分峰值来自状态、激活还是临时工作区，见 [7.2 节](../07_distributed_training/7.2_zero.md)。激活已经占主导时，分片并不直接解决主要问题。
@@ -201,7 +203,27 @@ def prepare(model, blocks, mode):
 
 **故障定位。** 启动即 OOM 查模型加载与首个 all-gather；反向 OOM 查激活、预取与分片单元大小；偶发卡死查首个报错 rank、数据迭代长度和 collective 次序；扩卡变慢查通信暴露时间与数据供给。只把整个模型包成一个 FSDP 单元，会失去逐层释放与重叠的主要收益。
 
-跨节点且需要张量、流水线、上下文或专家并行时，再考虑 [Megatron-Core](https://docs.nvidia.com/megatron-core/developer-guide/latest/user-guide/index.html)：它提供这些并行构件，但要求配套模型、数据与检查点工作流。已有 Transformers/Trainer 工作流、主要需要 ZeRO 或卸载时，可以评估 [DeepSpeed ZeRO](https://www.deepspeed.ai/tutorials/zero/)。这不是“框架排行”：卸载把容量压力转到 CPU 内存与互连，多维并行引入拓扑与调度成本；单卡或 DDP 已满足预算时，不应为复杂性付费。
+#### Megatron-Core：把并行布局接到训练循环
+
+[Megatron-Core](https://docs.nvidia.com/megatron-core/developer-guide/latest/)提供可组合的 Transformer 层、并行通信、流水线调度和分布式优化器；Megatron-LM 是使用这些构件的参考训练实现。它适合需要张量并行（TP）、流水线并行（PP）、上下文并行（CP）或专家并行（EP）的模型与集群，不能只给前面的 Trainer 加一个开关就完成迁移。并行机制见第 7 章，这里关注构件如何形成完整任务。
+
+**输入与运行路径。** 先准备模型结构、分词器、数据划分、精度和并行配置；从头预训练可随机初始化，微调则需要映射到目标架构的预训练权重。Megatron-LM 的经典预训练数据路径将文本预处理为 `.bin`/`.idx`，不是直接把前述 SFT JSONL 当成训练输入，见[快速入门](https://docs.nvidia.com/megatron-core/developer-guide/latest/get-started/quickstart.html)。启动器创建各 rank，初始化通信组；模型按 TP/PP 等布局实例化，数据加载器按数据并行（DP）分样本；流水线调度器组织微批的前向与反向，优化器完成同步后的更新，检查点系统保存各 rank 的状态。先沿官方最小训练循环接通这条路径，再接真实数据与完整模型。
+
+**拓扑示例。** 对不启用 CP、EP 的稠密模型，16 卡可组成 `TP=4、PP=2、DP=2`：每个副本有两段流水线，每段四卡切张量，两个副本读取不同样本。这只是可检查的布局示意，不是通用最优配置。TP 优先放在高带宽互连域内；PP 要评估阶段负载与微批数量，长序列激活压力再考虑 CP，MoE 才评估 EP，依据[并行策略](https://docs.nvidia.com/megatron-core/developer-guide/latest/user-guide/parallelism-guide.html)与[性能指南](https://docs.nvidia.com/nemo/megatron-bridge/latest/performance-guide.html)。扩卡后先确认实际通信组与预期一致，再测暴露的通信时间、流水线空泡和有效词元吞吐。
+
+**检查点与导出。** 分布式训练检查点用于恢复模型、优化器及训练进度；完整恢复还要保存并核对随机数与数据采样状态，见 [7.7 节](../07_distributed_training/7.7_checkpoint.md)。能否换拓扑续训，还受[优化器检查点格式](https://docs.nvidia.com/megatron-core/developer-guide/latest/api-guide/core/dist_checkpointing.html)与[数据加载状态](https://docs.nvidia.com/nemo/megatron-bridge/latest/training/checkpointing.html)限制，不能从“支持分片加载”推断全部状态可任意重分片。交给 vLLM、SGLang 或 TensorRT-LLM 前，要另行导出目标格式；[Megatron Bridge](https://docs.nvidia.com/nemo/megatron-bridge/latest/bridge-tech-details.html)为受支持架构处理配置、参数名称、QKV 布局与并行分片的转换。导出后用相同输入词元比较 logits 或确定性输出，并在保留集复评；文件能加载不等于转换正确。
+
+**验收与排障。** 先做小批的一步更新对照和同拓扑中断恢复，再扩大规模。loss 异常先查词元、掩码与损失分母；启动长时间等待先查[数据索引构建与共享缓存](https://docs.nvidia.com/megatron-core/developer-guide/latest/user-guide/data-loading.html)；计算卡死查首个报错 rank、通信组与 collective 次序；GPU 空等查流水线不均衡、微批不足与数据供给。多种并行同时打开会扩大排查空间，应逐项加入并留下对照。
+
+#### DeepSpeed：按状态开销选择 ZeRO 与卸载
+
+**输入与运行路径。** 保留已有 PyTorch 模型与数据处理，增加 DeepSpeed 配置，明确微批、梯度累积、精度、优化器和 `zero_optimization`。自写循环通过 `deepspeed.initialize` 得到 engine，前向后由 engine 的 `backward` 与 `step` 管理梯度同步和更新，见[训练入口](https://www.deepspeed.ai/getting-started/)。Trainer 集成则传入 `deepspeed` 配置，由 Trainer 驱动；两条路径不要混用。使用集成支持的 `"auto"` 对齐批量、学习率等共同字段，或确保显式值一致，并核对最终生效配置，见 [Transformers 集成指南](https://huggingface.co/docs/transformers/deepspeed)。
+
+**选择示例。** 权重可常驻但训练状态超预算时，先评估 ZeRO-1/2；参数本身也成为瓶颈时再评估 ZeRO-3。[ZeRO](https://www.deepspeed.ai/tutorials/zero/)的三个阶段依次分片优化器状态、梯度和参数，ZeRO-3 在计算时按需收集参数。若优化器仍挤占显存，可试 `offload_optimizer` 的 CPU 卸载；参数卸载 `offload_param` 属于 ZeRO-3 路径，见[集成配置](https://huggingface.co/docs/transformers/deepspeed)。例如，ZeRO-2 已能放下模型时，先比较有无 CPU 优化器卸载的峰值显存与 step 时间；容量收益必须连同 CPU 内存、计算及数据传输成本一起衡量，见 [ZeRO-Offload](https://www.deepspeed.ai/tutorials/zero-offload/)。激活占主导时，仍回到长度、微批和重算策略，不能只升 ZeRO 阶段。
+
+**保存与交付。** engine 的训练检查点包含分片状态，原生 `save_checkpoint` 要由所有进程参与，单独让 rank 0 调用会等待其他 rank。用于推理时，要另存常规模型权重；ZeRO-3 的 16 位权重保存需按集成配置收集分片，或用[官方权重恢复工具](https://deepspeed.readthedocs.io/en/latest/model-checkpointing.html)从 ZeRO 检查点恢复完整 `state_dict`，并预算 CPU 内存。再配齐模型配置与分词器，重载复评，不能把任意一个 rank 的文件当完整模型。
+
+**验收与排障。** 对照相同有效批量的一步更新，验证检查点恢复和推理导出两条路径；同时量显存、主机内存与稳态 step 时间。初始化 OOM 查分片加载是否真正生效；卸载后变慢查 CPU 优化器、主机内存与传输；保存卡死查所有 rank 是否进入同一保存调用。单卡或 DDP 已满足预算时，保留较简单的路径；选择框架的依据是瓶颈与完整交付成本。
 
 ### A.7.4 DPO 与 GRPO：先检查学习信号
 

@@ -18,6 +18,18 @@ def load_checker():
 
 
 class CheckProjectRulesTest(unittest.TestCase):
+    def test_explicit_html_anchors_are_valid_but_code_and_comments_are_not(self):
+        checker = load_checker()
+        anchors = checker.heading_anchors(
+            '## Topic\n\n<a id="stable-topic"></a>\n'
+            "<a name='legacy-topic'></a>\n"
+            '<!-- <a id="comment-only"></a> -->\n'
+            '```html\n<a id="example-only"></a>\n```\n'
+            '`<a id="inline-example"></a>`\n'
+            '``code with ` and <a name="double-backtick-example"></a>``\n'
+        )
+        self.assertEqual(anchors, {"topic", "stable-topic", "legacy-topic"})
+
     def test_heading_checks_catch_skipped_levels_and_wrong_first_heading(self):
         checker = load_checker()
         path = ROOT / "01_intro" / "1.1_bad.md"

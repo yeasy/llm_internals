@@ -7,6 +7,7 @@ import argparse
 import re
 import sys
 from datetime import date, datetime, timedelta
+from html.parser import HTMLParser
 from pathlib import Path
 from urllib.parse import unquote, urlparse
 
@@ -134,7 +135,19 @@ def slugify_heading(text: str) -> str:
 def heading_anchors(text: str) -> set[str]:
     anchors: set[str] = set()
     counts: dict[str, int] = {}
-    for line in strip_fenced_blocks(text).splitlines():
+    prose = strip_fenced_blocks(text)
+
+    class ExplicitAnchors(HTMLParser):
+        def handle_starttag(self, tag, attrs):
+            if tag == "a":
+                anchors.update(value for name, value in attrs
+                               if name in {"id", "name"} and value)
+
+    # A matching backtick run marks code, not a rendered HTML anchor.
+    html_prose = re.sub(r"(?<!`)(`+)(?!`)(.*?)(?<!`)\1(?!`)", "", prose,
+                        flags=re.DOTALL)
+    ExplicitAnchors().feed(html_prose)
+    for line in prose.splitlines():
         match = HEADING_RE.match(line)
         if not match:
             continue
