@@ -39,8 +39,10 @@
 | Claude Fable 5 | 2026.06.09 | Decoder | 未公开 | - | - | - | 1M | 发布时为能力最强的广泛发布模型；128K 输出、Adaptive Thinking 常开、\$10/\$50；2026-07-01 与 Mythos 5 一同恢复访问；2026-09-01 由 Fable 5.1 接替后已列入 legacy |
 | Claude Fable 5.1 | 2026.09.01 | Decoder | 未公开 | - | - | - | 1M | 当前能力最强的广泛发布模型（`claude-fable-5-1`）；128K 输出、Adaptive Thinking 常开、\$10/\$50，缓存命中价为基础输入的 2.5%；同日发布的 Mythos 5.1 仅限 Project Glasswing 获批客户 |
 | Claude Mythos 5 | 2026.06.09 | Decoder | 未公开 | - | - | - | 1M | 与 Fable 5 同规格和价格，Adaptive Thinking 常开；仅限 Project Glasswing 获批客户；2026-07-01 恢复访问 |
-| Claude Sonnet 5 | 2026.06.30 | Decoder | 未公开 | - | - | - | 1M | 128K 输出；Adaptive Thinking 默认开启；模型 ID `claude-sonnet-5` |
-| Claude Opus 5 | 2026.07.24 | Decoder | 未公开 | - | - | - | 1M | 当前 Opus 代际，接替 Opus 4.8；128K 输出、Adaptive Thinking 默认开启；模型 ID `claude-opus-5` |
+| Claude Sonnet 5 | 2026.06.30 | Decoder | 未公开 | - | - | - | 1M | 128K 输出；Adaptive Thinking 默认开启；模型 ID `claude-sonnet-5`；2026-09 起由 Sonnet 5.5 接替，官方模型页已列入 legacy |
+| Claude Opus 5 | 2026.07.24 | Decoder | 未公开 | - | - | - | 1M | 接替 Opus 4.8，2026-09 起由 Opus 5.5 接替，官方模型页已列入 legacy；128K 输出、Adaptive Thinking 默认开启；模型 ID `claude-opus-5` |
+| Claude Opus 5.5 | 2026.09.22 | Decoder | 未公开 | - | - | - | 1M | 当前 Opus 代际；128K 输出、Adaptive Thinking 常开且不可关闭，默认 effort 为 medium；\$4/\$20；模型 ID `claude-opus-5-5` |
+| Claude Sonnet 5.5 | 2026.09.28 | Decoder | 未公开 | - | - | - | 1M | 当前 Sonnet 代际；128K 输出、Adaptive Thinking 默认开启；\$2/\$10；与 Sonnet 5 同一 tokenizer；模型 ID `claude-sonnet-5-5` |
 | Llama 4 Scout | 2025.04 | MoE-Dec | 109B total / 17B active | - | - | - | 10M | MoE 架构 |
 | Llama 4 Maverick | 2025.04 | MoE-Dec | 400B total / 17B active | - | - | - | 1M | MoE 架构 |
 | GPT-5 | 2025.08.07 | Decoder | 未公开 | - | - | - | 400,000 | 文本/图像输入推理 |
@@ -54,6 +56,9 @@
 | GPT-5.6 Sol | 2026.07.09 | Decoder | 未公开 | - | - | - | 1,050,000 | 前沿能力层；128K 最大输出；`gpt-5.6` 别名指向 Sol；Responses/Chat Completions/Batch |
 | GPT-5.6 Terra | 2026.07.09 | Decoder | 未公开 | - | - | - | 1,050,000 | 智能与成本平衡层；128K 最大输出；Responses/Chat Completions/Batch |
 | GPT-5.6 Luna | 2026.07.09 | Decoder | 未公开 | - | - | - | 1,050,000 | 高吞吐成本敏感层；128K 最大输出；Responses/Chat Completions/Batch |
+| GPT-6 Astra | 2026.09.03 | Decoder | 未公开 | - | - | - | 1,050,000 | 官方目录首位、标为 Default；128K 最大输出；\$10/\$50 |
+| GPT-6 Luna | 2026.09.22 | Decoder | 未公开 | - | - | - | 1,050,000 | 成本敏感的大批量层；128K 最大输出；\$0.10/\$0.50 |
+| GPT-6.1 Sol | 2026.09.29 | Decoder | 未公开 | - | - | - | 1,050,000 | 接近 Astra 的能力、更低成本；128K 最大输出；\$2/\$10 |
 
 表 A-1：主流 Transformer 模型参数速查表
 

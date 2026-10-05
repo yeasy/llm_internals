@@ -87,6 +87,10 @@ class VolatileFactsTests(unittest.TestCase):
         self.assertIn("ttl_days=30", self.text)
         self.assertIn("conflict_status=resolved-conflict", self.text)
         self.assertIn("GPT-5.6 Sol", self.text)
+        self.assertIn("`claude-opus-5-5`", self.text)
+        self.assertIn("GPT-6.1 Sol", self.text)
+        self.assertIn("V4-Pro-0813", self.text)
+        self.assertNotIn("DeepSeek-V4 至今仍标注 Preview", self.text)
         self.assertIn("2026-07-09", self.text)
         for endpoint in ("v1/responses", "v1/chat/completions", "v1/batch"):
             self.assertIn(endpoint, self.text)
