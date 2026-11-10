@@ -37,7 +37,8 @@
 | Claude Opus 4.7 | 2026.04.16 | Decoder | 未公开 | - | - | - | 以官方模型页为准 | 软件工程、视觉理解和复杂多步任务 |
 | Claude Opus 4.8 | 2026.05.28 | Decoder | 未公开 | - | - | - | 1M | 发布时为最新 Opus 代际，2026-07 起由 Opus 5 接替，官方模型页已列入 legacy；128K 输出、Adaptive Thinking、fast mode |
 | Claude Fable 5 | 2026.06.09 | Decoder | 未公开 | - | - | - | 1M | 发布时为能力最强的广泛发布模型；128K 输出、Adaptive Thinking 常开、\$10/\$50；2026-07-01 与 Mythos 5 一同恢复访问；2026-09-01 由 Fable 5.1 接替后已列入 legacy |
-| Claude Fable 5.1 | 2026.09.01 | Decoder | 未公开 | - | - | - | 1M | 当前能力最强的广泛发布模型（`claude-fable-5-1`）；128K 输出、Adaptive Thinking 常开、\$10/\$50，缓存命中价为基础输入的 2.5%；同日发布的 Mythos 5.1 仅限 Project Glasswing 获批客户 |
+| Claude Fable 5.1 | 2026.09.01 | Decoder | 未公开 | - | - | - | 1M | 发布时为能力最强的广泛发布模型（`claude-fable-5-1`）；128K 输出、Adaptive Thinking 常开、\$10/\$50，缓存命中价为基础输入的 2.5%；同日发布的 Mythos 5.1 仅限 Project Glasswing 获批客户；2026-11-09 由 Fable 5.2 接替后已列入 legacy |
+| Claude Fable 5.2 | 2026.11.09 | Decoder | 未公开 | - | - | - | 1M | 当前能力最强的广泛发布模型（`claude-fable-5-2`）；128K 输出、Adaptive Thinking 常开、\$8/\$40，缓存命中价为基础输入的 2.5%；同日发布的 Mythos 5.2 只向通过 Anthropic 验证项目的组织开放 |
 | Claude Mythos 5 | 2026.06.09 | Decoder | 未公开 | - | - | - | 1M | 与 Fable 5 同规格和价格，Adaptive Thinking 常开；仅限 Project Glasswing 获批客户；2026-07-01 恢复访问 |
 | Claude Sonnet 5 | 2026.06.30 | Decoder | 未公开 | - | - | - | 1M | 128K 输出；Adaptive Thinking 默认开启；模型 ID `claude-sonnet-5`；2026-09 起由 Sonnet 5.5 接替，官方模型页已列入 legacy |
 | Claude Opus 5 | 2026.07.24 | Decoder | 未公开 | - | - | - | 1M | 接替 Opus 4.8，2026-09 起由 Opus 5.5 接替，官方模型页已列入 legacy；128K 输出、Adaptive Thinking 默认开启；模型 ID `claude-opus-5` |
