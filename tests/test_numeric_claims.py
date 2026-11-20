@@ -30,7 +30,8 @@ class NumericClaimsTests(unittest.TestCase):
             "<!-- numeric-claim: kv-cache -->",
         )
         self.assertEqual(
-            {row["配置"] for row in rows}, {"Llama 2-70B GQA", "Llama 2-70B MHA"}
+            {row["配置"] for row in rows},
+            {"Llama 2-7B MHA", "Llama 2-70B GQA", "Llama 2-70B MHA"},
         )
         values = {}
         for row in rows:
@@ -49,6 +50,52 @@ class NumericClaimsTests(unittest.TestCase):
             )
             values[row["配置"]] = gib
         self.assertEqual(values["Llama 2-70B MHA"] / values["Llama 2-70B GQA"], 8)
+        self.assertEqual(values["Llama 2-7B MHA"], 1)
+
+    def test_7b_tensor_sizes_recompute_from_shapes(self):
+        rows = table_after(
+            ROOT / "06_training_techniques" / "6.4_batch_sequence.md",
+            "<!-- numeric-claim: 7b-tensors -->",
+        )
+        self.assertEqual(len(rows), 5)
+        expected = {
+            "隐藏状态": ([1, 2048, 4096], 16),
+            "单个 Q、K 或 V": ([1, 32, 2048, 128], 16),
+            "一份 MLP 扩展状态": ([1, 2048, 11008], 43),
+            "完整注意力矩阵": ([1, 32, 2048, 2048], 256),
+            "单层 K 与 V 缓存合计": ([2, 1, 32, 2048, 128], 32),
+        }
+        self.assertEqual({row["张量"] for row in rows}, set(expected))
+        for row in rows:
+            shape = [int(value) for value in re.findall(r"\d+", row["形状"])]
+            self.assertEqual(shape, expected[row["张量"]][0])
+            size = math.prod(shape) * int(row["每元素字节"]) / 1024**2
+            self.assertEqual(size, float(row["大小 MiB"]))
+            self.assertEqual(size, expected[row["张量"]][1])
+
+    def test_7b_adam_model_states_have_an_explicit_precision_contract(self):
+        rows = table_after(
+            ROOT / "06_training_techniques" / "6.4_batch_sequence.md",
+            "<!-- numeric-claim: 7b-model-states -->",
+        )
+        expected = {
+            "前后向参数": ("FP16/BF16", 2),
+            "参数梯度": ("FP16/BF16", 2),
+            "主参数": ("FP32", 4),
+            "Adam 一阶矩": ("FP32", 4),
+            "Adam 二阶矩": ("FP32", 4),
+        }
+        self.assertEqual({row["项目"] for row in rows}, set(expected))
+        for row in rows:
+            precision, byte_count = expected[row["项目"]]
+            self.assertEqual(row["精度"], precision)
+            self.assertEqual(int(row["每参数字节"]), byte_count)
+            self.assertEqual(float(row["7B 开销 GB"]), 7e9 * byte_count / 1e9)
+        self.assertEqual(sum(float(row["7B 开销 GB"]) for row in rows), 112)
+
+    def test_peft_does_not_claim_freezing_eliminates_or_preserves_all_activations(self):
+        text = (ROOT / "08_alignment" / "8.4_peft.md").read_text(encoding="utf-8")
+        self.assertNotIn("LoRA 一点也不省激活显存", text)
 
     def test_zero_partition_table_recomputes_per_rank_memory(self):
         rows = table_after(
