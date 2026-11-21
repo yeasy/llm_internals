@@ -49,7 +49,7 @@
   * [5.5 预训练数据管线：从原始网页到一份配比](05_pretraining/5.5_data_pipeline.md)
   * [本章小结](05_pretraining/summary.md)
 
-* [第六章：训练技术的底层逻辑](06_training_techniques/README.md)
+* [第六章：训练技术的原理](06_training_techniques/README.md)
   * [6.1 损失函数与优化器：为什么选择 Adam](06_training_techniques/6.1_loss_optimizer.md)
   * [6.2 学习率调度：为什么需要先预热再衰减](06_training_techniques/6.2_lr_schedule.md)
   * [6.3 正则化策略：防止过拟合的多重手段](06_training_techniques/6.3_regularization.md)
@@ -133,7 +133,7 @@
   * [14.3 状态空间模型与混合架构：注意力的挑战者](14_future_trends/14.3_ssm_hybrid.md)
   * [14.4 多模态 Transformer：统一不同模态的表示](14_future_trends/14.4_multimodal.md)
   * [14.5 AI Agent 与工具调用：让模型从“说”到“做”](14_future_trends/14.5_agent_tool_use.md)
-  * [14.6 推理时计算扩展：让模型学会深度思考](14_future_trends/14.6_test_time_scaling.md)
+  * [14.6 推理时计算扩展与推理模型](14_future_trends/14.6_test_time_scaling.md)
   * [14.7 长上下文技术：从理论到工程实践](14_future_trends/14.7_long_context.md)
   * [14.8 机制可解释性：打开黑箱](14_future_trends/14.8_interpretability.md)
   * [14.9 未来展望](14_future_trends/14.9_outlook.md)
