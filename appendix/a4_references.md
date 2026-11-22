@@ -307,3 +307,40 @@
 277. Qiu, Z., et al. (2025). [Gated Attention for Large Language Models: Non-linearity, Sparsity, and Attention-Sink-Free](https://arxiv.org/abs/2505.06708).
 278. Ziegler, D. M., et al. (2019). [Fine-Tuning Language Models from Human Preferences](https://arxiv.org/abs/1909.08593).
 279. Stiennon, N., et al. (2020). [Learning to Summarize from Human Feedback](https://arxiv.org/abs/2009.01325). *NeurIPS 2020*
+
+### 易懂度修订与新进展补写新增
+
+280. Papineni, K., et al. (2002). [BLEU: a Method for Automatic Evaluation of Machine Translation](https://aclanthology.org/P02-1040/). *ACL 2002*
+281. He, K., et al. (2016). [Identity Mappings in Deep Residual Networks](https://arxiv.org/abs/1603.05027).
+282. Lewis, P., et al. (2020). [Retrieval-Augmented Generation for Knowledge-Intensive NLP Tasks](https://arxiv.org/abs/2005.11401).
+283. Ke, G., et al. (2020). [Rethinking Positional Encoding in Language Pre-training](https://arxiv.org/abs/2006.15595).
+284. Li, B., et al. (2020). [On the Sentence Embeddings from Pre-trained Language Models](https://arxiv.org/abs/2011.05864).
+285. Radford, A., et al. (2021). [Learning Transferable Visual Models From Natural Language Supervision](https://arxiv.org/abs/2103.00020).
+286. Wei, J., et al. (2022). [Emergent Abilities of Large Language Models](https://arxiv.org/abs/2206.07682).
+287. Défossez, A., et al. (2022). [High Fidelity Neural Audio Compression](https://arxiv.org/abs/2210.13438).
+288. Liu, X., et al. (2023). [Scaling Laws of RoPE-based Extrapolation](https://arxiv.org/abs/2310.05209).
+289. Patel, P., et al. (2023). [Splitwise: Efficient generative LLM inference using phase splitting](https://arxiv.org/abs/2311.18677).
+290. Yang, S., et al. (2023). [Gated Linear Attention Transformers with Hardware-Efficient Training](https://arxiv.org/abs/2312.06635).
+291. Zhong, Y., et al. (2024). [DistServe: Disaggregating Prefill and Decoding for Goodput-optimized Large Language Model Serving](https://arxiv.org/abs/2401.09670).
+292. Yang, S., et al. (2024). [Parallelizing Linear Transformers with the Delta Rule over Sequence Length](https://arxiv.org/abs/2406.06484).
+293. Zhu, D., et al. (2024). [Hyper-Connections](https://arxiv.org/abs/2409.19606).
+294. Défossez, A., et al. (2024). [Moshi: a speech-text foundation model for real-time dialogue](https://arxiv.org/abs/2410.00037).
+295. Behrouz, A., et al. (2024). [Titans: Learning to Memorize at Test Time](https://arxiv.org/abs/2501.00663).
+296. MiniMax. (2025). [MiniMax-01: Scaling Foundation Models with Lightning Attention](https://arxiv.org/abs/2501.08313).
+297. Yuan, J., et al. (2025). [Native Sparse Attention: Hardware-Aligned and Natively Trainable Sparse Attention](https://arxiv.org/abs/2502.11089).
+298. Betley, J., et al. (2025). [Emergent Misalignment: Narrow finetuning can produce broadly misaligned LLMs](https://arxiv.org/abs/2502.17424).
+299. Zhu, R., et al. (2025). [MegaScale-Infer: Serving Mixture-of-Experts at Scale with Disaggregated Expert Parallelism](https://arxiv.org/abs/2504.02263).
+300. Yue, Y., et al. (2025). [Does Reinforcement Learning Really Incentivize Reasoning Capacity in LLMs Beyond the Base Model?](https://arxiv.org/abs/2504.13837).
+301. Fu, W., et al. (2025). [AReaL: A Large-Scale Asynchronous Reinforcement Learning System for Language Reasoning](https://arxiv.org/abs/2505.24298).
+302. MiniMax. (2025). [MiniMax-M1: Scaling Test-Time Compute Efficiently with Lightning Attention](https://arxiv.org/abs/2506.13585).
+303. Wang, M., et al. (2025). [Persona Features Control Emergent Misalignment](https://arxiv.org/abs/2506.19823).
+304. Gunjal, A., et al. (2025). [Rubrics as Rewards: Reinforcement Learning Beyond Verifiable Domains](https://arxiv.org/abs/2507.17746).
+305. StepFun. (2025). [Step-3 is Large yet Affordable: Model-system Co-design for Cost-effective Decoding](https://arxiv.org/abs/2507.19427).
+306. Meituan LongCat Team. (2025). [LongCat-Flash Technical Report](https://arxiv.org/abs/2509.01322).
+307. Khatri, D., et al. (2025). [The Art of Scaling Reinforcement Learning Compute for LLMs](https://arxiv.org/abs/2510.13786).
+308. Zhu, R.-J., et al. (2025). [Scaling Latent Reasoning via Looped Language Models](https://arxiv.org/abs/2510.25741).
+309. DeepSeek-AI. (2025). [DeepSeek-V3.2: Pushing the Frontier of Open Large Language Models](https://arxiv.org/abs/2512.02556).
+310. Xie, Z., et al. (2025). [mHC: Manifold-Constrained Hyper-Connections](https://arxiv.org/abs/2512.24880).
+311. Cheng, X., et al. (2026). [Conditional Memory via Scalable Lookup: A New Axis of Sparsity for Large Language Models](https://arxiv.org/abs/2601.07372).
+312. Elango, V., et al. (2026). [LatentMoE: Toward Optimal Accuracy per FLOP and Parameter in Mixture of Experts](https://arxiv.org/abs/2601.18089).
+313. Lahoti, A., et al. (2026). [Mamba-3: Improved Sequence Modeling using State Space Principles](https://arxiv.org/abs/2603.15569).
