@@ -66,10 +66,10 @@
   * [7.7 检查点管理与容错](07_distributed_training/7.7_checkpoint.md)
   * [本章小结](07_distributed_training/summary.md)
 
-* [第八章：从预训练到对齐：让模型有用且安全](08_alignment/README.md)
+* [第八章：后训练：从指令微调到推理强化](08_alignment/README.md)
   * [8.1 监督微调：教模型“怎么回答”](08_alignment/8.1_sft.md)
-  * [8.2 RLHF：为什么需要人类反馈参与训练](08_alignment/8.2_rlhf.md)
-  * [8.3 DPO 与新型对齐：从复杂到简洁的演化](08_alignment/8.3_dpo.md)
+  * [8.2 强化学习：模型怎样从自己的回答中学](08_alignment/8.2_rlhf.md)
+  * [8.3 直接偏好优化：从两份回答的比较中学习](08_alignment/8.3_dpo.md)
   * [8.4 参数高效微调：为什么不必更新所有参数](08_alignment/8.4_peft.md)
   * [8.5 微调会怎么坏：四种失败模式与一条共同判据](08_alignment/8.5_practice.md)
   * [8.6 后训练评测：分数是怎么算出来的](08_alignment/8.6_evaluation.md)

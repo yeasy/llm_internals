@@ -2,7 +2,9 @@
 
 本附录把第 7、8、11 章的机制接到三条工作流：先用本地数据完成一次可检查的微调，再按瓶颈扩展训练，最后比较服务质量与成本。A.7.8 收录正文各章迁出的源码名、配置键与启动参数。判断依据是相同任务、相同预算下的实验结果，不是框架名称。
 
-**执行边界：以下是环境配方与工程决策指南，未在本机执行 CUDA 训练或服务压测。** 完整脚本与集成片段分别标明；语法检查不能证明依赖兼容、模型适配或性能达标。参数以链接的官方接口为依据；读者实际部署时，应保存依赖版本与启动命令，并按自己的工作负载验收。
+[工单转 JSON 实验](#ticket-json-lab)在 Apple Silicon 上跑过完整的训练和评测。CUDA 配方和服务压测按各自环境准备，完整脚本与接入片段分别标明。保存依赖版本和启动命令，按自己的任务验收。
+
+<a id="a7-experiment-setup"></a>
 
 ### A.7.1 先冻结实验契约
 
@@ -40,15 +42,17 @@ nvidia-smi > "$RUN_DIR/gpu.txt"
 
 “能跑完十步”只通过冒烟检查。它不能证明收敛、泛化、偏好提升或可用容量。
 
+<a id="cuda-sft-recipe"></a>
+
 ### A.7.2 本地 SFT 与 LoRA：先验证学了什么
 
-**目标与输入。** 用单卡验证完成词元上的监督微调；同一脚本可在全参数与 LoRA 间做消融。数据是本地 `train.jsonl`、`valid.jsonl`，每行包含两个非空字符串。下例是数据格式样例，不是足够的训练集：
+本例在一张 NVIDIA GPU 上微调已有的指令模型。先按 [A.7.1](#a7-experiment-setup) 设置目录和环境变量。把审核过的问答写入本地的 `train.jsonl` 与 `valid.jsonl`，每行用 `prompt` 存放用户消息，用 `completion` 存放助手的示范回答。下面是一条样本。
 
 ```json
-{"prompt":"把下面术语解释成一句中文。\n术语：梯度累积\n解释：", "completion":"梯度累积是在多次反向传播后统一更新参数。"}
+{"prompt":[{"role":"user","content":"把梯度累积解释成一句中文。"}],"completion":[{"role":"assistant","content":"梯度累积把多个小批次的梯度加起来，再进行一次参数更新。"}]}
 ```
 
-这里有意使用普通文本的 prompt/completion 数据；对话模型应改为模型匹配的会话格式并检查 chat template，不能把任意拼接当作对话训练。TRL 的[数据格式与完成词元损失](https://huggingface.co/docs/trl/sft_trainer#expected-dataset-type-and-format)规定了两类输入的处理方式。
+TRL 根据模型的聊天模板把这些消息变成词元，再只对 `completion` 计损失。这个脚本接受单轮问答，可用于有聊天模板的纯文本因果语言模型，例如 [Qwen2.5-0.5B-Instruct](https://huggingface.co/Qwen/Qwen2.5-0.5B-Instruct)。若用有思考模式的模型，可按模型卡说明在每条样本的 `chat_template_kwargs` 里设定模式，推理时也用同一模式。数据与模板接口分别见 [TRL 数据格式](https://huggingface.co/docs/trl/dataset_formats)和 [SFTTrainer v1.7.0 的实现](https://github.com/huggingface/trl/blob/v1.7.0/trl/trainer/sft_trainer.py)。
 
 下面是完整的 `sft_local.py`。依赖已准备好；默认只运行十步。它检查长度、明确 loss 的监督范围、评估并保存模型；不负责数据采集。
 
@@ -65,6 +69,9 @@ set_seed(42)
 model_dir = Path(os.environ["MODEL_DIR"]).resolve(strict=True)
 data_dir = Path(os.environ["DATA_DIR"]).resolve(strict=True)
 run_dir = Path(os.environ["RUN_DIR"])
+max_length = int(os.environ.get("MAX_LENGTH", "512"))
+if max_length < 1:
+    raise ValueError("MAX_LENGTH 必须为正整数")
 if (run_dir / "sft").exists() or (run_dir / "sft-final").exists():
     raise FileExistsError("请使用新的实验目录，避免覆盖或混合结果")
 assert torch.cuda.is_available() and torch.cuda.is_bf16_supported()
@@ -79,16 +86,29 @@ data = load_dataset("json", data_files={
     "validation": str(data_dir / "valid.jsonl"),
 })
 for split in data:
-    if len(data[split]) == 0:
+    if not len(data[split]):
         raise ValueError(f"{split}: 数据为空")
-    for row in data[split]:
-        if any(not isinstance(row[k], str) or not row[k].strip()
-               for k in ("prompt", "completion")):
-            raise ValueError("prompt/completion 必须为非空字符串")
-        # 预留 EOS 位置；正式数据处理还要检查实际 trainer 输出。
-        ids = tok(row["prompt"] + row["completion"])["input_ids"]
-        if len(ids) + 1 > 512:
-            raise ValueError("样本超过本实验长度预算，请先处理数据")
+    for index, row in enumerate(data[split], start=1):
+        prompt, answer = row["prompt"], row["completion"]
+        for messages, role in ((prompt, "user"), (answer, "assistant")):
+            if (not isinstance(messages, list) or len(messages) != 1
+                    or not isinstance(messages[0], dict)
+                    or messages[0].get("role") != role
+                    or not isinstance(messages[0].get("content"), str)
+                    or not messages[0]["content"].strip()):
+                raise ValueError(f"{split} 第 {index} 条须为单轮问答")
+        template_options = row.get("chat_template_kwargs") or {}
+        prompt_ids = tok.apply_chat_template(
+            prompt, add_generation_prompt=True, tokenize=True,
+            return_dict=True, **template_options,
+        )["input_ids"]
+        full_ids = tok.apply_chat_template(
+            prompt + answer, tokenize=True, return_dict=True, **template_options,
+        )["input_ids"]
+        if len(full_ids) > max_length:
+            raise ValueError(f"{split} 第 {index} 条有 {len(full_ids)} 个词元，超过 {max_length}")
+        if full_ids[:len(prompt_ids)] != prompt_ids or len(full_ids) == len(prompt_ids):
+            raise ValueError(f"{split} 第 {index} 条的聊天模板无法分出回答位置")
 model = AutoModelForCausalLM.from_pretrained(
     model_dir, local_files_only=True, dtype=torch.bfloat16,
 )
@@ -102,7 +122,7 @@ args = SFTConfig(
     output_dir=str(run_dir / "sft"), max_steps=10,
     per_device_train_batch_size=1, gradient_accumulation_steps=4,
     per_device_eval_batch_size=1, learning_rate=2e-5,
-    max_length=512, packing=False, completion_only_loss=True,
+    max_length=max_length, packing=False, completion_only_loss=True,
     bf16=True, fp16=False, logging_steps=1,
     save_strategy="no", report_to="none", seed=42,
 )
@@ -127,7 +147,7 @@ if trainer.is_world_process_zero():
     tok.save_pretrained(run_dir / "sft-final")
 ```
 
-保存脚本后，在同一终端运行。全参数对照使用新的输出目录，避免覆盖第一次结果：
+保存脚本后，在同一终端运行。默认上限 512 词元用于短问答，换成论文摘要时用 `MAX_LENGTH` 设置能放下正文、模板和目标摘要的预算。全参数对照使用新的输出目录，避免覆盖第一次结果。
 
 ```bash
 python sft_local.py
@@ -153,6 +173,22 @@ restored = PeftModel.from_pretrained(
     base, str(Path(os.environ["RUN_DIR"]) / "sft-final"),
     local_files_only=True,
 ).eval()
+```
+
+<a id="sft-adapter-merge"></a>
+
+如果下一阶段需要完整的 SFT 权重，确认重载结果后执行下面的代码。它适用于本节的非量化基座。合并后再用同一批提示核对输出。[PEFT 合并接口](https://huggingface.co/docs/peft/package_reference/peft_model#peft.PeftModel.merge_and_unload)
+
+```python
+from transformers import AutoTokenizer
+
+run_dir = Path(os.environ["RUN_DIR"])
+merged_dir = run_dir / "sft-merged"
+merged_dir.mkdir()
+restored.merge_and_unload(safe_merge=True).save_pretrained(merged_dir)
+AutoTokenizer.from_pretrained(
+    run_dir / "sft-final", local_files_only=True,
+).save_pretrained(merged_dir)
 ```
 
 **排障。** loss 为零先查所有 labels 是否被屏蔽；OOM 先减长度与微批，再评估激活检查点；目标模块不匹配先打印模型模块名，不随意替换名字。若训练 loss 下降但保留集变差，回到 [8.5 节](../08_alignment/8.5_practice.md)检查遗忘、污染与风格模仿。本例关闭中间检查点，只适合短实验；正式长任务必须补齐并演练[训练状态恢复](../07_distributed_training/7.7_checkpoint.md)。
@@ -225,19 +261,21 @@ def prepare(model, blocks, mode):
 
 **验收与排障。** 对照相同有效批量的一步更新，验证检查点恢复和推理导出两条路径；同时量显存、主机内存与稳态 step 时间。初始化 OOM 查分片加载是否真正生效；卸载后变慢查 CPU 优化器、主机内存与传输；保存卡死查所有 rank 是否进入同一保存调用。单卡或 DDP 已满足预算时，保留较简单的路径；选择框架的依据是瓶颈与完整交付成本。
 
-### A.7.4 DPO 与 GRPO：先检查学习信号
+### A.7.4 DPO、PPO 与 GRPO：先检查学习信号
 
 **选择依据。** 有可靠的成对偏好、但没有可信在线奖励时先做 DPO；能自动验证答案且愿意支付在线采样成本时再实验 GRPO。两者都必须与相同起点的 SFT 对照，不能拿不同数据、不同基座的最终分数归因于算法。
 
+<a id="dpo-recipe"></a>
+
 #### 离线偏好优化
 
-输入 `preference.jsonl` 使用同一 prompt 下的 chosen/rejected 字符串，先核验偏好方向与标签一致性：
+把同一条用户消息和两份助手回答写入 `preference.jsonl`。`chosen` 是审核者更认可的回答，`rejected` 是较差的回答。
 
 ```json
-{"prompt":"用一句话解释 KV cache：", "chosen":"KV cache 缓存已处理词元的键和值，供后续解码复用。", "rejected":"KV cache 会省去所有注意力计算。"}
+{"prompt":[{"role":"user","content":"用一句话解释 KV cache。"}],"chosen":[{"role":"assistant","content":"KV cache 缓存已处理词元的键和值，供后续解码复用。"}],"rejected":[{"role":"assistant","content":"KV cache 会省去所有注意力计算。"}]}
 ```
 
-以下为**替换 SFT 训练段的集成片段**；复用前面导入与加载逻辑，但 `MODEL_DIR` 要指向已通过评测的完整本地 SFT 权重。重新加载模型，不能复用刚训练过且带 adapter 的对象。此路线在 SFT 权重上新建 LoRA；参考策略是冻结的 SFT 起点，数据与配置见 [DPOTrainer](https://huggingface.co/docs/trl/dpo_trainer)。
+在新脚本中复用单卡 SFT 示例的导入、目录、模型和 LoRA 设置，跳过 SFT 的数据检查和训练。让 `MODEL_DIR` 指向已通过评测的完整本地 SFT 权重，另设新的 `RUN_DIR`。这段代码在 SFT 权重上新建 LoRA，冻结的 SFT 起点是参考策略。数据与配置见 [DPOTrainer](https://huggingface.co/docs/trl/dpo_trainer)。
 
 ```python
 from trl import DPOConfig, DPOTrainer
@@ -256,43 +294,423 @@ dpo = DPOTrainer(
     ),
 )
 dpo.train()
+dpo.save_model(str(run_dir / "dpo-final"))
 ```
 
-这里必须开启 LoRA，`lora` 不能为 `None`；若要全参数 DPO，应另外配置并预算冻结参考模型。原始 SFT 只有 adapter 时，先用原基座重载、合并并保存完整权重，做合并前后的输出一致性检查，再作为该片段的起点。继续训练同一个 SFT adapter 与“在完整 SFT 权重上加新 adapter”的参考策略处理不同，不能混用。
+训练结束后，`dpo-final` 保存新适配器。评测时把它加载到同一份 SFT 权重上。若原始 SFT 只保存了适配器，先按上面的[合并步骤](#sft-adapter-merge)保存并检查完整权重。
 
 **验收与排障。** 在独立偏好集评估盲测胜率、长度分布及通用能力回退；胜率差异附样本量与不确定性。偏好 accuracy 上升而真实回答变差时，检查长度偏差和 chosen/rejected 质量。先统计截断后是否仍保留两个答案的区别；两个答案都截成相同文本时，扩大训练不能修复监督信号。
 
-#### 在线可验证奖励
+<a id="ppo-capital-recipe"></a>
 
-GRPO 的输入是 prompt 与可验证标签。下面是**替换训练段的集成片段**，只演示纯文本数值答案任务；在新的进程中重新加载本地模型、分词器和 LoRA 配置。`math_train.jsonl` 每行形如 `{"prompt":"只输出整数：17+25=", "answer":"42"}`。完整模型与在线生成所需内存必须事先可容纳，不能用 SFT 的显存值直接推断。
+#### 在本机跑一轮 PPO
+
+这个例子用一个小 Transformer 回答首都问题。`prompt` 是模型读到的题目，`answer` 是判分程序核对用的标准答案。小模型每次生成两个词元，每个词元是一个汉字，可取“巴、黎、里、昂、马、赛、柏、林”中的任一个。它可以生成“巴林”这样的组合，到判分时才知道答得对不对。
+
+在本书源码仓库根目录，用已经安装 PyTorch 的 Python 执行下列命令。
+
+```bash
+WORK="$(mktemp -d)"
+cat > "$WORK/capital.jsonl" <<'JSONL'
+{"prompt":"法国的首都是什么？","answer":"巴黎"}
+{"prompt":"德国的首都是什么？","answer":"柏林"}
+JSONL
+python examples/ppo_capitals.py "$WORK/capital.jsonl" --batches 30
+```
+
+例如第一次抽到“巴”时，就把“巴”接到题目后面，预测下一个字。如果又抽到“黎”，就保存两个位置的概率，判分程序看到“巴黎”后给 1 分。训练时，把“题目 + 巴”重新送进 Transformer，一次前向就能重算这两个位置的概率。题目最后一个位置预测“巴”，“巴”的位置预测“黎”。
+
+<a id="ppo-reward-loss"></a>
+
+**分数在哪一行用上？** Transformer 的输入是题目和已经生成的词元。整条回答的 1 分留给训练程序。假设价值模型在“巴”和“黎”两个生成位置都预测能拿 0.5 分，那么实际得分减去预测，两个位置就各有 +0.5 的优势。如果整条得 0 分，在相同预测下，两个优势都是 −0.5。
+
+下面摘出语言模型的更新，并展开了脚本里的 `clipped_policy_loss`。 `actions` 是模型实际生成的两个词元， `old_values` 是采样时价值模型给两个位置的预测。
+
+```python
+advantages = (reward[:, None] - old_values).detach()
+new_logp = response_policy(actor, prefixes, start).log_prob(actions)
+ratio = (new_logp - old_logp.detach()).exp()
+clipped = ratio.clamp(0.8, 1.2)
+loss = -torch.minimum(ratio * advantages, clipped * advantages).mean()
+optimizer.zero_grad()
+loss.backward()
+optimizer.step()
+```
+
+反向传播是对损失求导。SFT 从标准答案里取出正确词元来算损失。这个 PPO 例子先用标准答案给整条回答打分，再取模型**实际生成的词元**来算损失。比如模型生成“巴林”时，损失用的是“巴”和“林”的概率，判分程序返回的 0 分则通过 `advantages` 乘进损失。
+
+只看生成“巴”这个位置对一个参数的影响。假设输出层有个权重 $$w$$ 对应的输入特征是 0.5，所以它对“巴”的原始分数的贡献是 $$0.5w$$。第一次更新前，“巴”的当前概率和旧概率都是 0.20，比值是 1。旧概率是采样时记下来的常数，当前概率仍然会随 $$w$$ 改变。由 softmax 的导数和上面的损失，在比值为 1 时，这一项的梯度为
+
+$$
+\frac{\partial L}{\partial w} = -A(1-p)\times 0.5.
+$$
+
+代入 $$p=0.20$$，优势为 +0.5 时，梯度是 −0.20。用学习率 0.1 做梯度下降，就把 $$w$$ 加 0.02。优势为 −0.5 时，梯度变成 +0.20，这次就把 $$w$$ 减 0.02。整批训练时，程序会合并所有生成位置对同一个参数的梯度。
+
+每批每题生成 96 份答案，用于三次更新，然后重新采样。完整脚本还根据实际得分计算价值模型的损失，并调用优化器修改参数。
+
+一次 CPU 实跑中，第一道题前四次生成了“黎黎、赛昂、昂里、里赛”。第一条的两个字在采样时的概率分别为 8.08% 和 9.34%，整条得 0 分。第一批法国题答对 1 次。跑完 30 批后，生成“巴黎”的概率从 0.93% 升到 99.20%，生成“柏林”的概率从 0.65% 升到 99.42%。这里测的是两道训练题上连续生成正确两个字的概率。
+
+要给已有语言模型跑 PPO，可以用 [verl 的单卡 PPO 示例](https://verl.readthedocs.io/en/latest/start/quickstart.html)。它从 Qwen2.5-0.5B-Instruct 开始，让模型自己生成数学题的答案，再由程序核对。先用官方脚本准备训练和验证的 Parquet 文件，再运行文档里的 `python3 -m verl.trainer.main_ppo` 配方。换自己的任务时，要替换数据和判分规则，并指定生成模型和价值模型的起始权重。GPU 示例按官方文档核对，本地实跑的是上面的 CPU 例子。
+
+<a id="grpo-capital-recipe"></a>
+
+#### 用程序打分做一次 GRPO
+
+先从“法国的首都是什么？”看数据怎么准备。把问题写进 `prompt`，把正确答案写进 `answer`。模型只看问题，`answer` 留给评分程序。模型每次答完，程序把答案两端的空白去掉，只在答案恰好是“巴黎”时给 1 分，其余给 0 分。
+
+把多道题整理成 `capital_train.jsonl`，放进 `DATA_DIR`。下面是一行样例和它的判分结果。
+
+```json
+{"prompt":[{"role":"user","content":"只写中文城市名。法国的首都是什么？"}],"answer":"巴黎"}
+```
+
+模型若生成“巴黎、里昂、巴黎、马赛”这四条回答，评分就是 1、0、1、0。TRL 的 `GRPOTrainer` 负责生成答案、调用判分函数、比较同一道题的四个分数，再更新模型。下一批用更新后的模型生成。
+
+<a id="capital-reward-update"></a>
+
+**在 CPU 上算一次参数更新。** 下面复现 [8.2 节的算例](../08_alignment/8.2_rlhf.md#score-to-update)。三座城市用 0、1、2 表示。把代码保存为 `capital_update.py`，在装有 PyTorch 的环境里运行 `python capital_update.py`。这里训练的参数就是三个城市的 logits。
+
+```python
+import torch
+
+logits = torch.nn.Parameter(torch.zeros(3))
+sampled = torch.tensor([0, 1, 0, 2])  # 巴黎、里昂、巴黎、马赛
+rewards = torch.tensor([1.0, 0.0, 1.0, 0.0])
+advantages = (rewards - rewards.mean()) / rewards.std(correction=0)
+
+optimizer = torch.optim.SGD([logits], lr=0.4)
+log_probs = logits.log_softmax(dim=0)[sampled]
+loss = -(advantages * log_probs).mean()
+loss.backward()
+optimizer.step()
+
+probs = logits.detach().softmax(dim=0)
+print([round(100 * p, 2) for p in probs.tolist()])  # [40.3, 29.85, 29.85]
+```
+
+手算用总体标准差，四个分数 1、0、1、0 的标准差为 0.5，优势为 +1、−1、+1、−1。下例采用 [TRL v1.7.0 的组内缩放](https://github.com/huggingface/trl/blob/v1.7.0/trl/trainer/grpo_trainer.py)，分母是样本标准差加一个很小的数，同一组的优势约为 +0.866、−0.866、+0.866、−0.866。
+
+**接到自己的模型上。** 下面的代码替换[单卡 SFT 示例](#cuda-sft-recipe)的训练部分。在新的脚本和进程中，用同样的环境变量读取已会按要求回答的本地模型，保留示例中读取目录、加载分词器和模型、设置 LoRA 的代码，跳过 SFT 的数据加载和训练。加上下列代码后执行 `python grpo_local.py`。先跑十步检查流程，完整模型和生成时的内存都要留出来。
 
 ```python
 from trl import GRPOConfig, GRPOTrainer
 
-math_data = load_dataset("json", data_files=str(
-    data_dir / "math_train.jsonl"), split="train")
+capital_data = load_dataset("json", data_files=str(
+    data_dir / "capital_train.jsonl"), split="train")
+
+
 def exact_reward(completions, answer, **kwargs):
-    return [float(text.strip() == str(target).strip())
-            for text, target in zip(completions, answer)]
+    return [float(messages[0]["content"].strip() == target.strip())
+            for messages, target in zip(completions, answer)]
+
 
 grpo = GRPOTrainer(
     model=model, processing_class=tok, peft_config=lora,
-    reward_funcs=exact_reward, train_dataset=math_data,
+    reward_funcs=exact_reward, train_dataset=capital_data,
     args=GRPOConfig(
         output_dir=str(run_dir / "grpo"), max_steps=10,
         per_device_train_batch_size=4, num_generations=4,
         gradient_accumulation_steps=1, max_completion_length=32,
-        learning_rate=1e-6, beta=0.04,
+        learning_rate=1e-6, beta=0.04, scale_rewards="group", loss_type="grpo",
         bf16=True, fp16=False, report_to="none", save_strategy="no",
-        use_vllm=False,
+        use_vllm=False, remove_unused_columns=False,
     ),
 )
 grpo.train()
+grpo.save_model(str(run_dir / "grpo-final"))
 ```
 
-自定义奖励接收同一批生成结果与额外数据列；会话格式的 completions 结构不同，不能照搬上述字符串处理。生成数与有效批量存在整除约束，`beta` 显式设为非零表示本实验包含 KL 项，不能依赖默认值；这些行为见 [GRPOTrainer 官方接口](https://huggingface.co/docs/trl/grpo_trainer)。
+上例用聊天消息格式的 `prompt`，评分函数从生成的助手消息里取文本。有效批量要能被每道题的生成数整除。`loss_type="grpo"` 先按每份回答的有效词元取平均，对应 [8.2 节的原始 GRPO 公式](../08_alignment/8.2_rlhf.md#rl-verifiable-rewards)。TRL v1.7.0 默认用 `"dapo"`，把批内有效词元合在一起取平均。`beta=0.04` 用来约束模型偏离训练起点的程度。GPU 配方按 [TRL v1.7.0 接口](https://huggingface.co/docs/trl/v1.7.0/grpo_trainer)核对。
 
-**验收与排障。** 训练前给奖励函数输入正确答案、错误答案、空答案、带解释答案，确认得分符合任务契约。记录组内奖励标准差、全对/全错组占比、截断比例、生成长度和保留题正确率。组内奖励全相同时，相对奖励没有区分信号；应查题目难度与采样多样性。奖励升高而测试正确率不升，优先查奖励漏洞与数据泄漏，不能称为推理能力提升。此精确字符串奖励只适合严格格式的玩具任务，不是通用数学评测器。
+**先查判分，再试训练。** 把答对、答错、空白和带解释的答案交给评分函数，逐项核对。这个评分规则适用于要求只输出标准城市名的练习。若允许别名或完整句子，应先调整规则。模型每次都答对，或每次都答错，同一组的分数就无法区分好坏。先看题是不是太简单或太难，再看采样有没有产生不同答案。
+
+**训练后用没见过的题复测。** 用相同的提示和生成设置比较原模型与训练后的模型。训练时记录全对组和全错组的比例、回答长度和截断比例。奖励变高而新题正确率没有提高时，先查评分规则和数据有没有泄漏。
+
+<a id="ticket-json-lab"></a>
+
+#### 把报修消息转成 JSON
+
+有人发来“办公室的 Wi-Fi 连不上”，负责处理的人需要知道是什么问题、要不要马上处理。这样的报修记录也叫工单。这个实验给每条报修消息配上正确答案，教模型用两个 JSON 字段回答。`category` 表示类别，取 `network`（网络）、`account`（账号）或 `hardware`（设备）。`priority` 表示优先级。故障影响多人，或者导致工作完全中断且无替代方案时，填 `high`，其余填 `normal`。方法选择见[第八章](../08_alignment/README.md)。
+
+##### 准备数据
+
+训练前先把工单分开，以便用模型没见过的写法检验结果。在本书源码仓库根目录运行下列命令，生成 108 条训练样本、6 条验证样本和 18 条测试样本。三组分别使用不同的故障描述和影响描述。工单都是专为这个小实验编写的。
+
+```bash
+WORK="$(mktemp -d)"
+python3 examples/ticket_post_training.py prepare "$WORK/data"
+```
+
+`train.jsonl` 的每一行是一条训练样本。用户消息给出规则和工单，助手消息把标准 JSON 答案写在文本字段里。训练时模型学习直接生成这段文本。
+
+```json
+{"messages":[{"role":"user","content":"把工单转成 JSON 对象，只输出 category 和 priority 两个字段。网络连接问题归为 network，账号登录与权限问题归为 account，设备故障归为 hardware。影响多人或导致工作完全中断且没有替代方案时，priority 为 high，其余为 normal。\n工单：办公 Wi-Fi 连不上。整个部门都受影响。"},{"role":"assistant","content":"{\"category\":\"network\",\"priority\":\"high\"}"}]}
+```
+
+##### 准备在本机运行的模型
+
+可以在搭载 Apple 芯片（Apple Silicon）的 Mac 上完成实验。[MLX LM](https://github.com/ml-explore/mlx-lm/blob/main/mlx_lm/LORA.md) 提供了在这种机器上运行和微调语言模型的工具。这里用 Python 3.11，下载通义千问指令模型 [Qwen2.5-0.5B-Instruct 的 MLX 4 位权重](https://huggingface.co/mlx-community/Qwen2.5-0.5B-Instruct-4bit)。已有兼容环境时可从下载模型开始。
+
+```bash
+python3.11 -m venv "$WORK/venv"
+. "$WORK/venv/bin/activate"
+python -m pip install "mlx==0.32.1" "mlx-lm==0.31.3"
+hf download mlx-community/Qwen2.5-0.5B-Instruct-4bit \
+  --revision a5339a4131f135d0fdc6a5c8b5bbed2753bbe0f3 \
+  --include '*.json' --include '*.safetensors' --include 'merges.txt' --include '*.jinja' \
+  --local-dir "$WORK/model"
+```
+
+##### 先测原模型
+
+在动手训练前，先把原模型的表现记录下来，之后才知道微调带来了什么变化。这个实验的训练设置已经定好，所以可以先保存原模型在测试集上的回答。做自己的任务时，可以先用验证集找错，最终测试集留到模型选好以后。
+
+```bash
+python examples/ticket_post_training.py predict "$WORK/data/test.jsonl" \
+  --model "$WORK/model" --output "$WORK/base.jsonl"
+python examples/ticket_post_training.py score "$WORK/data/test.jsonl" "$WORK/base.jsonl"
+```
+
+##### 用 SFT 和 LoRA 做微调
+
+用工单和标准答案做监督微调（SFT）。训练时只更新附加到模型上的少量参数，也就是 LoRA 适配器。在同一终端训练 80 步。`--mask-prompt` 让模型读到提示词，只在助手回答的位置计算损失。训练结束后，适配器保存在 `$WORK/adapter/adapters.safetensors`。
+
+```bash
+mlx_lm.lora --model "$WORK/model" --train --data "$WORK/data" \
+  --fine-tune-type lora --mask-prompt --num-layers 8 --batch-size 2 \
+  --iters 80 --learning-rate 1e-4 --max-seq-length 256 --seed 42 \
+  --steps-per-eval 40 --val-batches -1 --adapter-path "$WORK/adapter"
+```
+
+##### 用同一批工单复测
+
+从保存的文件加载适配器，再回答一遍同一份测试集。两次都采用贪心解码，即每一步选择概率最高的词元。预测文件按测试集顺序保存模型原文，每行是一个 JSON 字符串。
+
+```bash
+python examples/ticket_post_training.py predict "$WORK/data/test.jsonl" \
+  --model "$WORK/model" --adapter "$WORK/adapter" --output "$WORK/tuned.jsonl"
+python examples/ticket_post_training.py score "$WORK/data/test.jsonl" "$WORK/tuned.jsonl"
+```
+
+先检查模型原文能否直接解析成没有重复键的 JSON 对象，再看字段是否符合约定。类别和优先级分别计分，都除以测试工单总数。格式符合约定、两个字段也都正确，才算整条通过。下表是一次本地实测的结果。
+
+| 模型 | JSON 对象 | 字段符合约定 | 类别正确 | 优先级正确 | 整条通过 |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| 原模型 | 0/18 | 0/18 | 0/18 | 0/18 | 0/18 |
+| 加载适配器 | 18/18 | 18/18 | 18/18 | 9/18 | 9/18 |
+
+原模型的 18 份回答都用了 Markdown 代码块，原文因此无法直接解析。去掉代码块后，原模型答对了 11 条的类别和 10 条的优先级。微调后可以直接读取 JSON，但模型把所有工单都判成了 `normal`，漏掉了紧急工单。下一轮可在验证集上分开看 `high` 和 `normal`，再决定补哪些示范。若用这 18 条的表现来决定怎样改模型，就把它们留作回归集，并另备一批未见工单做最终验收。
+
+<a id="own-model-sft"></a>
+
+##### 换成自己的模型和任务
+
+如果你要让现有模型从订单通知里提取订单号和状态，准备一批真实写法和审核过的答案。用 MLX LM 时，可以把每条示范写成一行 JSONL。每行先给出任务要求和订单消息，然后给出模型应该生成的文本。下面是一条格式样例。
+
+```json
+{"messages":[{"role":"user","content":"从订单消息提取订单号和状态，只返回包含 order_id 和 status 的 JSON。订单 A102 已签收。"},{"role":"assistant","content":"{\"order_id\":\"A102\",\"status\":\"已签收\"}"}]}
+```
+
+把训练样本放到 `train.jsonl`，用来挑选训练设置的样本放到 `valid.jsonl`，最终验收用的样本放到 `test.jsonl`。为同一种状态准备不同说法，分文件时把同一订单的近重复记录放在同一组。测试样本使用训练时没见过的订单。检查用的提示里保留任务要求和订单内容，让模型自己生成答案。
+
+下面沿用上面准备好的 MLX LM 环境。把 `MODEL_DIR` 改成 MLX LM 支持的本地指令模型目录，目录应包含权重、配置和分词器文件，并且能用聊天模板处理上面的消息。把 `DATA_DIR` 改成放这三个文件的目录。先用验证集里的一条订单试答，保存原模型的输出。
+
+```bash
+MODEL_DIR=/path/to/your-mlx-model
+DATA_DIR=/path/to/your-jsonl-data
+RUN_DIR="$(mktemp -d)"
+PROMPT='从订单消息提取订单号和状态，只返回包含 order_id 和 status 的 JSON。订单 B207 正在配送。'
+mlx_lm.generate --model "$MODEL_DIR" --prompt "$PROMPT" --max-tokens 64 --temp 0
+```
+
+用训练文件做一次小规模试跑。以下配置沿用上述工单实验的模型和参数规模，先执行 10 步，确认能读入数据、算出损失和保存适配器。若更换模型或答案长度，检查它支持的层数、上下文长度和微调方式。训练、验证样本连同模板都要放进 `--max-seq-length`。
+
+```bash
+mlx_lm.lora --model "$MODEL_DIR" --train --data "$DATA_DIR" \
+  --fine-tune-type lora --mask-prompt --num-layers 8 --batch-size 2 \
+  --iters 10 --learning-rate 1e-4 --max-seq-length 256 --seed 42 \
+  --steps-per-eval 5 --val-batches -1 --adapter-path "$RUN_DIR/adapter"
+```
+
+权重和适配器配置都保存在 `$RUN_DIR/adapter`。把这个目录传给 `--adapter-path`，就能让原模型带着适配器回答同一个提示。执行成功说明加载流程通了。要判断训练效果，用同一份验证集比较微调前后，选好方案后再测独立测试集。
+
+```bash
+mlx_lm.generate --model "$MODEL_DIR" --adapter-path "$RUN_DIR/adapter" \
+  --prompt "$PROMPT" --max-tokens 64 --temp 0
+```
+
+单轮 `user` 加 `assistant` 的短答任务可以沿用上面的 `predict` 命令批量生成。把模型、适配器和 `test.jsonl` 的路径换成自己的。订单示例可以分别比较 JSON 格式、订单号和状态。工单的 `score` 命令读取 `category` 和 `priority`，换了字段要按新任务写评分规则。
+
+<a id="qwen-paper-summary"></a>
+
+##### 用 Qwen 写论文摘要
+
+这个例子输入论文正文，输出一段中文摘要。摘要要交代研究问题、方法、主要结果和原文说明的局限。先用合成的短正文走完数据准备、微调和验收，再换成自己的论文。实验用上文同一个 Qwen2.5-0.5B-Instruct 的 MLX 4 位权重。
+
+**准备正文和摘要。** `examples/data/paper_summaries.jsonl` 每篇论文只占一行。给同一篇论文的预印本和发表版分配同一个 `paper_id`，选用其中一版。按节提取材料时，先把选出的段落并进同一条记录的 `body`。若目的是让模型从正文总结，就从输入移除论文自带的摘要。抽查提取后的正文，确认表格的数字仍能对应到单位、分组和比较对象。
+
+```json
+{"paper_id":"train-pdf","split":"train","body":"研究比较了两种 PDF 表格提取方法。研究者标注了 120 篇英文论文的表格，并比较两种方法提取正确的比例。方法 A 的准确率为 89%，方法 B 为 81%。实验未覆盖扫描件。","summary":"研究在 120 篇英文论文上比较了两种 PDF 表格提取方法。方法 A 的准确率为 89%，比方法 B 高 8 个百分点。实验未纳入扫描件，结果能否推广到扫描文档仍待验证。"}
+```
+
+下列命令在本书源码仓库根目录运行。若已有上面的 MLX LM 环境和模型目录，可以跳过安装与下载，把 `MODEL_DIR` 设为现有目录。
+
+```bash
+PAPER_WORK="$(mktemp -d)"
+python3.11 -m venv "$PAPER_WORK/venv"
+. "$PAPER_WORK/venv/bin/activate"
+python -m pip install "mlx==0.32.1" "mlx-lm==0.31.3"
+MODEL_DIR="$PAPER_WORK/model"
+hf download mlx-community/Qwen2.5-0.5B-Instruct-4bit \
+  --revision a5339a4131f135d0fdc6a5c8b5bbed2753bbe0f3 \
+  --include '*.json' --include '*.safetensors' --include 'merges.txt' --include '*.jinja' \
+  --local-dir "$MODEL_DIR"
+
+python examples/paper_summary.py prepare examples/data/paper_summaries.jsonl \
+  "$PAPER_WORK/data" --model "$MODEL_DIR" --max-seq-length 512
+```
+
+脚本把正文放进用户消息，把审核过的摘要放进助手消息，分别写出 `train.jsonl`、`valid.jsonl` 和 `test.jsonl`。它按模型的聊天模板计算长度，超过预算的样本会报错。512 词元适合本例的短正文。处理真实论文时，先测正文和目标摘要加上模板的长度，再选训练预算。篇幅超过可用上下文时，可以按节先摘取证据，再用证据生成摘要。训练和推理应采用同一种输入整理方式。
+
+**先测原模型，再训练。** 此例的训练配置已定好，因此可以先保存原模型在测试集上的输出。换自己的数据时，用验证集找错误、挑设置，最终测试集留到方案定下以后。生成只使用用户消息，参考摘要留给验收。两个模型用相同的提示和输出长度上限。换成真实论文时，先检查这个上限会不会截断摘要。
+
+```bash
+python examples/paper_summary.py predict "$PAPER_WORK/data/test.jsonl" \
+  --model "$MODEL_DIR" --output "$PAPER_WORK/base.jsonl" \
+  --max-input-tokens 384 --max-new-tokens 128
+
+mlx_lm.lora --model "$MODEL_DIR" --train --data "$PAPER_WORK/data" \
+  --fine-tune-type lora --mask-prompt --num-layers 8 --batch-size 2 \
+  --iters 30 --learning-rate 1e-4 --max-seq-length 512 --seed 42 \
+  --steps-per-eval 15 --val-batches -1 --adapter-path "$PAPER_WORK/adapter"
+
+python examples/paper_summary.py predict "$PAPER_WORK/data/test.jsonl" \
+  --model "$MODEL_DIR" --adapter "$PAPER_WORK/adapter" \
+  --output "$PAPER_WORK/tuned.jsonl" --max-input-tokens 384 --max-new-tokens 128
+```
+
+**按原文验收。** 逐篇看两个模型的摘要。数一数有多少说法得不到原文支持，再数漏了几项必须覆盖的信息。已经提到但写错的信息只计在第一项。把人工核对结果按 `paper_id` 分别写进 `base-review.jsonl` 和 `tuned-review.jsonl`。下列两行是一次实跑后填的适配器评分。脚本按论文编号核对三份文件，汇总空输出、问题数和通过的摘要数。
+
+```json
+{"paper_id":"test-water","unsupported_claims":2,"missed_key_points":1}
+{"paper_id":"test-museum","unsupported_claims":0,"missed_key_points":0}
+```
+
+```bash
+python examples/paper_summary.py review "$PAPER_WORK/data/test.jsonl" \
+  "$PAPER_WORK/base.jsonl" "$PAPER_WORK/base-review.jsonl"
+python examples/paper_summary.py review "$PAPER_WORK/data/test.jsonl" \
+  "$PAPER_WORK/tuned.jsonl" "$PAPER_WORK/tuned-review.jsonl"
+```
+
+这次实跑用了 8 篇训练正文、2 篇验证正文和 2 篇测试正文。验证损失在第 15 步从 2.215 降到 1.901，第 30 步回升到 2.122。漏水检测的摘要里，原模型把比较检出次数写成了记录失败次数。加载适配器后，模型又把“未测量不漏水时的误报率”写成“未测量漏水时的误报率”，并漏掉了各做 50 次模拟漏水的实验规模。两种模型都只通过了 1 篇。真实论文的摘要质量需要用更大的一批独立样本测量。
+
+**有可靠的判分再加 GRPO。** 先在验证集上试评分器，让同一篇论文的几份候选摘要同时包含正确、漏写和误报的版本，核对判分能否把它们区分开。可以先做一个容易核验的任务，例如同时输出关键结论的数值、单位和证据段落编号，再用这些字段核验结果。自由文本中的推断仍要和原文核对。奖励若只看格式或文字重合，模型可能得高分却遗漏主要发现。
+
+要在 NVIDIA 上比较 SFT 与 SFT 加 GRPO，可用[单卡 SFT 示例](#cuda-sft-recipe)训练同样的问答数据。把生成的每条 `messages` 中的用户消息放进 `prompt`，助手消息放进 `completion`，两个字段都用数组包住。随后从 SFT 权重启动 [GRPO 配方](#grpo-capital-recipe)，把正文留在 `prompt`，把训练用的证据标注放进额外字段，由评分函数读取并为每份生成结果打分。若 SFT 用 PEFT 保存为适配器，先按[合并步骤](#sft-adapter-merge)得到完整权重。验收时用同一批留出论文比较两个模型。实跑覆盖上面的 MLX 流程，GPU 配方按 TRL 官方文档核对。公开的长文训练结果见 [Highlight-Then-Summarize](https://arxiv.org/html/2609.31382)。
+
+<a id="gemini-sft-job"></a>
+
+##### 通过 API 提交 Gemini 监督微调作业
+
+如果希望把训练交给云平台，可以在 Google Cloud 上提交 Gemini 监督微调作业。数据脚本会把同一批训练样本另存为 `gemini_train.jsonl`，供这个作业使用。Gemini 的[文本训练数据格式](https://docs.cloud.google.com/gemini-enterprise-agent-platform/models/tuning/text)用 `contents` 和 `parts` 表示消息和消息里的内容，助手角色写成 `model`。下面的用户指令已缩短，实际文件保留完整指令。
+
+```json
+{"contents":[{"role":"user","parts":[{"text":"把工单转成 JSON。工单：办公 Wi-Fi 连不上。整个部门都受影响。"}]},{"role":"model","parts":[{"text":"{\"category\":\"network\",\"priority\":\"high\"}"}]}]}
+```
+
+先准备一个已开通计费和相应 API 的 Google Cloud 项目，以及存放训练数据的 Cloud Storage 存储桶。运行脚本的身份需要有提交作业和调用推理端点的权限，Google 的客户端通过[应用默认凭据](https://docs.cloud.google.com/docs/authentication/set-up-adc-local-dev-environment)识别这个身份。下面把合成训练集上传到存储桶。评测时，只把工单和指令发给推理 API，标准答案留在本机。
+
+```bash
+export GOOGLE_CLOUD_PROJECT=your-project
+export GOOGLE_CLOUD_LOCATION=us
+export GOOGLE_GENAI_USE_ENTERPRISE=True
+TRAIN_URI=gs://your-bucket/ticket-lab/gemini_train.jsonl
+python -m pip install --upgrade google-genai
+gcloud storage cp "$WORK/data/gemini_train.jsonl" "$TRAIN_URI"
+```
+
+将下列代码保存为 `ticket_gemini.py`。脚本通过 Google 的 Python SDK 选择支持监督微调的 Gemini 3.5 Flash。`submit` 提交训练并打印作业名，`check` 查询作业状态。作业成功后，平台会返回一个可调用的地址，也就是调优模型的推理端点。此时可以让原模型和调优模型分别用同样的推理设置回答同一批工单。接口见 [Gemini 监督微调文档](https://docs.cloud.google.com/gemini-enterprise-agent-platform/models/tuning/supervised-tuning/use)。
+
+```python
+import argparse
+import json
+from pathlib import Path
+
+from google import genai
+from google.genai import types
+
+base_model = "gemini-3.5-flash"
+parser = argparse.ArgumentParser()
+parser.add_argument("action", choices=("submit", "check"))
+parser.add_argument("resource", help="训练数据 URI 或作业名")
+parser.add_argument("--test", type=Path)
+parser.add_argument("--output-dir", type=Path)
+args = parser.parse_args()
+if (args.test is None) != (args.output_dir is None):
+    parser.error("--test 和 --output-dir 必须一起提供")
+if args.action == "submit" and args.test is not None:
+    parser.error("评测参数只用于 check")
+
+if args.action == "submit":
+    with genai.Client(http_options=types.HttpOptions(api_version="v1beta1")) as client:
+        job = client.tunings.tune(
+            base_model=base_model,
+            training_dataset=types.TuningDataset(gcs_uri=args.resource),
+            config=types.CreateTuningJobConfig(tuned_model_display_name="ticket-json"),
+        )
+    print(job.name)
+else:
+    with genai.Client(http_options=types.HttpOptions(api_version="v1")) as client:
+        job = client.tunings.get(name=args.resource)
+        print(job.state)
+        if job.state in {"JOB_STATE_FAILED", "JOB_STATE_CANCELLED", "JOB_STATE_EXPIRED"}:
+            raise SystemExit(f"作业 {job.name} 失败或终止：{job.error}")
+        if job.state != "JOB_STATE_SUCCEEDED":
+            raise SystemExit(0)
+        if not job.tuned_model or not job.tuned_model.endpoint:
+            raise RuntimeError(f"作业 {job.name} 未返回推理端点")
+        endpoint = job.tuned_model.endpoint
+        print(endpoint)
+        if args.test is not None:
+            if args.output_dir.exists():
+                raise FileExistsError(args.output_dir)
+            with args.test.open(encoding="utf-8") as stream:
+                prompts = [json.loads(line)["messages"][0]["content"] for line in stream]
+            config = types.GenerateContentConfig(
+                thinking_config=types.ThinkingConfig(thinking_level="MINIMAL"),
+            )
+            predictions = {}
+            for name, model in (("base", base_model), ("tuned", endpoint)):
+                predictions[name] = [
+                    client.models.generate_content(model=model, contents=prompt, config=config).text or ""
+                    for prompt in prompts
+                ]
+            args.output_dir.mkdir()
+            for name, outputs in predictions.items():
+                with (args.output_dir / f"{name}.jsonl").open("x", encoding="utf-8") as stream:
+                    for output in outputs:
+                        print(json.dumps(output, ensure_ascii=False), file=stream)
+```
+
+提交一次作业，把返回的完整作业名填入 `JOB`。作业还在运行时，只执行查询命令。等作业成功后，在查询命令里加上评测参数。两份输出分别计分，用的是本地实验的评分规则，对比的是 Gemini 自己在微调前后的变化。
+
+```bash
+python ticket_gemini.py submit "$TRAIN_URI"
+JOB="projects/your-project/locations/us/tuningJobs/your-job-id"
+python ticket_gemini.py check "$JOB"
+python ticket_gemini.py check "$JOB" \
+  --test "$WORK/data/test.jsonl" --output-dir "$WORK/gemini"
+python examples/ticket_post_training.py score "$WORK/data/test.jsonl" "$WORK/gemini/base.jsonl"
+python examples/ticket_post_training.py score "$WORK/data/test.jsonl" "$WORK/gemini/tuned.jsonl"
+```
+
+Gemini 提供的是完整的训练作业。给定数据和配置后，平台负责运行训练。提交前先查[模型和地区是否支持微调](https://docs.cloud.google.com/gemini-enterprise-agent-platform/models/tuning/supervised-tuning)。
+
+<a id="tinker-training"></a>
+
+如果需要自己决定每轮怎样采样、怎样算损失，可以用 [Tinker](https://tinker-docs.thinkingmachines.ai/tinker/api-reference/trainingclient/)。先选一个服务支持的起始模型。Tinker 负责提供和管理算力，把采样、计算梯度和更新参数分别做成可调用的接口。读者可以自己把这些操作接成训练循环，也可以从 [Tinker Cookbook](https://tinker-docs.thinkingmachines.ai/cookbook/quickstart/) 的现成配方起步。训练后的 LoRA 适配器可以[下载并转换为推理框架支持的格式](https://tinker-docs.thinkingmachines.ai/cookbook/deployment/basics/)。
 
 ### A.7.5 用同一客户端比较两个服务引擎
 

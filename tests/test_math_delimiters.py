@@ -1,9 +1,8 @@
-"""Inline formulas must use $$...$$, the only delimiter GitBook renders.
+"""Keep the formula delimiter convention used by the GitBook edition.
 
-GitBook draws a $$...$$ that shares its line with other text as inline math and
-shows single-dollar $...$ as literal text. mdPress follows the same convention
-(a $$...$$ is display math only when it stands on its own line), so $$ is the
-one inline delimiter that renders in every published format.
+GitBook treats $$...$$ as inline math when it shares a line with prose.
+mdPress 0.8.3 and later follow that convention. GitHub documents single-dollar
+inline math and may leave some same-line double-dollar formulas as literal text.
 """
 from pathlib import Path
 import re

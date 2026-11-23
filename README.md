@@ -127,6 +127,8 @@ graph TD
 
 安装 [mdPress](https://github.com/yeasy/mdpress) 后，在仓库根目录启动本地预览，再打开 `http://localhost:9000`。
 
+请使用 [mdPress 0.8.5](https://github.com/yeasy/mdPress/releases/tag/v0.8.5) 或更新版本，以正确显示本书的行内公式和中文正文宽度。
+
 ```bash
 brew tap yeasy/tap && brew install mdpress
 mdpress serve

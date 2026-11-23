@@ -68,18 +68,19 @@ class Block(nn.Module):
 
 
 class TinyGPT(nn.Module):
-    def __init__(self):
+    def __init__(self, vocab_size=len(VOCAB), context_length=CONTEXT):
         super().__init__()
-        self.token_embedding = nn.Embedding(len(VOCAB), WIDTH)
-        self.position_embedding = nn.Embedding(CONTEXT, WIDTH)
+        self.token_embedding = nn.Embedding(vocab_size, WIDTH)
+        self.position_embedding = nn.Embedding(context_length, WIDTH)
         self.blocks = nn.Sequential(*(Block() for _ in range(LAYERS)))
         self.norm = nn.LayerNorm(WIDTH)
-        self.lm_head = nn.Linear(WIDTH, len(VOCAB), bias=False)
+        self.lm_head = nn.Linear(WIDTH, vocab_size, bias=False)
 
     def forward(self, token_ids):
         length = token_ids.size(1)
-        if not 0 < length <= CONTEXT:
-            raise ValueError(f"Sequence length must be between 1 and {CONTEXT}")
+        context_length = self.position_embedding.num_embeddings
+        if not 0 < length <= context_length:
+            raise ValueError(f"Sequence length must be between 1 and {context_length}")
         positions = torch.arange(length, device=token_ids.device)
         x = self.token_embedding(token_ids) + self.position_embedding(positions)
         return self.lm_head(self.norm(self.blocks(x)))
