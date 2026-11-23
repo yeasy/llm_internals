@@ -338,7 +338,7 @@ done
 
 ### A.7.6 把指标变成可诊断的结论
 
-设请求 $i$ 的发送时间为 $t_{i,0}$，首个输出词元到达为 $t_{i,1}$，末个输出词元到达为 $t_{i,n_i}$，输出词元数为 $n_i$。客户端口径下：
+设请求 $$i$$ 的发送时间为 $$t_{i,0}$$，首个输出词元到达为 $$t_{i,1}$$，末个输出词元到达为 $$t_{i,n_i}$$，输出词元数为 $$n_i$$。客户端口径下：
 
 $$
 \mathrm{TTFT}_i=t_{i,1}-t_{i,0},\qquad
@@ -347,7 +347,7 @@ $$
 
 单词元响应没有 TPOT，应单列而非填零。p95 TTFT 是请求 TTFT 样本的第 95 百分位；p95 TPOT 是请求内平均出词时间的第 95 百分位。它们都不是“95% 的词元间隔”，一次流式返回多个词元时更要保留分块计时口径，详见 [11.13 节](../11_serving/11.13_best_practices.md)。
 
-若测量窗口长度为 $T$，成功完成请求集合为 $S$，输出吞吐定义为 $Q_{\mathrm{out}}=\sum_{i\in S}n_i/T$。同时报告失败率与在途未完成数，不能把失败请求直接丢掉制造高吞吐。“p95 吞吐”只有在定义了固定窗口的吞吐时间序列后才有意义；通常更有用的是指定到达率下的 p95 延迟和整体吞吐。
+若测量窗口长度为 $$T$$，成功完成请求集合为 $$S$$，输出吞吐定义为 $$Q_{\mathrm{out}}=\sum_{i\in S}n_i/T$$。同时报告失败率与在途未完成数，不能把失败请求直接丢掉制造高吞吐。“p95 吞吐”只有在定义了固定窗口的吞吐时间序列后才有意义；通常更有用的是指定到达率下的 p95 延迟和整体吞吐。
 
 质量由冻结测试集的任务指标衡量；性能配置改变后仍要重测。显存同时记录引擎的 KV 池容量、设备进程占用及训练张量峰值，它们不是同一指标。成本用完成同一合格工作量所需 GPU 小时衡量；云端再乘实际资源单价，重试、失败和预热都计入预算。
 
@@ -404,7 +404,7 @@ $$
 | Hugging Face Llama | `q_proj`、`k_proj`、`v_proj`、`o_proj`（`nn.Linear`） | `q_proj` 为 `[n_h × d_h, d_model]`，`k_proj`、`v_proj` 为 `[n_kv × d_h, d_model]` | 由 `config.attention_bias` 决定，Llama 系列为 `False` |
 | Hugging Face GPT-2 | `c_attn`、`c_proj`（`Conv1D`） | `c_attn` 把 Q/K/V 融合成一个 `[768, 3 × 768]`，前向后按 `split` 拆成三份 | 有 |
 
-两种常见实现里的注意力权重。`nn.Linear` 按“输出 × 输入”存放权重，与正文 $XW$ 的 `[输入, 输出]` 互为转置；GPT-2 的 `Conv1D` 按 `[输入, 输出]` 存放，且把三个投影融合成一个矩阵，一次矩阵乘法算出 Q、K、V。GQA 下 `k_proj` 与 `v_proj` 的输出宽度按 `n_kv` 而非 `n_h` 计算。
+两种常见实现里的注意力权重。`nn.Linear` 按“输出 × 输入”存放权重，与正文 $$XW$$ 的 `[输入, 输出]` 互为转置；GPT-2 的 `Conv1D` 按 `[输入, 输出]` 存放，且把三个投影融合成一个矩阵，一次矩阵乘法算出 Q、K、V。GQA 下 `k_proj` 与 `v_proj` 的输出宽度按 `n_kv` 而非 `n_h` 计算。
 
 每头宽度的取值顺序：Hugging Face 先读配置里的 `head_dim`，没有才退回 `hidden_size // num_attention_heads`。Qwen3-4B 的配置是 `hidden_size` 2560、`num_attention_heads` 32、`head_dim` 128，`32 × 128 = 4096` 不等于 2560，由 `o_proj` 投回 2560。
 
@@ -414,17 +414,17 @@ $$
 
 | 正文的步骤 | 接口里的对应物 | 要点 |
 | --- | --- | --- |
-| 输入的 Q、K、V | `query` 形状 `[..., Hq, L, E]`，`key` 形状 `[..., H, S, E]`，`value` 形状 `[..., H, S, Ev]` | 常见布局是 `[B, n_h, T, d_h]`；`L` 是查询数，`S` 是键值数，两者不必相等（这个 `S` 是 PyTorch 文档的记号，与正文的分数矩阵 $S$ 无关）；`E` 即 $d_k$，`Ev` 即 $d_v$ |
-| 缩放因子 $1/\sqrt{d_k}$ | `scale` | 默认即 $1/\sqrt{E}$，$E$ 取 `query` 的最后一维；传入非默认值可实现 μP 那类缩放 |
+| 输入的 Q、K、V | `query` 形状 `[..., Hq, L, E]`，`key` 形状 `[..., H, S, E]`，`value` 形状 `[..., H, S, Ev]` | 常见布局是 `[B, n_h, T, d_h]`；`L` 是查询数，`S` 是键值数，两者不必相等（这个 `S` 是 PyTorch 文档的记号，与正文的分数矩阵 $$S$$ 无关）；`E` 即 $$d_k$$，`Ev` 即 $$d_v$$ |
+| 缩放因子 $$1/\sqrt{d_k}$$ | `scale` | 默认即 $$1/\sqrt{E}$$，$$E$$ 取 `query` 的最后一维；传入非默认值可实现 μP 那类缩放 |
 | Softmax 之前加掩码 | `attn_mask` 或 `is_causal=True` | 布尔掩码中 `True` 表示参与注意力，与 `masked_fill` 的约定相反；浮点掩码直接加到分数上；两者不能与 `is_causal` 同时使用 |
-| Softmax 之后的 dropout | `dropout_p` | 作用在注意力权重上，即 Softmax 之后、乘 $V$ 之前 |
+| Softmax 之后的 dropout | `dropout_p` | 作用在注意力权重上，即 Softmax 之后、乘 $$V$$ 之前 |
 | K/V 头数少于 Q 头数 | `enable_gqa=True` | 见正文 2.3.7 节 |
 
 该函数在多个后端之间选择，包括不把 `[L, S]` 分数矩阵写回显存的融合实现与朴素的数学实现；后者在半精度输入下把中间结果保持为 FP32。Hugging Face 的 Llama 朴素注意力把 Softmax 写成 `softmax(attn_weights, dim=-1, dtype=torch.float32).to(query.dtype)`，即在 FP32 下计算再转回原精度。
 
 #### 2.4.3 节：Hugging Face 的掩码转换
 
-Hugging Face 的掩码工具把布尔掩码转成“可见处为 0.0、屏蔽处为 `torch.finfo(dtype).min`”的浮点掩码再与分数相加，用有限极小值代替 $-\infty$，避免半精度下的 `inf` 在后续算子里变成 `NaN`。
+Hugging Face 的掩码工具把布尔掩码转成“可见处为 0.0、屏蔽处为 `torch.finfo(dtype).min`”的浮点掩码再与分数相加，用有限极小值代替 $$-\infty$$，避免半精度下的 `inf` 在后续算子里变成 `NaN`。
 
 #### 2.4.7 节：变长打包的内核接口
 
@@ -468,33 +468,33 @@ HF 的 `LlamaMLP` 定义三个投影 `gate_proj`、`up_proj`、`down_proj`，激
 | `gelu_new` | GELU 的 tanh 近似（GPT-2） |
 | `gelu_pytorch_tanh` | 同一近似；Gemma 把它放在门控一路，即 GeGLU |
 | `silu` | Swish₁，即 SwiGLU 的门控激活 |
-| `relu2` | 平方 ReLU，$\max(0, z)^2$（Nemotron-4） |
+| `relu2` | 平方 ReLU，$$\max(0, z)^2$$（Nemotron-4） |
 
-Phi-4 把 `W_gate` 与 `W_up` 横向拼成一个 `[d, 2d_ff]` 矩阵存储，算法不变。gpt-oss 的配置虽写 `silu`，实现另有三处改动：门控取 $z\,\sigma(1.702z)$，且先把输入上限截断为 7；另一路截断到 ±7 之后再加 1。
+Phi-4 把 `W_gate` 与 `W_up` 横向拼成一个 `[d, 2d_ff]` 矩阵存储，算法不变。gpt-oss 的配置虽写 `silu`，实现另有三处改动：门控取 $$z\,\sigma(1.702z)$$，且先把输入上限截断为 7；另一路截断到 ±7 之后再加 1。
 
 #### 3.5.6 节：层实现里的残差
 
 HF 的 `LlamaDecoderLayer.forward` 里出现两次 `residual = hidden_states` 与两次 `hidden_states = residual + hidden_states`，中间分别夹着 `input_layernorm` 加注意力、`post_attention_layernorm` 加 `mlp`。读一个新模型的层实现，先找这两对语句，就能确定归一化放在哪里。
 
-#### 3.6.8 节：归一化的模块名、$\epsilon$ 与参数化
+#### 3.6.8 节：归一化的模块名、$$\epsilon$$ 与参数化
 
-| 模型 | 模块 | 参数与初始化 | $\epsilon$ 字段 | 一层里的名字 |
+| 模型 | 模块 | 参数与初始化 | $$\epsilon$$ 字段 | 一层里的名字 |
 | --- | --- | --- | --- | --- |
 | HF Llama | `LlamaRMSNorm` | 一个 `weight`，初始化为全 1 | `rms_norm_eps`，Llama 2/3 为 `1e-5` | `input_layernorm`（注意力前）、`post_attention_layernorm`（FFN 前）、`model.norm`（末端） |
 | HF Gemma 2 | `Gemma2RMSNorm` | `weight` 初始化为全 0，前向用 `(1.0 + weight)` 缩放 | 同类字段 | 另有 `pre_feedforward_layernorm`、`post_feedforward_layernorm` |
 | HF GPT-2 | `LayerNorm` | `weight`、`bias` | `layer_norm_epsilon` | `ln_1`、`ln_2`、`ln_f` |
 
-`LlamaRMSNorm.forward` 先把输入转成 `torch.float32`，算完平方均值与 `rsqrt` 后再转回原 dtype。Gemma 2 的 `(1.0 + weight)` 参数化在数学上等价于初始值为 1 的 $\gamma$，但权重衰减作用在 0 附近而不是 1 附近，正则化行为不同；移植权重时忽略这一点，整个模型的尺度会错。
+`LlamaRMSNorm.forward` 先把输入转成 `torch.float32`，算完平方均值与 `rsqrt` 后再转回原 dtype。Gemma 2 的 `(1.0 + weight)` 参数化在数学上等价于初始值为 1 的 $$\gamma$$，但权重衰减作用在 0 附近而不是 1 附近，正则化行为不同；移植权重时忽略这一点，整个模型的尺度会错。
 
 #### 3.7.4 节：现代层在 `config.json` 里的字段
 
 表 3-12 右边一列的各项可以由 `config.json` 直接确认：`hidden_act`（FFN 激活）、`rms_norm_eps`（RMSNorm）、`intermediate_size`（FFN 宽度）、`rope_theta`（RoPE）、`num_key_value_heads`（GQA）、`attention_bias` 与 `mlp_bias`（偏置）、`tie_word_embeddings`（权重绑定）。
 
-偏置一行常被记反：原始 Transformer 的多头注意力投影不带偏置，只有 FFN 的 $\max(0, xW_1+b_1)W_2+b_2$ 带两个。给注意力投影加上偏置的是 GPT-2 一路：HF 实现里这些投影是 `Conv1D`，该模块无条件持有一个 `bias` 参数。
+偏置一行常被记反：原始 Transformer 的多头注意力投影不带偏置，只有 FFN 的 $$\max(0, xW_1+b_1)W_2+b_2$$ 带两个。给注意力投影加上偏置的是 GPT-2 一路：HF 实现里这些投影是 `Conv1D`，该模块无条件持有一个 `bias` 参数。
 
 #### 3.7.5 节：GQA 的实现
 
-算注意力分数时，每组 K/V 被复制 $n_h / n_{kv}$ 份与对应的 Query 头配对，HF 实现里这一步是 `repeat_kv`。判断一个模型用不用 GQA，看 `num_key_value_heads` 是否小于 `num_attention_heads`。
+算注意力分数时，每组 K/V 被复制 $$n_h / n_{kv}$$ 份与对应的 Query 头配对，HF 实现里这一步是 `repeat_kv`。判断一个模型用不用 GQA，看 `num_key_value_heads` 是否小于 `num_attention_heads`。
 
 #### 4.2.5 节：可学习位置表的配置键与 OPT 的位置偏移
 
@@ -505,21 +505,21 @@ HF 的 `LlamaDecoderLayer.forward` 里出现两次 `residual = hidden_states` �
 
 带 KV 缓存解码时，新词元的位置号是 `arange(1) + past_seen_tokens`，GPT-2 的实现即如此。
 
-OPT 的位置表长度是 $L_{\max} + 2$，查表时位置号统一加 2；位置号由 `cumsum(attention_mask) * attention_mask - 1` 算出，从而跳过左侧填充。多乘的那一次掩码不能省：省掉它，掩码为 0 的位置会继承前一格的累加值，而不是统一归到 −1。照抄别的模型的 `position_ids` 会错两位。
+OPT 的位置表长度是 $$L_{\max} + 2$$，查表时位置号统一加 2；位置号由 `cumsum(attention_mask) * attention_mask - 1` 算出，从而跳过左侧填充。多乘的那一次掩码不能省：省掉它，掩码为 0 的位置会继承前一格的累加值，而不是统一归到 −1。照抄别的模型的 `position_ids` 会错两位。
 
 #### 4.3.5 节：Llama 3.1 的分段缩放
 
-Llama 3.1 的 `rope_scaling` 写着 `rope_type = "llama3"`、`factor = 8`、`low_freq_factor = 1`、`high_freq_factor = 4`、`original_max_position_embeddings = 8192`。记 $s = 8$、$f_{\text{lo}} = 1$、$f_{\text{hi}} = 4$、$L_0 = 8192$：波长 $\lambda < L_0/f_{\text{hi}} = 2048$ 的对不动，$\lambda > L_0/f_{\text{lo}} = 8192$ 的对频率除以 8，两者之间按波长线性过渡：
+Llama 3.1 的 `rope_scaling` 写着 `rope_type = "llama3"`、`factor = 8`、`low_freq_factor = 1`、`high_freq_factor = 4`、`original_max_position_embeddings = 8192`。记 $$s = 8$$、$$f_{\text{lo}} = 1$$、$$f_{\text{hi}} = 4$$、$$L_0 = 8192$$：波长 $$\lambda < L_0/f_{\text{hi}} = 2048$$ 的对不动，$$\lambda > L_0/f_{\text{lo}} = 8192$$ 的对频率除以 8，两者之间按波长线性过渡：
 
 $$w_i = \frac{L_0/\lambda_i - f_{\text{lo}}}{f_{\text{hi}} - f_{\text{lo}}}, \qquad \theta_i' = (1 - w_i)\frac{\theta_i}{s} + w_i \theta_i$$
 
-代入 $b = 500{,}000$、$d_h = 128$，第 0 至 28 对不动，第 29 至 34 对在斜坡上，第 35 至 63 对除以 8。斜坡带的一例是第 32 对：$\theta = 1.414 \times 10^{-3}$，$\lambda = 4{,}443$，$w_{32} = (8192/4443 - 1)/(4 - 1) = 0.281$，$\theta' = 0.719 \times \theta/8 + 0.281\,\theta = 5.248 \times 10^{-4}$，相当于只除以 2.69。Meta 参考实现对这组常数的注释是由网格搜索得到。
+代入 $$b = 500{,}000$$、$$d_h = 128$$，第 0 至 28 对不动，第 29 至 34 对在斜坡上，第 35 至 63 对除以 8。斜坡带的一例是第 32 对：$$\theta = 1.414 \times 10^{-3}$$，$$\lambda = 4{,}443$$，$$w_{32} = (8192/4443 - 1)/(4 - 1) = 0.281$$，$$\theta' = 0.719 \times \theta/8 + 0.281\,\theta = 5.248 \times 10^{-4}$$，相当于只除以 2.69。Meta 参考实现对这组常数的注释是由网格搜索得到。
 
 #### 4.3.6 节：RoPE 的配置键与实现细节
 
 | 配置键 | 含义 | 取值示例 |
 | --- | --- | --- |
-| `rope_theta` | 底数 $b$ | Llama 3 为 `500000.0`；GPT-NeoX 写作 `rotary_emb_base`，为 `10000` |
+| `rope_theta` | 底数 $$b$$ | Llama 3 为 `500000.0`；GPT-NeoX 写作 `rotary_emb_base`，为 `10000` |
 | `rope_scaling` | 缩放方案与参数 | `rope_type` 取 `ROPE_INIT_FUNCTIONS` 的键：`linear`、`dynamic`、`yarn`、`longrope`、`llama3`、`proportional`；不写则按 `default` 走不缩放的原始公式 |
 | `max_position_embeddings` | 声明支持的最大位置 | Llama 3.1 为 131072 |
 | `partial_rotary_factor` | 只旋转每个头的前若干维 | GPT-NeoX 写作 `rotary_pct`，20B 模型取 0.25 |
@@ -547,7 +547,7 @@ T5 的相对距离分桶（32 个桶、最大距离 128、因果方向），按 
 - **Llama 4。** `no_rope_layers` 逐层标出哪些层用 RoPE，`no_rope_layer_interval` 默认 4（每四层去掉一次）；`attention_chunk_size` 默认 8192，带 RoPE 的层做分块局部注意力。SmolLM3 用同一组配置键。
 - **Cohere Command 系列**（`cohere2` 架构）。按层类型判断是否调用 `apply_rotary_pos_emb`：滑窗层施加 RoPE，全局层不施加。
 - **部分旋转。** 配置键 `partial_rotary_factor`，GPT-NeoX 写作 `rotary_pct`。
-- **Gemma 3。** 滑窗层与全局层各配一个 $\theta$：全局层 1,000,000，滑窗层 10,000。
+- **Gemma 3。** 滑窗层与全局层各配一个 $$\theta$$：全局层 1,000,000，滑窗层 10,000。
 
 #### 5.1.7 节：因果语言模型的标签移位与忽略标记
 
@@ -555,7 +555,7 @@ Hugging Face 的因果语言模型接口只接收一个与 `input_ids` 等长的
 
 #### 5.2.7 节：MLM 名额分配的默认参数
 
-BERT 官方的 `create_pretraining_data.py` 默认 `max_seq_length = 128`、`masked_lm_prob = 0.15`、`max_predictions_per_seq = 20`（$128 \times 0.15 = 19.2$ 向上取整）。Hugging Face 的 `DataCollatorForLanguageModeling` 用三个参数表达 80/10/10：`mlm_probability = 0.15`、`mask_replace_prob = 0.8`、`random_replace_prob = 0.1`，剩下的 0.1 保持不变；它在每个批次现场采样，属于动态掩码。
+BERT 官方的 `create_pretraining_data.py` 默认 `max_seq_length = 128`、`masked_lm_prob = 0.15`、`max_predictions_per_seq = 20`（$$128 \times 0.15 = 19.2$$ 向上取整）。Hugging Face 的 `DataCollatorForLanguageModeling` 用三个参数表达 80/10/10：`mlm_probability = 0.15`、`mask_replace_prob = 0.8`、`random_replace_prob = 0.1`，剩下的 0.1 保持不变；它在每个批次现场采样，属于动态掩码。
 
 #### 5.3.2 节：T5 的哨兵词元
 
@@ -648,7 +648,7 @@ PyTorch FSDP2（`fully_shard`，[文档](https://docs.pytorch.org/docs/stable/di
 
 #### 8.3.5 节：TRL DPOTrainer 的配置项
 
-框架侧，TRL 的 `DPOTrainer` 把 $\beta$、损失变体与参考对数概率的预计算都做成了配置项。参数名随版本变动，机制不变：**一个 $\beta$、一种损失形状、一份参考对数概率是否落盘。**
+框架侧，TRL 的 `DPOTrainer` 把 $$\beta$$、损失变体与参考对数概率的预计算都做成了配置项。参数名随版本变动，机制不变：**一个 $$\beta$$、一种损失形状、一份参考对数概率是否落盘。**
 
 #### 9.1.2 节：vLLM 采样器的两组处理器与 logprobs 的取值位置
 
@@ -684,11 +684,11 @@ PyTorch FSDP2（`fully_shard`，[文档](https://docs.pytorch.org/docs/stable/di
 
 #### 9.2.3 节：Hugging Face 的 length_penalty 方向
 
-**实现中的参数名容易读反。** Hugging Face 的 `length_penalty` 是“得分除以 $|y|^{\alpha}$”这一长度归一化形式（[9.2.3 节](../09_decoding/9.2_greedy_beam.md)）里的指数：得分除以 `长度 ** length_penalty`，默认 1.0。得分是负数，所以取正值偏向更长的序列，取负值偏向更短。名字叫“惩罚”，调大却得到更长的输出。
+**实现中的参数名容易读反。** Hugging Face 的 `length_penalty` 是“得分除以 $$|y|^{\alpha}$$”这一长度归一化形式（[9.2.3 节](../09_decoding/9.2_greedy_beam.md)）里的指数：得分除以 `长度 ** length_penalty`，默认 1.0。得分是负数，所以取正值偏向更长的序列，取负值偏向更短。名字叫“惩罚”，调大却得到更长的输出。
 
 #### 9.3.1 节：温度趋零时 vLLM 与 HF 的处理
 
-**两个极限。** $\tau \to 0$ 时最大项的指数压倒其余各项，分布收缩到 argmax，等同贪心。实现里不会真的除以 0：vLLM 把温度低于 `1e-5` 的请求直接送入贪心分支；Hugging Face 要求温度严格为正，贪心由 `do_sample=False` 指定。$\tau \to \infty$ 时各项趋于相等，分布趋于均匀，Llama 3 词表下每个词元约 `1 ÷ 128,256 ≈ 7.8 × 10⁻⁶`。
+**两个极限。** $$\tau \to 0$$ 时最大项的指数压倒其余各项，分布收缩到 argmax，等同贪心。实现里不会真的除以 0：vLLM 把温度低于 `1e-5` 的请求直接送入贪心分支；Hugging Face 要求温度严格为正，贪心由 `do_sample=False` 指定。$$\tau \to \infty$$ 时各项趋于相等，分布趋于均匀，Llama 3 词表下每个词元约 `1 ÷ 128,256 ≈ 7.8 × 10⁻⁶`。
 
 #### 9.3.3 节：Top-p 排序成本与 vLLM 的 PyTorch 原生路径
 
@@ -702,14 +702,14 @@ PyTorch FSDP2（`fully_shard`，[文档](https://docs.pytorch.org/docs/stable/di
 
 **进阶：几个实现细节。** 下面四条是引擎路径上的细节，第一遍可以跳过。
 
-- [9.3.8 节](../09_decoding/9.3_sampling.md)的指数竞赛（对每个词元抽 $q_i \sim \text{Exp}(1)$，取 $p_i/q_i$ 的 argmax），PyTorch 自己也用。`torch.multinomial` 在只抽 1 个样本或无放回抽样时，走的正是 `q = empty_like(p).exponential_(1)`、相除、argmax 这条快速路径，源码注释写明它来自 Gumbel-Softmax。vLLM 仍然自己实现一遍，文档字符串给的理由是 `torch.multinomial` 会引入 CPU 与 GPU 的同步；自己实现还便于给个别请求换上独立的随机数发生器。
+- [9.3.8 节](../09_decoding/9.3_sampling.md)的指数竞赛（对每个词元抽 $$q_i \sim \text{Exp}(1)$$，取 $$p_i/q_i$$ 的 argmax），PyTorch 自己也用。`torch.multinomial` 在只抽 1 个样本或无放回抽样时，走的正是 `q = empty_like(p).exponential_(1)`、相除、argmax 这条快速路径，源码注释写明它来自 Gumbel-Softmax。vLLM 仍然自己实现一遍，文档字符串给的理由是 `torch.multinomial` 会引入 CPU 与 GPU 的同步；自己实现还便于给个别请求换上独立的随机数发生器。
 - Softmax 强制用 FP32。FP16 能表示的最小正数约 `6 × 10⁻⁸`，比它小的概率直接变成 0；BF16 只有 7 位尾数，相对精度约 0.8%。12.8 万项的长尾在半精度下会整段失真，vLLM 在处理链一开始就把 logits 转成 FP32，另有 `use_fp64_gumbel` 选项让噪声用 FP64。
 - 指定了 Top-k 或 Top-p 时，默认路径并不是 9.3.8 节的指数竞赛实现。CUDA 上若 FlashInfer 可用，`TopKTopPSampler` 走 `forward_cuda`，由 FlashInfer 的拒绝采样内核一步完成截断与抽样，免去 9.3.3 的整表排序。拒绝采样是指先抽出一个候选，不满足条件就丢弃重抽，直到抽中满足条件的为止。源码注明它与 `random_sample` 只是统计等价，同一个种子下两条路径的输出不保证相同。指数竞赛用于未指定 Top-k 与 Top-p 的请求，以及 `forward_native` 回退路径；带 `seed` 的请求（FlashInfer 不支持逐请求随机数发生器）和开启 `use_fp64_gumbel` 时也回到这条路径。
 - 词表沿张量并行切分时，裸的全词表抽样可以用“每卡局部最大值加一次全局带下标的 max 规约”完成。一旦有 Top-p、禁词表或约束掩码，就需要全局的候选集合或概率质量，实际通信收益取决于框架的实现。
 
 #### 9.3.9 节：vLLM 逐请求种子
 
-**种子。** 采样的随机性来自指数竞赛里的噪声 $q$（[9.3.8 节](../09_decoding/9.3_sampling.md)）。vLLM 的 `seed` 参数为该请求单独建一个随机数发生器，只改写 $q$ 中属于它的那一行；源码里的 TODO 写明这条路径逐请求处理、较慢。同一个种子只在同一引擎、同一条代码路径下可复现，换引擎或换路径都不保证。
+**种子。** 采样的随机性来自指数竞赛里的噪声 $$q$$（[9.3.8 节](../09_decoding/9.3_sampling.md)）。vLLM 的 `seed` 参数为该请求单独建一个随机数发生器，只改写 $$q$$ 中属于它的那一行；源码里的 TODO 写明这条路径逐请求处理、较慢。同一个种子只在同一引擎、同一条代码路径下可复现，换引擎或换路径都不保证。
 
 #### 9.4.7 节：vLLM structured_outputs 字段与后端
 
@@ -725,7 +725,7 @@ PyTorch FSDP2（`fully_shard`，[文档](https://docs.pytorch.org/docs/stable/di
 #### 10.2.4 与 10.2.7 节：GQA 与 MLA 的配置键
 
 - Hugging Face 的模型配置里，Q 头数与 KV 头数是 `num_attention_heads` 与 `num_key_value_heads` 两个字段；计算时把每组 K、V 沿头维复制或广播给组内各查询头。
-- DeepSeek-V3 的 MLA 配置：`hidden_size = 7168`、`num_attention_heads = 128`、`kv_lora_rank = 512`（缓存的隐向量宽度）、`qk_nope_head_dim = 128`、`qk_rope_head_dim = 64`（RoPE 旁路宽度）、`v_head_dim = 128`；查询侧另有一个 `q_lora_rank = 1536` 的低维隐向量 $c^{Q}_t$，$q^{R}_t = \operatorname{RoPE}(c^{Q}_t W^{QR})$。
+- DeepSeek-V3 的 MLA 配置：`hidden_size = 7168`、`num_attention_heads = 128`、`kv_lora_rank = 512`（缓存的隐向量宽度）、`qk_nope_head_dim = 128`、`qk_rope_head_dim = 64`（RoPE 旁路宽度）、`v_head_dim = 128`；查询侧另有一个 `q_lora_rank = 1536` 的低维隐向量 $$c^{Q}_t$$，$$q^{R}_t = \operatorname{RoPE}(c^{Q}_t W^{QR})$$。
 - vLLM 的 MLA 后端在源码注释里把两种计算形态称为 compute friendly（用于 prefill，把 K、V 展开成完整形状）与 data-movement friendly（用于 decode，吸收投影后直接读 576 维的缓存）。
 
 #### 10.2.6 与 10.3.7 节：分页 KV 的张量形状
@@ -748,7 +748,7 @@ GPU 的线程层级与存储层级（取自 FlashAttention-3 论文对 H100 的�
 GPU 的线程层级与存储层级。32 个线程组成一个 warp，4 个相邻 warp 组成一个 warpgroup；同一 CTA 内的线程可直接寻址 SMEM。
 
 - **FA3（Hopper）。** 张量内存加速器（TMA）在 GMEM 与 SMEM 之间异步搬运；Tensor Core 经 warpgroup 级的 `WGMMA` 指令异步调用，可直接从共享内存取输入。warp 特化把一个 CTA 内的 warp 分成生产者（只经 TMA 把下一块 K、V 装入 SMEM 的环形缓冲）与消费者（只做矩阵乘），并用 `setmaxnreg` 把寄存器多分给做矩阵乘的 warpgroup。FP8 路径用块级量化（每小块 Q、K、V 独立定标）与非相干处理（量化前乘随机 ±1 对角阵与 Hadamard 矩阵之积）。
-- **FA4（Blackwell）。** 每个 SM 新增 256 KB 的 Tensor Memory（TMEM）存放 Tensor Core 的中间结果，矩阵乘分块从 64 × 128 增大到 128 × 128，Tensor Core 操作完全异步并可直接写 TMEM；反向传播配合 2-CTA MMA 模式减少共享内存流量与原子加。指数运算的硬件指令是 `MUFU.EX2`；软件模拟把 $2^{\lfloor x \rfloor}$ 交给整数 ALU 改写指数位，小数部分用多项式逼近走 FMA，每行只对 10–25% 的元素这样做，比例按矩阵乘与指数运算的吞吐比经验调定。FA3 的设计搬到 Blackwell 上，共享内存流量和指数运算的耗时超过矩阵乘 25–60%。
+- **FA4（Blackwell）。** 每个 SM 新增 256 KB 的 Tensor Memory（TMEM）存放 Tensor Core 的中间结果，矩阵乘分块从 64 × 128 增大到 128 × 128，Tensor Core 操作完全异步并可直接写 TMEM；反向传播配合 2-CTA MMA 模式减少共享内存流量与原子加。指数运算的硬件指令是 `MUFU.EX2`；软件模拟把 $$2^{\lfloor x \rfloor}$$ 交给整数 ALU 改写指数位，小数部分用多项式逼近走 FMA，每行只对 10–25% 的元素这样做，比例按矩阵乘与指数运算的吞吐比经验调定。FA3 的设计搬到 Blackwell 上，共享内存流量和指数运算的耗时超过矩阵乘 25–60%。
 - **指令与架构编号。** `cp.async` 要求 sm_80 及以上；`tcgen05.mma` 面向 sm_100a 与 sm_110a（PTX ISA 9.0 起 sm_101a 更名为 sm_110a）。
 
 #### 10.3.8 节：注意力内核的框架入口
@@ -766,7 +766,7 @@ GPU 的线程层级与存储层级。32 个线程组成一个 warp，4 个相邻
 
 #### 10.6.3 节：投机解码的框架入口
 
-vLLM、TensorRT-LLM 与 SGLang 都支持投机解码。以 vLLM 为例，通过 `--speculative-config` 传入一个 JSON：`method` 选草稿来源，文档列出的常用取值有 `draft_model`、`ngram`、`suffix`、`mtp`、`eagle3`、`dflash`；`model` 指定草稿模型；`num_speculative_tokens` 即 $\gamma$。`ngram` 方法另有 `prompt_lookup_min` 与 `prompt_lookup_max` 控制匹配窗口。
+vLLM、TensorRT-LLM 与 SGLang 都支持投机解码。以 vLLM 为例，通过 `--speculative-config` 传入一个 JSON：`method` 选草稿来源，文档列出的常用取值有 `draft_model`、`ngram`、`suffix`、`mtp`、`eagle3`、`dflash`；`model` 指定草稿模型；`num_speculative_tokens` 即 $$\gamma$$。`ngram` 方法另有 `prompt_lookup_min` 与 `prompt_lookup_max` 控制匹配窗口。
 
 #### 11.1.3 节：TensorRT-LLM 的部署参考
 
@@ -1087,13 +1087,13 @@ Hugging Face `LlamaDecoderLayer` 里各字段落到的模块。权重按 `[输�
 | `rope_theta` | 500,000 | 不占参数，逐层作用在 q、k 上 |
 | `max_position_embeddings` | 8,192 | Llama 3.1 起为 131,072 |
 
-Llama 3 8B 的配置字段与模块名对照。Llama 1 与 Llama 2 的 7B 的 `intermediate_size` 是 11,008，即 $\frac{8}{3} \times 4{,}096 = 10{,}922.67$ 向上取到 256 的倍数。
+Llama 3 8B 的配置字段与模块名对照。Llama 1 与 Llama 2 的 7B 的 `intermediate_size` 是 11,008，即 $$\frac{8}{3} \times 4{,}096 = 10{,}922.67$$ 向上取到 256 的倍数。
 
 #### 13.4.1 与 13.4.3 节：BART 的掩码词元与 T5 的两份缓存
 
 - BART 论文里的掩码写作 `[MASK]`，fairseq 与 Hugging Face 实现中的词元是 `<mask>`。
 - Hugging Face 的 `T5ForConditionalGeneration` 在生成时把编码器结果放在 `encoder_outputs` 里跨步复用，把解码器自注意力与交叉注意力两份 K/V 一起放在 `past_key_values` 里；`generate` 只在第一步计算 `encoder_outputs`。
-- `google-t5/t5-base` 的检查点里有三张相对位置偏置表（每张 $32 \times 12 = 384$ 个数，32 个相对距离分桶乘 12 个头）：编码器 1 张、解码器 2 张。解码器的第二张挂在交叉注意力上，加载时作为多余的键忽略。
+- `google-t5/t5-base` 的检查点里有三张相对位置偏置表（每张 $$32 \times 12 = 384$$ 个数，32 个相对距离分桶乘 12 个头）：编码器 1 张、解码器 2 张。解码器的第二张挂在交叉注意力上，加载时作为多余的键忽略。
 
 #### 14.2.1 节：MoE 前向六步在框架里的对应
 
@@ -1115,7 +1115,7 @@ DeepSeek-V3 的相关配置键（`config.json`）：`hidden_size = 7168`、`inte
 #### 14.3.3 节：Mamba 官方实现的构造参数与内核
 
 - `mamba_ssm` 库中，块结构的超参就是 `Mamba(d_model, d_state, d_conv, expand)` 四个构造参数，默认 `d_state = 16`、`d_conv = 4`、`expand = 2`；扫描内核是 `selective_scan_fn`。
-- 论文里 $f_\Delta$ 先投到 1 维再广播到全部通道，官方实现把这 1 维推广为宽度 `dt_rank` 的低秩投影。
+- 论文里 $$f_\Delta$$ 先投到 1 维再广播到全部通道，官方实现把这 1 维推广为宽度 `dt_rank` 的低秩投影。
 - 因果卷积与 SiLU 在 `mamba_simple.py` 中写在同一行：`x = self.act(self.conv1d(x)[..., :seqlen])`。
 
 #### 14.3.7 节：Qwen3.5 线性层的状态形状

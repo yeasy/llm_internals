@@ -9,11 +9,11 @@
 | 问题 | 答题要点 | 小节 |
 | -------- | -------------------- | --- |
 | Q、K、V 分别是什么 | 由同一输入经三个投影得到；Q 表示当前位置要找什么，K 表示各位置可供匹配的特征，两者点积得分；V 是按分数取走的内容 | [2.1](../02_attention/2.1_qkv_intuition.md) |
-| 为什么除以 $\sqrt{d_k}$ | 各分量独立、方差为 1 时，点积方差为 $d_k$；缩放后回到 1，避免 Softmax 饱和、梯度趋零 | [2.2](../02_attention/2.2_scaled_dot_product.md) |
+| 为什么除以 $$\sqrt{d_k}$$ | 各分量独立、方差为 1 时，点积方差为 $$d_k$$；缩放后回到 1，避免 Softmax 饱和、梯度趋零 | [2.2](../02_attention/2.2_scaled_dot_product.md) |
 | 为什么用多头 | 单头只输出一个加权平均，取自多处的信息混在一起分不开；多头给出多个分布 | [2.3](../02_attention/2.3_multi_head.md) |
 | 多头与同宽单头的区别 | 投影参数与计算量相同，差别在 Softmax 分布的个数；不少头可剪掉而效果几乎不变 | [2.3](../02_attention/2.3_multi_head.md) |
 | 自注意力、交叉注意力、因果掩码 | Q 与 K/V 是否来自同一序列；因果掩码把未来位置的分数置为负无穷 | [2.4](../02_attention/2.4_self_cross_causal.md) |
-| 注意力的复杂度 | 打分项 $O(n^2 d)$，投影与 FFN 为 $O(n d^2)$；序列不长时后者占大头 | [2.5](../02_attention/2.5_complexity_limits.md) |
+| 注意力的复杂度 | 打分项 $$O(n^2 d)$$，投影与 FFN 为 $$O(n d^2)$$；序列不长时后者占大头 | [2.5](../02_attention/2.5_complexity_limits.md) |
 | 注意力有哪些固有局限 | 除平方代价外还有四条：不含顺序、行和为 1 导致注意力汇、长度稀释、纯注意力堆叠会秩坍缩 | [2.5](../02_attention/2.5_complexity_limits.md) |
 
 表 A-2：注意力相关的常见面试题。
@@ -41,8 +41,8 @@
 | 残差连接的作用 | 反向传播多一条恒等路径，梯度不必连乘穿过每一层 | [3.5](../03_components/3.5_residual.md) |
 | 为什么用 LayerNorm 不用 BatchNorm | 批小时统计量不稳，填充位置污染统计量，训练与推理的统计量不一致 | [3.6](../03_components/3.6_layer_norm.md) |
 | Pre-LN 与 Post-LN | Post-LN 的恒等路径要穿过 LN，梯度逐层被重新缩放，依赖预热；Pre-LN 保留纯加法通道，更稳，代价是深层贡献被稀释 | [3.6](../03_components/3.6_layer_norm.md) |
-| RMSNorm 省掉了什么 | 不减均值、没有偏移 $\beta$，只按均方根缩放 | [3.6](../03_components/3.6_layer_norm.md) |
-| 单层参数量怎么估 | 注意力 $4d^2$ 加 4 倍宽 FFN $8d^2$，约 $12d^2$；GQA 与 SwiGLU 会改变两项的比例 | [3.7](../03_components/3.7_full_architecture.md) |
+| RMSNorm 省掉了什么 | 不减均值、没有偏移 $$\beta$$，只按均方根缩放 | [3.6](../03_components/3.6_layer_norm.md) |
+| 单层参数量怎么估 | 注意力 $$4d^2$$ 加 4 倍宽 FFN $$8d^2$$，约 $$12d^2$$；GQA 与 SwiGLU 会改变两项的比例 | [3.7](../03_components/3.7_full_architecture.md) |
 | 一次生成经过哪些步骤 | 分词、嵌入、L 层各六步、最终归一化、LM head、采样；Prefill 一次，Decode 逐词元 | [3.8](../03_components/3.8_gpt_inference_flow.md) |
 
 表 A-4：层内组件相关的常见面试题。
@@ -81,7 +81,7 @@
 | KL 惩罚与 PPO 裁剪的区别 | KL 约束策略不偏离 SFT 参考模型；裁剪约束每次更新不偏离采样时的旧策略 | [8.2](../08_alignment/8.2_rlhf.md) |
 | GRPO 改了什么 | 同一问题采样一组回答，用组内标准化的奖励作优势，去掉价值网络 | [8.2](../08_alignment/8.2_rlhf.md) |
 | DPO 的思路与代价 | 利用 KL 约束目标的闭式解，直接用偏好对训练策略；省去奖励模型与在线采样，但只能离线学习 | [8.3](../08_alignment/8.3_dpo.md) |
-| LoRA 的原理 | 冻结原权重，旁路加低秩 $AB$；$B$ 初始化为零，训练后可合并，推理无额外开销 | [8.4](../08_alignment/8.4_peft.md) |
+| LoRA 的原理 | 冻结原权重，旁路加低秩 $$AB$$；$$B$$ 初始化为零，训练后可合并，推理无额外开销 | [8.4](../08_alignment/8.4_peft.md) |
 | 微调会带来什么问题 | 灾难性遗忘、对齐税、只学到风格、自造污染，训练损失看不出这些 | [8.5](../08_alignment/8.5_practice.md) |
 
 表 A-7：对齐与微调相关的常见面试题。
@@ -102,11 +102,11 @@
 | -------- | -------------------- | --- |
 | Prefill 与 Decode 的瓶颈 | Prefill 计算密集；Decode 每步只处理一个词元却要读全部权重，访存密集 | [10.1](../10_inference_optimization/10.1_bottleneck.md) |
 | KV 缓存为什么有效 | 因果掩码下旧位置的 K、V 不随新词元改变，算一次即可复用 | [10.2](../10_inference_optimization/10.2_kv_cache.md) |
-| KV 缓存多大 | 每词元 $2 L n_{kv} d_h$ 个数；Llama 2 70B 在 FP16 下每词元 320 KiB | [10.2](../10_inference_optimization/10.2_kv_cache.md) |
-| MQA、GQA 与 MLA | 多个 Query 头共享 K/V 头，缓存按 $n_{kv}$ 缩小；MLA 改为缓存低维隐向量 | [10.2](../10_inference_optimization/10.2_kv_cache.md) |
-| FlashAttention 快在哪里 | 分块加在线 Softmax，不把 $[T, T]$ 矩阵写回显存；结果精确，省的是访存，计算量反而略增 | [10.3](../10_inference_optimization/10.3_flash_attention.md) |
+| KV 缓存多大 | 每词元 $$2 L n_{kv} d_h$$ 个数；Llama 2 70B 在 FP16 下每词元 320 KiB | [10.2](../10_inference_optimization/10.2_kv_cache.md) |
+| MQA、GQA 与 MLA | 多个 Query 头共享 K/V 头，缓存按 $$n_{kv}$$ 缩小；MLA 改为缓存低维隐向量 | [10.2](../10_inference_optimization/10.2_kv_cache.md) |
+| FlashAttention 快在哪里 | 分块加在线 Softmax，不把 $$[T, T]$$ 矩阵写回显存；结果精确，省的是访存，计算量反而略增 | [10.3](../10_inference_optimization/10.3_flash_attention.md) |
 | 量化的难点 | 激活存在离群值；常用方法有 SmoothQuant、GPTQ、AWQ | [10.4](../10_inference_optimization/10.4_quantization.md) |
-| 投机解码为什么不改变分布 | 草稿按 $\min(1, p/q)$ 接受，被拒时从残差分布重采样，输出分布与目标模型完全一致 | [10.6](../10_inference_optimization/10.6_speculative_decoding.md) |
+| 投机解码为什么不改变分布 | 草稿按 $$\min(1, p/q)$$ 接受，被拒时从残差分布重采样，输出分布与目标模型完全一致 | [10.6](../10_inference_optimization/10.6_speculative_decoding.md) |
 | 连续批处理与 PagedAttention | 按迭代调度，请求随时进出；KV 按固定大小的块分配，消除碎片 | [11.2](../11_serving/11.2_continuous_batching.md) |
 | 为什么把 Prefill 与 Decode 分开部署 | 两者瓶颈不同，放在同一批里会互相拖慢首词元延迟与逐词元延迟 | [11.9](../11_serving/11.9_disaggregated_serving.md) |
 
@@ -132,11 +132,11 @@
 
 **“FFN 占约三分之二的参数量。”** 只适用于 GPT-3 式配置。Llama 3 8B 用 GQA 省下注意力参数，又加宽 FFN，FFN 已占一层参数的八成。
 
-**“$d_{\text{model}}$ 必须等于头数乘以每头宽度。”** 这只是多数模型的取法，[GPT-3 论文](https://arxiv.org/abs/2005.14165)表 2.1 中 13B 模型的 5,140 就不等于 40 × 128。
+**“$$d_{\text{model}}$$ 必须等于头数乘以每头宽度。”** 这只是多数模型的取法，[GPT-3 论文](https://arxiv.org/abs/2005.14165)表 2.1 中 13B 模型的 5,140 就不等于 40 × 128。
 
-**“除以 $\sqrt{d_k}$ 是为了防止梯度消失。”** 这是结果，原因要先说：点积方差随 $d_k$ 线性增长，缩放把它拉回 1。
+**“除以 $$\sqrt{d_k}$$ 是为了防止梯度消失。”** 这是结果，原因要先说：点积方差随 $$d_k$$ 线性增长，缩放把它拉回 1。
 
-**“注意力的复杂度是 $O(n^2 d)$。”** 这只是打分一项。整层还有 $O(n d^2)$ 的投影与 FFN，按 2.5 节的比值，因果掩码下序列长度要超过约 $12d$，平方项才超过线性项。
+**“注意力的复杂度是 $$O(n^2 d)$$。”** 这只是打分一项。整层还有 $$O(n d^2)$$ 的投影与 FFN，按 2.5 节的比值，因果掩码下序列长度要超过约 $$12d$$，平方项才超过线性项。
 
 **“多头让每个头学习不同的子空间。”** 这是直觉，不是机制。机制是多个 Softmax 分布；实证上不少头是冗余的。
 

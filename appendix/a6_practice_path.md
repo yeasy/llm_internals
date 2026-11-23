@@ -38,7 +38,7 @@ CPU 实验中第二行是 `False` 也可以继续。不要用教学模型的执�
 
 ### A.6.2 实验一：手算梯度，再让自动微分核对
 
-先只取语言模型的输出层。输入矩阵 $X\in\mathbb{R}^{N\times d}$ 表示 $N$ 个待预测位置的隐藏向量，每行 $d$ 个数；$W\in\mathbb{R}^{d\times V}$ 和 $b\in\mathbb{R}^{V}$ 是输出层参数，$V$ 为词表大小。这里的 $N$ 只是本实验的位置数，不是模型参数量。
+先只取语言模型的输出层。输入矩阵 $$X\in\mathbb{R}^{N\times d}$$ 表示 $$N$$ 个待预测位置的隐藏向量，每行 $$d$$ 个数；$$W\in\mathbb{R}^{d\times V}$$ 和 $$b\in\mathbb{R}^{V}$$ 是输出层参数，$$V$$ 为词表大小。这里的 $$N$$ 只是本实验的位置数，不是模型参数量。
 
 ```text
 X [N,d] × W [d,V] + b [V]
@@ -54,7 +54,7 @@ dZ [N,V] → dW [d,V]、db [V]、dX [N,d]
        更新 W、b，重新计算同一批次损失
 ```
 
-令 $Y$ 为目标编号对应的独热矩阵，$P=\operatorname{softmax}(XW+b)$，$G$ 为损失对 logits 的梯度，则：
+令 $$Y$$ 为目标编号对应的独热矩阵，$$P=\operatorname{softmax}(XW+b)$$，$$G$$ 为损失对 logits 的梯度，则：
 
 $$
 \mathcal L=-\frac{1}{N}\sum_{i=1}^{N}\log P_{i,y_i},\qquad
@@ -67,7 +67,7 @@ $$
 \frac{\partial\mathcal L}{\partial X}=GW^T.
 $$
 
-分母 $N$ 来自平均损失，不能在梯度中遗漏。$dX$ 的作用是把误差信号传回前面的 Transformer 层；它不是另一个目标词元。以学习率 $\eta$ 做一次 SGD 更新，就是 $W\leftarrow W-\eta dW$、$b\leftarrow b-\eta db$。
+分母 $$N$$ 来自平均损失，不能在梯度中遗漏。$$dX$$ 的作用是把误差信号传回前面的 Transformer 层；它不是另一个目标词元。以学习率 $$\eta$$ 做一次 SGD 更新，就是 $$W\leftarrow W-\eta dW$$、$$b\leftarrow b-\eta db$$。
 
 脚本取两个位置、二维隐藏向量、三个候选词元：
 
@@ -80,7 +80,7 @@ $$
 b=\begin{bmatrix}0&0.1&-0.1\end{bmatrix}.
 $$
 
-目标编号为 $y=[2,0]$，编号从零开始。第一行希望选第三个词元，第二行希望选第一个词元。矩阵乘法得到：
+目标编号为 $$y=[2,0]$$，编号从零开始。第一行希望选第三个词元，第二行希望选第一个词元。矩阵乘法得到：
 
 $$
 Z=\begin{bmatrix}0.9&-0.1&0\\0.1&0.3&-0.45\end{bmatrix}_{2\times3}.
@@ -90,7 +90,7 @@ $$
 P\approx\begin{bmatrix}0.563555&0.207320&0.229124\\0.357353&0.436472&0.206175\end{bmatrix}_{2\times3}.
 $$
 
-平均损失为 $-(\log0.229124+\log0.357353)/2\approx1.251260$。第一行梯度是 $[0.563555,0.207320,0.229124-1]/2$。再用 $X^TG$ 算权重梯度，例如第一行第一列为 $1\times0.281778+(-1)\times(-0.321323)=0.603101$。取 $\eta=0.1$，该权重从 $0.1$ 更新为 $0.039690$；全部权重和偏置更新后，损失约为 $1.099419$。展示数字经过舍入，脚本用未舍入值计算。
+平均损失为 $$-(\log0.229124+\log0.357353)/2\approx1.251260$$。第一行梯度是 $$[0.563555,0.207320,0.229124-1]/2$$。再用 $$X^TG$$ 算权重梯度，例如第一行第一列为 $$1\times0.281778+(-1)\times(-0.321323)=0.603101$$。取 $$\eta=0.1$$，该权重从 $$0.1$$ 更新为 $$0.039690$$；全部权重和偏置更新后，损失约为 $$1.099419$$。展示数字经过舍入，脚本用未舍入值计算。
 
 运行源码中的输出层梯度实验 `examples/training_step.py`：
 
@@ -106,7 +106,7 @@ $$
 \approx\frac{\mathcal L(w+\delta)-\mathcal L(w-\delta)}{2\delta}.
 $$
 
-这里 $w$ 是参数矩阵中的一个数，$\delta$ 是小扰动。扰动过大有截断误差，过小有浮点消减误差；实验使用双精度核对。自动梯度检查的原理见 [PyTorch gradcheck](https://docs.pytorch.org/docs/stable/notes/gradcheck.html)。
+这里 $$w$$ 是参数矩阵中的一个数，$$\delta$$ 是小扰动。扰动过大有截断误差，过小有浮点消减误差；实验使用双精度核对。自动梯度检查的原理见 [PyTorch gradcheck](https://docs.pytorch.org/docs/stable/notes/gradcheck.html)。
 
 **验收与边界。** 能解释 `P−Y`、均值分母和三个梯度的维度，再独立换一组矩阵重算。本例只手推输出层，不冒充整个 Transformer 的手工反向传播；整个模型的反向计算在下一实验中由自动微分完成。一次固定小样本更新使损失下降，也不意味着任意学习率、任意批次都必然下降。
 
@@ -167,7 +167,7 @@ python examples/kv_cache.py
 python -m unittest tests.test_kv_cache -v
 ```
 
-设 $p$ 为已经缓存的词元数，$n$ 为本轮新增词元数，$m=p+n$。批大小为 $B$，头数为 $H$，每头宽度为 $d_h$。本例 $H=2$、$d_h=16$，每层独立保存 K/V。
+设 $$p$$ 为已经缓存的词元数，$$n$$ 为本轮新增词元数，$$m=p+n$$。批大小为 $$B$$，头数为 $$H$$，每头宽度为 $$d_h$$。本例 $$H=2$$、$$d_h=16$$，每层独立保存 K/V。
 
 | 本轮计算 | 输入 | 输出 |
 | --- | --- | --- |
@@ -179,7 +179,7 @@ python -m unittest tests.test_kv_cache -v
 | 残差、MLP、下一层 | `[B,n,32]` | `[B,n,32]` |
 | 最终归一化与输出层 | `[B,n,32]` | logits `[B,n,9]` |
 
-Prefill 时 $p=0$，一次处理整个 Prompt；逐词元 Decode 时 $n=1$，位置不能重新从零开始。分块处理时 $n>1$，块内仍要屏蔽未来位置。对本轮第 $i$ 行，能读取的完整 K/V 位置满足 $j\le p+i$，其中 $i,j$ 从零编号。
+Prefill 时 $$p=0$$，一次处理整个 Prompt；逐词元 Decode 时 $$n=1$$，位置不能重新从零开始。分块处理时 $$n>1$$，块内仍要屏蔽未来位置。对本轮第 $$i$$ 行，能读取的完整 K/V 位置满足 $$j\le p+i$$，其中 $$i,j$$ 从零编号。
 
 例如旧缓存长 4，新输入长 2，则两个新查询的可见性为：
 
@@ -192,7 +192,7 @@ $$
 
 此处 1 表示可见；它是布尔选择规则，不是把分数乘以 0 来屏蔽。被屏蔽分数应在 Softmax 前置为负无穷。非方阵下不能不加区分地照搬 `tril()`；框架的掩码对齐规则需查具体 API，见 [PyTorch SDPA](https://docs.pytorch.org/docs/stable/generated/torch.nn.functional.scaled_dot_product_attention.html)。
 
-**验收。** 分别检查逐词元与分块 Decode 的每一行 logits，而不是只比较最终贪心词元；两个不同的分布也可能选中同一个词元。每次调用后，各层缓存长度都应增加 $n$，旧缓存不被意外修改。允许符合精度的浮点误差，不要求不同计算形状下逐位相同。
+**验收。** 分别检查逐词元与分块 Decode 的每一行 logits，而不是只比较最终贪心词元；两个不同的分布也可能选中同一个词元。每次调用后，各层缓存长度都应增加 $$n$$，旧缓存不被意外修改。允许符合精度的浮点误差，不要求不同计算形状下逐位相同。
 
 一次 CPU FP32 运行中，逐词元与分块路径的最大 logits 误差分别为 `1.192e-07` 和 `5.960e-08`；两层最终 K/V 都为 `[1,2,6,16]`。这些数值是本例观测结果，不是通用于任意模型的容差阈值。
 
@@ -220,7 +220,7 @@ python -m unittest tests.test_post_training -v
 
 SFT 的 `labels` 形状是 `[B,T]`，被忽略位置不计入损失。必须把掩码与**预测目标所在位置**对齐，不能把用户输入掩掉后误删应被监督的第一个回答词元。真实聊天模板的角色边界和结束符规则见 [8.1 节](../08_alignment/8.1_sft.md)。
 
-LoRA 对输入宽度 $d_{in}$、输出宽度 $d_{out}$ 的线性层采用 $A\in\mathbb{R}^{r\times d_{in}}$、$B\in\mathbb{R}^{d_{out}\times r}$，其中 $r$ 为秩，增量权重为 $(\alpha/r)BA$。当 $B=0$ 时初始输出不变；首步 $A$ 的梯度也可能为零，因此不能用“每个适配器张量首步都必须改变”验收。初始化与缩放约定见 [PEFT LoRA](https://huggingface.co/docs/peft/developer_guides/lora)。
+LoRA 对输入宽度 $$d_{in}$$、输出宽度 $$d_{out}$$ 的线性层采用 $$A\in\mathbb{R}^{r\times d_{in}}$$、$$B\in\mathbb{R}^{d_{out}\times r}$$，其中 $$r$$ 为秩，增量权重为 $$(\alpha/r)BA$$。当 $$B=0$$ 时初始输出不变；首步 $$A$$ 的梯度也可能为零，因此不能用“每个适配器张量首步都必须改变”验收。初始化与缩放约定见 [PEFT LoRA](https://huggingface.co/docs/peft/developer_guides/lora)。
 
 DPO 的完整损失和参考模型含义见 [8.3 节](../08_alignment/8.3_dpo.md)。实验输入的是已经计算好的回答对数概率；实际训练还需要从词元 logits 中选择目标概率、屏蔽 Prompt 与填充、按回答求和，不能把整段对话无差别求和。
 
