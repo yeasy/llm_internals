@@ -4,9 +4,7 @@
 
 [工单转 JSON 实验](#ticket-json-lab)在 Apple Silicon 上跑过完整的训练和评测。CUDA 配方和服务压测按各自环境准备，完整脚本与接入片段分别标明。保存依赖版本和启动命令，按自己的任务验收。
 
-<a id="a7-experiment-setup"></a>
-
-### A.7.1 先冻结实验契约
+### A.7.1 先冻结实验契约 <a href="#a7-experiment-setup" id="a7-experiment-setup"></a>
 
 准备一个已安装兼容依赖的 Linux/CUDA 环境。训练环境需要 PyTorch、Transformers、Datasets、PEFT、TRL；两个服务端分别使用各自受支持的环境，压测客户端固定为第三个环境。不要把多个引擎的依赖强行装进同一环境。模型必须已经在本地，具有权重、配置、分词器；本例不启用远程模型代码。
 
@@ -42,9 +40,7 @@ nvidia-smi > "$RUN_DIR/gpu.txt"
 
 “能跑完十步”只通过冒烟检查。它不能证明收敛、泛化、偏好提升或可用容量。
 
-<a id="cuda-sft-recipe"></a>
-
-### A.7.2 本地 SFT 与 LoRA：先验证学了什么
+### A.7.2 本地 SFT 与 LoRA：先验证学了什么 <a href="#cuda-sft-recipe" id="cuda-sft-recipe"></a>
 
 本例在一张 NVIDIA GPU 上微调已有的指令模型。先按 [A.7.1](#a7-experiment-setup) 设置目录和环境变量。把审核过的问答写入本地的 `train.jsonl` 与 `valid.jsonl`，每行用 `prompt` 存放用户消息，用 `completion` 存放助手的示范回答。下面是一条样本。
 
@@ -175,7 +171,7 @@ restored = PeftModel.from_pretrained(
 ).eval()
 ```
 
-<a id="sft-adapter-merge"></a>
+#### 合并 SFT 适配器 <a href="#sft-adapter-merge" id="sft-adapter-merge"></a>
 
 如果下一阶段需要完整的 SFT 权重，确认重载结果后执行下面的代码。它适用于本节的非量化基座。合并后再用同一批提示核对输出。[PEFT 合并接口](https://huggingface.co/docs/peft/package_reference/peft_model#peft.PeftModel.merge_and_unload)
 
@@ -265,9 +261,7 @@ def prepare(model, blocks, mode):
 
 **选择依据。** 有可靠的成对偏好、但没有可信在线奖励时先做 DPO；能自动验证答案且愿意支付在线采样成本时再实验 GRPO。两者都必须与相同起点的 SFT 对照，不能拿不同数据、不同基座的最终分数归因于算法。
 
-<a id="dpo-recipe"></a>
-
-#### 离线偏好优化
+#### 离线偏好优化 <a href="#dpo-recipe" id="dpo-recipe"></a>
 
 把同一条用户消息和两份助手回答写入 `preference.jsonl`。`chosen` 是审核者更认可的回答，`rejected` 是较差的回答。
 
@@ -301,9 +295,7 @@ dpo.save_model(str(run_dir / "dpo-final"))
 
 **验收与排障。** 在独立偏好集评估盲测胜率、长度分布及通用能力回退；胜率差异附样本量与不确定性。偏好 accuracy 上升而真实回答变差时，检查长度偏差和 chosen/rejected 质量。先统计截断后是否仍保留两个答案的区别；两个答案都截成相同文本时，扩大训练不能修复监督信号。
 
-<a id="ppo-capital-recipe"></a>
-
-#### 在本机跑一轮 PPO
+#### 在本机跑一轮 PPO <a href="#ppo-capital-recipe" id="ppo-capital-recipe"></a>
 
 这个例子用一个小 Transformer 回答首都问题。`prompt` 是模型读到的题目，`answer` 是判分程序核对用的标准答案。小模型每次生成两个词元，每个词元是一个汉字，可取“巴、黎、里、昂、马、赛、柏、林”中的任一个。它可以生成“巴林”这样的组合，到判分时才知道答得对不对。
 
@@ -320,9 +312,9 @@ python examples/ppo_capitals.py "$WORK/capital.jsonl" --batches 30
 
 例如第一次抽到“巴”时，就把“巴”接到题目后面，预测下一个字。如果又抽到“黎”，就保存两个位置的概率，判分程序看到“巴黎”后给 1 分。训练时，把“题目 + 巴”重新送进 Transformer，一次前向就能重算这两个位置的概率。题目最后一个位置预测“巴”，“巴”的位置预测“黎”。
 
-<a id="ppo-reward-loss"></a>
+##### 分数怎样进入训练损失 <a href="#ppo-reward-loss" id="ppo-reward-loss"></a>
 
-**分数在哪一行用上？** Transformer 的输入是题目和已经生成的词元。整条回答的 1 分留给训练程序。假设价值模型在“巴”和“黎”两个生成位置都预测能拿 0.5 分，那么实际得分减去预测，两个位置就各有 +0.5 的优势。如果整条得 0 分，在相同预测下，两个优势都是 −0.5。
+Transformer 的输入是题目和已经生成的词元。整条回答的 1 分留给训练程序。假设价值模型在“巴”和“黎”两个生成位置都预测能拿 0.5 分，那么实际得分减去预测，两个位置就各有 +0.5 的优势。如果整条得 0 分，在相同预测下，两个优势都是 −0.5。
 
 下面摘出语言模型的更新，并展开了脚本里的 `clipped_policy_loss`。 `actions` 是模型实际生成的两个词元， `old_values` 是采样时价值模型给两个位置的预测。
 
@@ -353,9 +345,7 @@ $$
 
 要给已有语言模型跑 PPO，可以用 [verl 的单卡 PPO 示例](https://verl.readthedocs.io/en/latest/start/quickstart.html)。它从 Qwen2.5-0.5B-Instruct 开始，让模型自己生成数学题的答案，再由程序核对。先用官方脚本准备训练和验证的 Parquet 文件，再运行文档里的 `python3 -m verl.trainer.main_ppo` 配方。换自己的任务时，要替换数据和判分规则，并指定生成模型和价值模型的起始权重。GPU 示例按官方文档核对，本地实跑的是上面的 CPU 例子。
 
-<a id="grpo-capital-recipe"></a>
-
-#### 用程序打分做一次 GRPO
+#### 用程序打分做一次 GRPO <a href="#grpo-capital-recipe" id="grpo-capital-recipe"></a>
 
 先从“法国的首都是什么？”看数据怎么准备。把问题写进 `prompt`，把正确答案写进 `answer`。模型只看问题，`answer` 留给评分程序。模型每次答完，程序把答案两端的空白去掉，只在答案恰好是“巴黎”时给 1 分，其余给 0 分。
 
@@ -367,9 +357,9 @@ $$
 
 模型若生成“巴黎、里昂、巴黎、马赛”这四条回答，评分就是 1、0、1、0。TRL 的 `GRPOTrainer` 负责生成答案、调用判分函数、比较同一道题的四个分数，再更新模型。下一批用更新后的模型生成。
 
-<a id="capital-reward-update"></a>
+##### 在 CPU 上算一次参数更新 <a href="#capital-reward-update" id="capital-reward-update"></a>
 
-**在 CPU 上算一次参数更新。** 下面复现 [8.2 节的算例](../08_alignment/8.2_rlhf.md#score-to-update)。三座城市用 0、1、2 表示。把代码保存为 `capital_update.py`，在装有 PyTorch 的环境里运行 `python capital_update.py`。这里训练的参数就是三个城市的 logits。
+下面复现 [8.2 节的算例](../08_alignment/8.2_rlhf.md#score-to-update)。三座城市用 0、1、2 表示。把代码保存为 `capital_update.py`，在装有 PyTorch 的环境里运行 `python capital_update.py`。这里训练的参数就是三个城市的 logits。
 
 ```python
 import torch
@@ -427,9 +417,7 @@ grpo.save_model(str(run_dir / "grpo-final"))
 
 **训练后用没见过的题复测。** 用相同的提示和生成设置比较原模型与训练后的模型。训练时记录全对组和全错组的比例、回答长度和截断比例。奖励变高而新题正确率没有提高时，先查评分规则和数据有没有泄漏。
 
-<a id="ticket-json-lab"></a>
-
-#### 把报修消息转成 JSON
+#### 把报修消息转成 JSON <a href="#ticket-json-lab" id="ticket-json-lab"></a>
 
 有人发来“办公室的 Wi-Fi 连不上”，负责处理的人需要知道是什么问题、要不要马上处理。这样的报修记录也叫工单。这个实验给每条报修消息配上正确答案，教模型用两个 JSON 字段回答。`category` 表示类别，取 `network`（网络）、`account`（账号）或 `hardware`（设备）。`priority` 表示优先级。故障影响多人，或者导致工作完全中断且无替代方案时，填 `high`，其余填 `normal`。方法选择见[第八章](../08_alignment/README.md)。
 
@@ -502,9 +490,7 @@ python examples/ticket_post_training.py score "$WORK/data/test.jsonl" "$WORK/tun
 
 原模型的 18 份回答都用了 Markdown 代码块，原文因此无法直接解析。去掉代码块后，原模型答对了 11 条的类别和 10 条的优先级。微调后可以直接读取 JSON，但模型把所有工单都判成了 `normal`，漏掉了紧急工单。下一轮可在验证集上分开看 `high` 和 `normal`，再决定补哪些示范。若用这 18 条的表现来决定怎样改模型，就把它们留作回归集，并另备一批未见工单做最终验收。
 
-<a id="own-model-sft"></a>
-
-##### 换成自己的模型和任务
+##### 换成自己的模型和任务 <a href="#own-model-sft" id="own-model-sft"></a>
 
 如果你要让现有模型从订单通知里提取订单号和状态，准备一批真实写法和审核过的答案。用 MLX LM 时，可以把每条示范写成一行 JSONL。每行先给出任务要求和订单消息，然后给出模型应该生成的文本。下面是一条格式样例。
 
@@ -542,9 +528,7 @@ mlx_lm.generate --model "$MODEL_DIR" --adapter-path "$RUN_DIR/adapter" \
 
 单轮 `user` 加 `assistant` 的短答任务可以沿用上面的 `predict` 命令批量生成。把模型、适配器和 `test.jsonl` 的路径换成自己的。订单示例可以分别比较 JSON 格式、订单号和状态。工单的 `score` 命令读取 `category` 和 `priority`，换了字段要按新任务写评分规则。
 
-<a id="qwen-paper-summary"></a>
-
-##### 用 Qwen 写论文摘要
+##### 用 Qwen 写论文摘要 <a href="#qwen-paper-summary" id="qwen-paper-summary"></a>
 
 这个例子输入论文正文，输出一段中文摘要。摘要要交代研究问题、方法、主要结果和原文说明的局限。先用合成的短正文走完数据准备、微调和验收，再换成自己的论文。实验用上文同一个 Qwen2.5-0.5B-Instruct 的 MLX 4 位权重。
 
@@ -610,9 +594,7 @@ python examples/paper_summary.py review "$PAPER_WORK/data/test.jsonl" \
 
 要在 NVIDIA 上比较 SFT 与 SFT 加 GRPO，可用[单卡 SFT 示例](#cuda-sft-recipe)训练同样的问答数据。把生成的每条 `messages` 中的用户消息放进 `prompt`，助手消息放进 `completion`，两个字段都用数组包住。随后从 SFT 权重启动 [GRPO 配方](#grpo-capital-recipe)，把正文留在 `prompt`，把训练用的证据标注放进额外字段，由评分函数读取并为每份生成结果打分。若 SFT 用 PEFT 保存为适配器，先按[合并步骤](#sft-adapter-merge)得到完整权重。验收时用同一批留出论文比较两个模型。实跑覆盖上面的 MLX 流程，GPU 配方按 TRL 官方文档核对。公开的长文训练结果见 [Highlight-Then-Summarize](https://arxiv.org/html/2609.31382)。
 
-<a id="gemini-sft-job"></a>
-
-##### 通过 API 提交 Gemini 监督微调作业
+##### 通过 API 提交 Gemini 监督微调作业 <a href="#gemini-sft-job" id="gemini-sft-job"></a>
 
 如果希望把训练交给云平台，可以在 Google Cloud 上提交 Gemini 监督微调作业。数据脚本会把同一批训练样本另存为 `gemini_train.jsonl`，供这个作业使用。Gemini 的[文本训练数据格式](https://docs.cloud.google.com/gemini-enterprise-agent-platform/models/tuning/text)用 `contents` 和 `parts` 表示消息和消息里的内容，助手角色写成 `model`。下面的用户指令已缩短，实际文件保留完整指令。
 
@@ -708,7 +690,7 @@ python examples/ticket_post_training.py score "$WORK/data/test.jsonl" "$WORK/gem
 
 Gemini 提供的是完整的训练作业。给定数据和配置后，平台负责运行训练。提交前先查[模型和地区是否支持微调](https://docs.cloud.google.com/gemini-enterprise-agent-platform/models/tuning/supervised-tuning)。
 
-<a id="tinker-training"></a>
+##### Tinker <a href="#tinker-training" id="tinker-training"></a>
 
 如果需要自己决定每轮怎样采样、怎样算损失，可以用 [Tinker](https://tinker-docs.thinkingmachines.ai/tinker/api-reference/trainingclient/)。先选一个服务支持的起始模型。Tinker 负责提供和管理算力，把采样、计算梯度和更新参数分别做成可调用的接口。读者可以自己把这些操作接成训练循环，也可以从 [Tinker Cookbook](https://tinker-docs.thinkingmachines.ai/cookbook/quickstart/) 的现成配方起步。训练后的 LoRA 适配器可以[下载并转换为推理框架支持的格式](https://tinker-docs.thinkingmachines.ai/cookbook/deployment/basics/)。
 
