@@ -3,8 +3,8 @@
 正文位置：02_attention/2.4_self_cross_causal.md
 输出：02_attention/_images/causal_mask_heatmap.png
 
-分数与掩码的计算与正文那段可运行示例完全一致（含 `torch.manual_seed(42)`，
-故每次运行结果可复现），此处一并带上，使本脚本可独立运行。
+分数与掩码的计算固定 `torch.manual_seed(42)`，每次运行结果可复现；
+正文 2.4 节引用的第 3 行分数与权重即取自本脚本的输出。
 """
 
 from __future__ import annotations
@@ -27,7 +27,7 @@ def compute_weights() -> tuple[torch.Tensor, torch.Tensor]:
     torch.manual_seed(42)
     Q = torch.randn(SEQ_LEN, D_K)
     K = torch.randn(SEQ_LEN, D_K)
-    torch.randn(SEQ_LEN, D_K)  # V：与正文同序消耗随机数，保证分数一致
+    torch.randn(SEQ_LEN, D_K)  # V：按固定次序消耗随机数，保证分数可复现
 
     scores = torch.matmul(Q, K.transpose(-2, -1)) / math.sqrt(D_K)
 

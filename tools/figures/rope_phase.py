@@ -3,8 +3,8 @@
 正文位置：04_position_encoding/4.3_rope.md
 输出：04_position_encoding/_images/rope_decay.png
 
-`apply_rope()` 与分数序列的计算与正文保留的那段代码一致（含
-`torch.manual_seed(42)`，故曲线可复现），此处一并带上，使本脚本可独立运行。
+`apply_rope()` 按 4.3 节的旋转公式实现，分数序列固定
+`torch.manual_seed(42)`，故曲线可复现。
 """
 
 from __future__ import annotations

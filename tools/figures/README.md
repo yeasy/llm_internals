@@ -27,13 +27,13 @@ Linux 的 Noto Sans CJK 任一即可）；各脚本已按此顺序自动挑选�
 |---|---|---|
 | `attention_heatmap.py` | 图 2-2 缩放点积注意力权重热力图 | [2.2](../../02_attention/2.2_scaled_dot_product.md) |
 | `causal_mask_heatmap.py` | 图 2-4 因果掩码前后的注意力权重对比 | [2.4](../../02_attention/2.4_self_cross_causal.md) |
-| `gpt_inference_overview.py` | 图 3-11 一次 Prefill：整个模型、一层、一个头的逐级展开 | [3.8](../../03_components/3.8_gpt_inference_flow.md) |
-| `inference_timeline.py` | 图 3-12 回答“5。”的三次前向计算 | [3.8](../../03_components/3.8_gpt_inference_flow.md) |
-| `input_pipeline.py` | 图 3-13 一条消息怎样变成初始表示 | [3.8](../../03_components/3.8_gpt_inference_flow.md) |
-| `attention_shape_flow.py` | 图 3-14 及随文分图：投影、打分、掩码、读取、合并与词表投影的矩阵形状 | [3.8](../../03_components/3.8_gpt_inference_flow.md) |
-| `decode_with_cache.py` | 图 3-16 一轮 Decode 怎样对着 KV 缓存只算一行 | [3.8](../../03_components/3.8_gpt_inference_flow.md) |
-| `transformer_layer_blocks.py` | 图 3-15 Pre-Norm 的两次归一化与两条残差旁路 | [3.8](../../03_components/3.8_gpt_inference_flow.md) |
-| `inference_bottleneck.py` | 图 3-17 Prefill 与 Decode 各自落在哪一种瓶颈里 | [3.8](../../03_components/3.8_gpt_inference_flow.md) |
+| `gpt_inference_overview.py` | 图 3-8 一次 Prefill：整个模型、一层、一个头的逐级展开 | [3.8](../../03_components/3.8_gpt_inference_flow.md) |
+| `inference_timeline.py` | 图 3-9 回答“5。”的三次前向计算 | [3.8](../../03_components/3.8_gpt_inference_flow.md) |
+| `input_pipeline.py` | 图 3-10 一条消息怎样变成初始表示 | [3.8](../../03_components/3.8_gpt_inference_flow.md) |
+| `attention_shape_flow.py` | 图 3-11 及随文分图：投影、打分、掩码、读取、合并与词表投影的矩阵形状 | [3.8](../../03_components/3.8_gpt_inference_flow.md) |
+| `decode_with_cache.py` | 图 3-13 一轮 Decode 怎样对着 KV 缓存只算一行 | [3.8](../../03_components/3.8_gpt_inference_flow.md) |
+| `transformer_layer_blocks.py` | 图 3-12 Pre-Norm 的两次归一化与两条残差旁路 | [3.8](../../03_components/3.8_gpt_inference_flow.md) |
+| `inference_bottleneck.py` | 图 3-14 Prefill 与 Decode 各自落在哪一种瓶颈里 | [3.8](../../03_components/3.8_gpt_inference_flow.md) |
 | `sinusoidal_pe.py` | 图 4-1 正弦位置编码的频率分解 | [4.1](../../04_position_encoding/4.1_sinusoidal.md) |
 | `rope_phase.py` | 图 4-2 RoPE 注意力分数随相对距离的相位变化 | [4.3](../../04_position_encoding/4.3_rope.md) |
 | `lr_schedule_comparison.py` | 图 6-1 三种学习率调度策略对比 | [6.2](../../06_training_techniques/6.2_lr_schedule.md) |
@@ -51,10 +51,10 @@ Linux 的 Noto Sans CJK 任一即可）；各脚本已按此顺序自动挑选�
 | `ch09_token_vs_char.py` | 图 9-6 正则 `[0-9]+\.[0-9]{2}` 的字符级自动机 | [9.4](../../09_decoding/9.4_constrained.md) |
 | `ch09_block_diffusion.py` | 图 9-7 (a) 表 9-14 的去噪过程 | [9.6](../../09_decoding/9.6_diffusion_lm.md) |
 | `ch10_roofline.py` | 图 10-1 H100 的 Roofline 与 Llama 3 8B 的四个工作点 | [10.1](../../10_inference_optimization/10.1_bottleneck.md) |
-| `ch10_mla_dataflow.py` | 图 10-4 MLA 中一个词元的数据流 | [10.2](../../10_inference_optimization/10.2_kv_cache.md) |
-| `ch10_flash_tiling.py` | 图 10-5 FlashAttention 分块前向的循环结构与各变量的驻留位置 | [10.3](../../10_inference_optimization/10.3_flash_attention.md) |
-| `ch10_quant_grid.py` | 图 10-9 同一行权重在三种量化方案下落到的格点 | [10.4](../../10_inference_optimization/10.4_quantization.md) |
-| `ch10_spec_round.py` | 图 10-10 投机解码的一轮 | [10.6](../../10_inference_optimization/10.6_speculative_decoding.md) |
+| `ch10_mla_dataflow.py` | 图 10-3 MLA 中一个词元的数据流 | [10.2](../../10_inference_optimization/10.2_kv_cache.md) |
+| `ch10_flash_tiling.py` | 图 10-4 FlashAttention 分块前向的循环结构与各变量的驻留位置 | [10.3](../../10_inference_optimization/10.3_flash_attention.md) |
+| `ch10_quant_grid.py` | 图 10-7 同一行权重在三种量化方案下落到的格点 | [10.4](../../10_inference_optimization/10.4_quantization.md) |
+| `ch10_spec_round.py` | 图 10-8 投机解码的一轮 | [10.6](../../10_inference_optimization/10.6_speculative_decoding.md) |
 | `ch11a_engine_components.py` | 图 11-1 推理引擎的组件与一个请求的路径 | [11.1](../../11_serving/11.1_engines_overview.md) |
 | `ch11a_batching_gantt.py` | 图 11-2 同样 8 个请求 | [11.2](../../11_serving/11.2_continuous_batching.md) |
 | `ch11a_mixed_batch_shapes.py` | 图 11-3 一轮迭代里的混合批 | [11.2](../../11_serving/11.2_continuous_batching.md) |
@@ -87,12 +87,12 @@ Linux 的 Noto Sans CJK 任一即可）；各脚本已按此顺序自动挑选�
 | `ch02_mask_family.py` | 图 2-5 五种掩码都是同一张 `[T, T]` 矩阵 | [2.4](../../02_attention/2.4_self_cross_causal.md) |
 | `ch02_flops_crossover.py` | 图 2-6 $$d = 4096$$ 时 | [2.5](../../02_attention/2.5_complexity_limits.md) |
 | `ch03_bpe_pipeline.py` | 图 3-1 一段文本怎样经预分词、字节化与合并变成词元 ID | [3.1](../../03_components/3.1_tokenization.md) |
-| `ch03_ffn_shapes.py` | 图 3-3 两矩阵 FFN 与三矩阵 SwiGLU 的形状对照 | [3.4](../../03_components/3.4_feedforward.md) |
-| `ch03_ffn_walkthrough.py` | 图 3-4 两矩阵 MLP 与 SwiGLU 对同一个输入的逐步计算 | [3.4](../../03_components/3.4_feedforward.md) |
-| `ch03_residual_stream.py` | 图 3-5 残差流——各子层从同一条通路读、向同一条通路写 | [3.5](../../03_components/3.5_residual.md) |
-| `ch03_norm_axes.py` | 图 3-6 同一张 `[B, T, d]` 上 | [3.6](../../03_components/3.6_layer_norm.md) |
-| `ch03_norm_placement.py` | 图 3-7 归一化放在哪里——Post-Norm、Pre-Norm 与前后双归一化 | [3.6](../../03_components/3.6_layer_norm.md) |
-| `ch03_gqa_heads.py` | 图 3-10 8 个 Query 头共用几组 K/V | [3.7](../../03_components/3.7_full_architecture.md) |
+| `ch03_ffn_shapes.py` | 图 3-2 两矩阵 FFN 与三矩阵 SwiGLU 的形状对照 | [3.4](../../03_components/3.4_feedforward.md) |
+| `ch03_ffn_walkthrough.py` | 图 3-3 两矩阵 MLP 与 SwiGLU 对同一个输入的逐步计算 | [3.4](../../03_components/3.4_feedforward.md) |
+| `ch03_residual_stream.py` | 图 3-4 残差流——各子层从同一条通路读、向同一条通路写 | [3.5](../../03_components/3.5_residual.md) |
+| `ch03_norm_axes.py` | 图 3-5 同一张 `[B, T, d]` 上 | [3.6](../../03_components/3.6_layer_norm.md) |
+| `ch03_norm_placement.py` | 图 3-6 归一化放在哪里——Post-Norm、Pre-Norm 与前后双归一化 | [3.6](../../03_components/3.6_layer_norm.md) |
+| `ch03_gqa_heads.py` | 图 3-7 8 个 Query 头共用几组 K/V | [3.7](../../03_components/3.7_full_architecture.md) |
 | `ch04_rope_wavelength.py` | 图 4-3 左图是 64 对频率的波长谱 | [4.3](../../04_position_encoding/4.3_rope.md) |
 | `ch04_alibi_decay.py` | 图 4-4 8 个头的 ALiBi 偏置换算成 Softmax 权重乘子后的衰减曲线 | [4.4](../../04_position_encoding/4.4_alibi_others.md) |
 | `ch05_shift_labels.py` | 图 5-1 一条序列怎样错一位变成 T−1 个训练样本 | [5.1](../../05_pretraining/5.1_autoregressive.md) |
@@ -122,11 +122,12 @@ Linux 的 Noto Sans CJK 任一即可）；各脚本已按此顺序自动挑选�
 | `ch14a_linear_state.py` | 图 14-1 同一个式子的两种相乘顺序 | [14.1](../../14_future_trends/14.1_efficient_attention.md) |
 | `ch14a_moe_forward.py` | 图 14-2 一次 MoE 前向的六步 | [14.2](../../14_future_trends/14.2_moe.md) |
 | `ch14a_mamba_block.py` | 图 14-4 Mamba 块的形状流 | [14.3](../../14_future_trends/14.3_ssm_hybrid.md) |
-| `ch14a_visual_tokens.py` | 图 14-7 一张 336×336 的图怎样变成 576 行 | [14.4](../../14_future_trends/14.4_multimodal.md) |
-| `ch14a_agent_context.py` | 图 14-10 Agent 循环里上下文怎样逐轮变长 | [14.5](../../14_future_trends/14.5_agent_tool_use.md) |
-| `ch14b_r1_pipeline.py` | 图 14-12 DeepSeek-R1 的四阶段训练流程与各阶段的数据来源 | [14.6](../../14_future_trends/14.6_test_time_scaling.md) |
-| `ch14b_causal_shard_balance.py` | 图 14-14 把序列切成 $$2P = 8$$ 块后 | [14.7](../../14_future_trends/14.7_long_context.md) |
-| `ch14b_superposition_2d.py` | 图 14-17 5 个特征挤进 2 维时的方向排布 | [14.8](../../14_future_trends/14.8_interpretability.md) |
+| `ch14a_visual_tokens.py` | 图 14-6 一张 336×336 的图怎样变成 576 行 | [14.4](../../14_future_trends/14.4_multimodal.md) |
+| `ch14a_agent_context.py` | 图 14-9 Agent 循环里上下文怎样逐轮变长 | [14.5](../../14_future_trends/14.5_agent_tool_use.md) |
+| `ch14b_r1_pipeline.py` | 图 14-11 DeepSeek-R1 的四阶段训练流程与各阶段的数据来源 | [14.6](../../14_future_trends/14.6_test_time_scaling.md) |
+| `ch14b_causal_shard_balance.py` | 图 14-13 把序列切成 $$2P = 8$$ 块后 | [14.7](../../14_future_trends/14.7_long_context.md) |
+| `ch14b_lost_in_middle.py` | 图 14-14 多文档问答准确率随含答案文档位置的变化（Lost in the Middle 实测） | [14.7](../../14_future_trends/14.7_long_context.md) |
+| `ch14b_superposition_2d.py` | 图 14-15 5 个特征挤进 2 维时的方向排布 | [14.8](../../14_future_trends/14.8_interpretability.md) |
 
 `tests/test_figure_scripts.py` 保证这张表与正文引用、磁盘文件三者不脱节：正文引用的脚本
 必须存在，本目录的每个脚本必须被正文引用，且每个脚本声明的输出图必须已提交。

@@ -1,6 +1,6 @@
 ## A.2 PyTorch 实现示例
 
-以下代码展示了 Transformer 核心组件的 PyTorch 实现。更多与正文数学推导配套的可运行代码示例，可参见[第 2 章](../02_attention/2.2_scaled_dot_product.md)、[第 3 章](../03_components/3.4_feedforward.md)与[第 4 章](../04_position_encoding/4.3_rope.md)中的内嵌代码。
+以下代码展示了 Transformer 核心组件的 PyTorch 实现。
 
 完成本附录后，继续用 [A.6](a6_practice_path.md)核对手算梯度、精确恢复训练、KV Cache 等价性与后训练目标，再用 [A.7](a7_framework_recipes.md)迁移到开源训练框架和推理服务。
 

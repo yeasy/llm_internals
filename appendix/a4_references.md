@@ -139,7 +139,7 @@
 114. Lei, Y., et al. (2026). [The Energy Cost of Execution-Idle in GPU Clusters](https://arxiv.org/abs/2604.04745).
 115. Zhong, T., et al. (2026). [Diagnosing Training Inference Mismatch in LLM Reinforcement Learning](https://arxiv.org/abs/2605.14220). *ByteDance & University of Virginia*.
 
-### 本轮加深新增
+### 补充文献（一）
 
 以下条目在第 7、9、10、11 章加深时引入，题目与作者经 arXiv API 核对。
 
@@ -308,7 +308,7 @@
 278. Ziegler, D. M., et al. (2019). [Fine-Tuning Language Models from Human Preferences](https://arxiv.org/abs/1909.08593).
 279. Stiennon, N., et al. (2020). [Learning to Summarize from Human Feedback](https://arxiv.org/abs/2009.01325). *NeurIPS 2020*
 
-### 易懂度修订与新进展补写新增
+### 补充文献（二）
 
 280. Papineni, K., et al. (2002). [BLEU: a Method for Automatic Evaluation of Machine Translation](https://aclanthology.org/P02-1040/). *ACL 2002*
 281. He, K., et al. (2016). [Identity Mappings in Deep Residual Networks](https://arxiv.org/abs/1603.05027).
@@ -344,3 +344,52 @@
 311. Cheng, X., et al. (2026). [Conditional Memory via Scalable Lookup: A New Axis of Sparsity for Large Language Models](https://arxiv.org/abs/2601.07372).
 312. Elango, V., et al. (2026). [LatentMoE: Toward Optimal Accuracy per FLOP and Parameter in Mixture of Experts](https://arxiv.org/abs/2601.18089).
 313. Lahoti, A., et al. (2026). [Mamba-3: Improved Sequence Modeling using State Space Principles](https://arxiv.org/abs/2603.15569).
+
+### 补充文献（三）
+
+314. van Laarhoven, T. (2017). [L2 Regularization versus Batch and Weight Normalization](https://arxiv.org/abs/1706.05350).
+315. Smith, S. L., et al. (2017). [Don't Decay the Learning Rate, Increase the Batch Size](https://arxiv.org/abs/1711.00489).
+316. Khandelwal, U., et al. (2018). [Sharp Nearby, Fuzzy Far Away: How Neural Language Models Use Context](https://arxiv.org/abs/1805.04623).
+317. Sanh, V., et al. (2019). [DistilBERT, a distilled version of BERT: smaller, faster, cheaper and lighter](https://arxiv.org/abs/1910.01108).
+318. Kasai, J., et al. (2020). [Deep Encoder, Shallow Decoder: Reevaluating Non-autoregressive Machine Translation](https://arxiv.org/abs/2006.10369).
+319. Wang, Y. A., et al. (2020). [What Do Position Embeddings Learn? An Empirical Study of Pre-Trained Language Model Positional Encoding](https://arxiv.org/abs/2010.04903).
+320. Zamirai, P., et al. (2020). [Revisiting BFloat16 Training](https://arxiv.org/abs/2010.06192).
+321. Qu, Y., et al. (2020). [RocketQA: An Optimized Training Approach to Dense Passage Retrieval for Open-Domain Question Answering](https://arxiv.org/abs/2010.08191).
+322. Gao, L., et al. (2021). [Scaling Deep Contrastive Learning Batch Size under Memory Limited Setup](https://arxiv.org/abs/2101.06983).
+323. Thakur, N., et al. (2021). [BEIR: A Heterogenous Benchmark for Zero-shot Evaluation of Information Retrieval Models](https://arxiv.org/abs/2104.08663).
+324. Gilmer, J., et al. (2021). [A Loss Curvature Perspective on Training Instability in Deep Learning](https://arxiv.org/abs/2110.04369).
+325. Haviv, A., et al. (2022). [Transformer Language Models without Positional Encodings Still Learn Positional Information](https://arxiv.org/abs/2203.16634).
+326. Saharia, C., et al. (2022). [Photorealistic Text-to-Image Diffusion Models with Deep Language Understanding](https://arxiv.org/abs/2205.11487).
+327. Kusupati, A., et al. (2022). [Matryoshka Representation Learning](https://arxiv.org/abs/2205.13147).
+328. Muennighoff, N., et al. (2022). [MTEB: Massive Text Embedding Benchmark](https://arxiv.org/abs/2210.07316).
+329. Wang, L., et al. (2022). [Text Embeddings by Weakly-Supervised Contrastive Pre-training](https://arxiv.org/abs/2212.03533).
+330. Dettmers, T., et al. (2022). [The case for 4-bit precision: k-bit Inference Scaling Laws](https://arxiv.org/abs/2212.09720).
+331. Molybog, I., et al. (2023). [A Theory on Adam Instability in Large-Scale Machine Learning](https://arxiv.org/abs/2304.09871).
+332. Kunstner, F., et al. (2023). [Noise Is Not the Main Factor Behind the Gap Between SGD and Adam on Transformers, but Sign Descent Might Be](https://arxiv.org/abs/2304.13960).
+333. Kosson, A., et al. (2023). [Rotational Equilibrium: How Weight Decay Balances Learning Across Neural Networks](https://arxiv.org/abs/2305.17212).
+334. Kazemnejad, A., et al. (2023). [The Impact of Positional Encoding on Length Generalization in Transformers](https://arxiv.org/abs/2305.19466).
+335. Zheng, L., et al. (2023). [Judging LLM-as-a-Judge with MT-Bench and Chatbot Arena](https://arxiv.org/abs/2306.05685).
+336. Dehghani, M., et al. (2023). [Patch n' Pack: NaViT, a Vision Transformer for any Aspect Ratio and Resolution](https://arxiv.org/abs/2307.06304).
+337. Li, Z., et al. (2023). [Towards General Text Embeddings with Multi-stage Contrastive Learning](https://arxiv.org/abs/2308.03281).
+338. Wang, L., et al. (2023). [Improving Text Embeddings with Large Language Models](https://arxiv.org/abs/2401.00368).
+339. Chen, J., et al. (2024). [M3-Embedding: Multi-Linguality, Multi-Functionality, Multi-Granularity Text Embeddings Through Self-Knowledge Distillation](https://arxiv.org/abs/2402.03216).
+340. Duan, M., et al. (2024). [Do Membership Inference Attacks Work on Large Language Models?](https://arxiv.org/abs/2402.07841).
+341. Kunstner, F., et al. (2024). [Heavy-Tailed Class Imbalance and Why Adam Outperforms Gradient Descent on Language Models](https://arxiv.org/abs/2402.19449).
+342. BehnamGhader, P., et al. (2024). [LLM2Vec: Large Language Models Are Secretly Powerful Text Encoders](https://arxiv.org/abs/2404.05961).
+343. Lee, C., et al. (2024). [NV-Embed: Improved Techniques for Training LLMs as Generalist Embedding Models](https://arxiv.org/abs/2405.17428).
+344. Kalra, D. S., et al. (2024). [Why Warmup the Learning Rate? Underlying Mechanisms and Improvements](https://arxiv.org/abs/2406.09405).
+345. Li, J., et al. (2024). [DataComp-LM: In search of the next generation of training sets for language models](https://arxiv.org/abs/2406.11794).
+346. Yao, S., et al. (2024). [τ-bench: A Benchmark for Tool-Agent-User Interaction in Real-World Domains](https://arxiv.org/abs/2406.12045).
+347. Pearce, T., et al. (2024). [Reconciling Kaplan and Chinchilla Scaling Laws](https://arxiv.org/abs/2406.12907).
+348. Zhou, C., et al. (2024). [Transfusion: Predict the Next Token and Diffuse Images with One Multi-Modal Model](https://arxiv.org/abs/2408.11039).
+349. Wang, P., et al. (2024). [Qwen2-VL: Enhancing Vision-Language Model's Perception of the World at Any Resolution](https://arxiv.org/abs/2409.12191).
+350. Bernstein, J., et al. (2024). [Old Optimizer, New Norm: An Anthology](https://arxiv.org/abs/2409.20325).
+351. Wen, K., et al. (2024). [Understanding Warmup-Stable-Decay Learning Rates: A River Valley Loss Landscape Perspective](https://arxiv.org/abs/2410.05192).
+352. Paulo, G., et al. (2025). [Sparse Autoencoders Trained on the Same Data Learn Different Features](https://arxiv.org/abs/2501.16615).
+353. Yang, A., et al. (2025). [Qwen3 Technical Report](https://arxiv.org/abs/2505.09388).
+354. Comanici, G., et al. (2025). [Gemini 2.5: Pushing the Frontier with Advanced Reasoning, Multimodality, Long Context, and Next Generation Agentic Capabilities](https://arxiv.org/abs/2507.06261).
+355. Google DeepMind Mech Interp Team (2025). [Negative Results for SAEs On Downstream Tasks and Deprioritising SAE Research](https://www.alignmentforum.org/posts/4uXCAJNuPKtKBsi28/negative-results-for-saes-on-downstream-tasks). *AI Alignment Forum*.
+356. Anthropic. [Extended thinking](https://platform.claude.com/docs/en/build-with-claude/extended-thinking). *Claude Platform Docs*.
+357. Anthropic (2025). [Introducing advanced tool use for Claude](https://www.anthropic.com/engineering/advanced-tool-use).
+358. Kimi Team (2026). [Attention Residuals](https://arxiv.org/abs/2603.15031).
+359. Zhang, H., et al. (2024). [How Does Critical Batch Size Scale in Pre-training?](https://arxiv.org/abs/2410.21676).

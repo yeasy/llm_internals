@@ -1,6 +1,6 @@
 ## A.7 开源框架工程实践
 
-本附录把第 7、8、11 章的机制接到三条工作流：先用本地数据完成一次可检查的微调，再按瓶颈扩展训练，最后比较服务质量与成本。判断依据是相同任务、相同预算下的实验结果，不是框架名称。
+本附录把第 7、8、11 章的机制接到三条工作流：先用本地数据完成一次可检查的微调，再按瓶颈扩展训练，最后比较服务质量与成本。A.7.8 收录正文各章迁出的源码名、配置键与启动参数。判断依据是相同任务、相同预算下的实验结果，不是框架名称。
 
 **执行边界：以下是环境配方与工程决策指南，未在本机执行 CUDA 训练或服务压测。** 完整脚本与集成片段分别标明；语法检查不能证明依赖兼容、模型适配或性能达标。参数以链接的官方接口为依据；读者实际部署时，应保存依赖版本与启动命令，并按自己的工作负载验收。
 
@@ -392,3 +392,761 @@ $$
 | 解码延迟是主要约束，评估投机 | 接受率、草稿与验证开销，低/高并发分别比较 | 只报接受率，不报端到端收益 |
 
 这些边界对应 [vLLM 前缀缓存](https://docs.vllm.ai/en/latest/features/automatic_prefix_caching/)、[量化支持](https://docs.vllm.ai/en/latest/features/quantization/)、[并行部署](https://docs.vllm.ai/en/latest/serving/parallelism_scaling/)、[PD 分离](https://docs.vllm.ai/en/latest/features/disagg_prefill/)和[投机解码](https://docs.vllm.ai/en/latest/features/speculative_decoding/)。按 [11.13 节](../11_serving/11.13_best_practices.md)先固定服务目标，再逐项加入优化；若复杂度增加而合格请求成本未降，应保留较简单的配置。
+
+### A.7.8 正文迁出的实现对照
+
+正文各章只讲设计决定及其理由；源码类名、配置键、启动参数、默认值与版本细节随版本变化，集中列在这里，按小节号排序。注了版本的条目以所注版本为准；未注版本的条目描述的是写作时各框架主线的行为。默认值与字段名常随版本变化，升级框架后先对照官方文档。
+
+#### 2.1.5 节：注意力投影在常见实现里的名字
+
+| 实现 | 模块名 | 权重形状 | 偏置 |
+| --- | --- | --- | --- |
+| Hugging Face Llama | `q_proj`、`k_proj`、`v_proj`、`o_proj`（`nn.Linear`） | `q_proj` 为 `[n_h × d_h, d_model]`，`k_proj`、`v_proj` 为 `[n_kv × d_h, d_model]` | 由 `config.attention_bias` 决定，Llama 系列为 `False` |
+| Hugging Face GPT-2 | `c_attn`、`c_proj`（`Conv1D`） | `c_attn` 把 Q/K/V 融合成一个 `[768, 3 × 768]`，前向后按 `split` 拆成三份 | 有 |
+
+两种常见实现里的注意力权重。`nn.Linear` 按“输出 × 输入”存放权重，与正文 $XW$ 的 `[输入, 输出]` 互为转置；GPT-2 的 `Conv1D` 按 `[输入, 输出]` 存放，且把三个投影融合成一个矩阵，一次矩阵乘法算出 Q、K、V。GQA 下 `k_proj` 与 `v_proj` 的输出宽度按 `n_kv` 而非 `n_h` 计算。
+
+每头宽度的取值顺序：Hugging Face 先读配置里的 `head_dim`，没有才退回 `hidden_size // num_attention_heads`。Qwen3-4B 的配置是 `hidden_size` 2560、`num_attention_heads` 32、`head_dim` 128，`32 × 128 = 4096` 不等于 2560，由 `o_proj` 投回 2560。
+
+#### 2.2.6 节：PyTorch `scaled_dot_product_attention` 与正文四步的对应
+
+签名为 `scaled_dot_product_attention(query, key, value, attn_mask=None, dropout_p=0.0, is_causal=False, scale=None, enable_gqa=False)`。
+
+| 正文的步骤 | 接口里的对应物 | 要点 |
+| --- | --- | --- |
+| 输入的 Q、K、V | `query` 形状 `[..., Hq, L, E]`，`key` 形状 `[..., H, S, E]`，`value` 形状 `[..., H, S, Ev]` | 常见布局是 `[B, n_h, T, d_h]`；`L` 是查询数，`S` 是键值数，两者不必相等（这个 `S` 是 PyTorch 文档的记号，与正文的分数矩阵 $S$ 无关）；`E` 即 $d_k$，`Ev` 即 $d_v$ |
+| 缩放因子 $1/\sqrt{d_k}$ | `scale` | 默认即 $1/\sqrt{E}$，$E$ 取 `query` 的最后一维；传入非默认值可实现 μP 那类缩放 |
+| Softmax 之前加掩码 | `attn_mask` 或 `is_causal=True` | 布尔掩码中 `True` 表示参与注意力，与 `masked_fill` 的约定相反；浮点掩码直接加到分数上；两者不能与 `is_causal` 同时使用 |
+| Softmax 之后的 dropout | `dropout_p` | 作用在注意力权重上，即 Softmax 之后、乘 $V$ 之前 |
+| K/V 头数少于 Q 头数 | `enable_gqa=True` | 见正文 2.3.7 节 |
+
+该函数在多个后端之间选择，包括不把 `[L, S]` 分数矩阵写回显存的融合实现与朴素的数学实现；后者在半精度输入下把中间结果保持为 FP32。Hugging Face 的 Llama 朴素注意力把 Softmax 写成 `softmax(attn_weights, dim=-1, dtype=torch.float32).to(query.dtype)`，即在 FP32 下计算再转回原精度。
+
+#### 2.4.3 节：Hugging Face 的掩码转换
+
+Hugging Face 的掩码工具把布尔掩码转成“可见处为 0.0、屏蔽处为 `torch.finfo(dtype).min`”的浮点掩码再与分数相加，用有限极小值代替 $-\infty$，避免半精度下的 `inf` 在后续算子里变成 `NaN`。
+
+#### 2.4.7 节：变长打包的内核接口
+
+FlashAttention 的变长接口 `flash_attn_varlen_func` 用 `cu_seqlens`（各条序列长度的前缀和）表达边界，内核按段处理，天然不会跨段打分，既不需要显式的 `[n, n]` 块对角掩码，也跳过被遮住的块。重置 `position_ids` 只改变位置编码，不改变可见性，不能代替它。
+
+#### 3.1.5 节：读一个真实分词器
+
+Hugging Face 的 `tokenizer.json` 有四项要看：
+
+- `model.vocab`：词元到 ID 的映射。
+- `model.merges`：有序合并表，即 3.1.3 里 rank 的来源。
+- `pre_tokenizer`：3.1.4 的预分词正则。
+- `added_tokens`：特殊词元及其 ID。
+
+tiktoken 按编码名组织，常见的有 `gpt2`、`cl100k_base`、`o200k_base`，其 `n_vocab` 分别为 50,257、100,277、200,019。速度方面，tiktoken 官方 README 给出的是比同类开源分词器快 3 到 6 倍。
+
+GPT-2 的词表文件用 `bytes_to_unicode` 把 256 个字节一一映射到 256 个可打印的 Unicode 字符，再在映射后的字符上跑 BPE，所以词表文件看起来全是可见字符，实质仍是字节。预分词正则收录在 tiktoken 仓库的 `tiktoken_ext/openai_public.py`。SentencePiece 的字节回退由 `byte_fallback` 选项开启。
+
+#### 3.2.7 节：嵌入与 LM head 的模块名
+
+| 框架 / 模型 | 输入嵌入 | 位置嵌入 | 末端归一化 | 输出投影 | 相关配置字段 |
+| --- | --- | --- | --- | --- | --- |
+| PyTorch | `nn.Embedding(num_embeddings, embedding_dim)`，权重 `[V, d]` | — | — | — | `sparse=True` 启用稀疏行梯度 |
+| HF Llama | `model.embed_tokens` | 无（RoPE） | `model.norm` | `lm_head` | `vocab_size`、`hidden_size`、`tie_word_embeddings` |
+| HF GPT-2 | `wte` | `wpe` | `ln_f` | 与 `wte` 绑定 | 同上 |
+
+Gemma 2 的 HF 实现把嵌入乘以 `config.hidden_size ** 0.5`，Llama 系列的 `LlamaModel` 不做缩放。
+
+张量并行下，嵌入表按行切分 `V`，每卡只持有自己那段，越界 ID 的结果置零后做一次 all-reduce（见 7.3 节）；词表大小常被补齐到某个倍数，正是为了让这一步切得整齐。logits 张量 `[B, T, V]` 的显存：Llama 3 8B 在 `B = 4`、`T = 8192`、BF16 下是 `4 × 8192 × 128256 × 2 = 8,405,385,216` 字节，约 7.8 GiB。
+
+#### 3.4.5、3.4.7 节：FFN 的字段与模块名
+
+读一个模型的 FFN：`hidden_act` 给出激活函数（Gemma 的字段名是 `hidden_activation`）；MLP 类里有没有门控投影（`gate_proj`，或与 up 合存的 `gate_up_proj`）决定是否门控；MoE 模型的前若干层稠密层数由 `first_k_dense_replace` 一类字段给出（DeepSeek-V3 为 3，Kimi K2 为 1）。
+
+HF 的 `LlamaMLP` 定义三个投影 `gate_proj`、`up_proj`、`down_proj`，激活由 `config.hidden_act` 选取（Llama 系列为 `"silu"`），中间宽度是 `config.intermediate_size`，偏置由 `config.mlp_bias` 控制。前向是 `down_proj(act_fn(gate_proj(x)) * up_proj(x))`；激活加在 gate 这一路，两路互换名字在数学上等价。推理引擎常把 `gate_proj` 与 `up_proj` 横向拼成一个矩阵，一次矩阵乘得到两段结果再切开，省一次内核启动与一次对 `x` 的重复读取，具体命名随引擎版本变化。
+
+几个激活字段的含义：
+
+| 字段 | 含义 |
+| --- | --- |
+| `gelu_new` | GELU 的 tanh 近似（GPT-2） |
+| `gelu_pytorch_tanh` | 同一近似；Gemma 把它放在门控一路，即 GeGLU |
+| `silu` | Swish₁，即 SwiGLU 的门控激活 |
+| `relu2` | 平方 ReLU，$\max(0, z)^2$（Nemotron-4） |
+
+Phi-4 把 `W_gate` 与 `W_up` 横向拼成一个 `[d, 2d_ff]` 矩阵存储，算法不变。gpt-oss 的配置虽写 `silu`，实现另有三处改动：门控取 $z\,\sigma(1.702z)$，且先把输入上限截断为 7；另一路截断到 ±7 之后再加 1。
+
+#### 3.5.6 节：层实现里的残差
+
+HF 的 `LlamaDecoderLayer.forward` 里出现两次 `residual = hidden_states` 与两次 `hidden_states = residual + hidden_states`，中间分别夹着 `input_layernorm` 加注意力、`post_attention_layernorm` 加 `mlp`。读一个新模型的层实现，先找这两对语句，就能确定归一化放在哪里。
+
+#### 3.6.8 节：归一化的模块名、$\epsilon$ 与参数化
+
+| 模型 | 模块 | 参数与初始化 | $\epsilon$ 字段 | 一层里的名字 |
+| --- | --- | --- | --- | --- |
+| HF Llama | `LlamaRMSNorm` | 一个 `weight`，初始化为全 1 | `rms_norm_eps`，Llama 2/3 为 `1e-5` | `input_layernorm`（注意力前）、`post_attention_layernorm`（FFN 前）、`model.norm`（末端） |
+| HF Gemma 2 | `Gemma2RMSNorm` | `weight` 初始化为全 0，前向用 `(1.0 + weight)` 缩放 | 同类字段 | 另有 `pre_feedforward_layernorm`、`post_feedforward_layernorm` |
+| HF GPT-2 | `LayerNorm` | `weight`、`bias` | `layer_norm_epsilon` | `ln_1`、`ln_2`、`ln_f` |
+
+`LlamaRMSNorm.forward` 先把输入转成 `torch.float32`，算完平方均值与 `rsqrt` 后再转回原 dtype。Gemma 2 的 `(1.0 + weight)` 参数化在数学上等价于初始值为 1 的 $\gamma$，但权重衰减作用在 0 附近而不是 1 附近，正则化行为不同；移植权重时忽略这一点，整个模型的尺度会错。
+
+#### 3.7.4 节：现代层在 `config.json` 里的字段
+
+表 3-12 右边一列的各项可以由 `config.json` 直接确认：`hidden_act`（FFN 激活）、`rms_norm_eps`（RMSNorm）、`intermediate_size`（FFN 宽度）、`rope_theta`（RoPE）、`num_key_value_heads`（GQA）、`attention_bias` 与 `mlp_bias`（偏置）、`tie_word_embeddings`（权重绑定）。
+
+偏置一行常被记反：原始 Transformer 的多头注意力投影不带偏置，只有 FFN 的 $\max(0, xW_1+b_1)W_2+b_2$ 带两个。给注意力投影加上偏置的是 GPT-2 一路：HF 实现里这些投影是 `Conv1D`，该模块无条件持有一个 `bias` 参数。
+
+#### 3.7.5 节：GQA 的实现
+
+算注意力分数时，每组 K/V 被复制 $n_h / n_{kv}$ 份与对应的 Query 头配对，HF 实现里这一步是 `repeat_kv`。判断一个模型用不用 GQA，看 `num_key_value_heads` 是否小于 `num_attention_heads`。
+
+#### 4.2.5 节：可学习位置表的配置键与 OPT 的位置偏移
+
+| 模型 | 位置表配置键 | 模块名 | 备注 |
+| --- | --- | --- | --- |
+| GPT-2 | `n_positions`（等价写法 `max_position_embeddings`） | `transformer.wpe`，与词嵌入 `transformer.wte` 并列 | 只相加词嵌入与位置两张表 |
+| BERT | `max_position_embeddings` | `embeddings.position_embeddings` | 另有段嵌入 `token_type_embeddings`（`type_vocab_size` 为 2），三张表相加后再过 LayerNorm 与 Dropout |
+
+带 KV 缓存解码时，新词元的位置号是 `arange(1) + past_seen_tokens`，GPT-2 的实现即如此。
+
+OPT 的位置表长度是 $L_{\max} + 2$，查表时位置号统一加 2；位置号由 `cumsum(attention_mask) * attention_mask - 1` 算出，从而跳过左侧填充。多乘的那一次掩码不能省：省掉它，掩码为 0 的位置会继承前一格的累加值，而不是统一归到 −1。照抄别的模型的 `position_ids` 会错两位。
+
+#### 4.3.5 节：Llama 3.1 的分段缩放
+
+Llama 3.1 的 `rope_scaling` 写着 `rope_type = "llama3"`、`factor = 8`、`low_freq_factor = 1`、`high_freq_factor = 4`、`original_max_position_embeddings = 8192`。记 $s = 8$、$f_{\text{lo}} = 1$、$f_{\text{hi}} = 4$、$L_0 = 8192$：波长 $\lambda < L_0/f_{\text{hi}} = 2048$ 的对不动，$\lambda > L_0/f_{\text{lo}} = 8192$ 的对频率除以 8，两者之间按波长线性过渡：
+
+$$w_i = \frac{L_0/\lambda_i - f_{\text{lo}}}{f_{\text{hi}} - f_{\text{lo}}}, \qquad \theta_i' = (1 - w_i)\frac{\theta_i}{s} + w_i \theta_i$$
+
+代入 $b = 500{,}000$、$d_h = 128$，第 0 至 28 对不动，第 29 至 34 对在斜坡上，第 35 至 63 对除以 8。斜坡带的一例是第 32 对：$\theta = 1.414 \times 10^{-3}$，$\lambda = 4{,}443$，$w_{32} = (8192/4443 - 1)/(4 - 1) = 0.281$，$\theta' = 0.719 \times \theta/8 + 0.281\,\theta = 5.248 \times 10^{-4}$，相当于只除以 2.69。Meta 参考实现对这组常数的注释是由网格搜索得到。
+
+#### 4.3.6 节：RoPE 的配置键与实现细节
+
+| 配置键 | 含义 | 取值示例 |
+| --- | --- | --- |
+| `rope_theta` | 底数 $b$ | Llama 3 为 `500000.0`；GPT-NeoX 写作 `rotary_emb_base`，为 `10000` |
+| `rope_scaling` | 缩放方案与参数 | `rope_type` 取 `ROPE_INIT_FUNCTIONS` 的键：`linear`、`dynamic`、`yarn`、`longrope`、`llama3`、`proportional`；不写则按 `default` 走不缩放的原始公式 |
+| `max_position_embeddings` | 声明支持的最大位置 | Llama 3.1 为 131072 |
+| `partial_rotary_factor` | 只旋转每个头的前若干维 | GPT-NeoX 写作 `rotary_pct`，20B 模型取 0.25 |
+
+RoPE 相关的常见配置键，取自各模型公开的 `config.json` 与 Transformers 的 `modeling_rope_utils.py`。
+
+- **配对布局。** Hugging Face 的 `rotate_half` 把前半与后半配对（第 0 与第 64 维、第 1 与第 65 维……），cos/sin 表由 `[T, d_h/2]` 拼成 `[T, d_h]`。把 Meta 原始权重转成 HF 格式时，要对 `q_proj`、`k_proj` 做相应的行置换。
+- **fp32 的 cos/sin 表。** Transformers 的 Llama 实现在计算这张表时显式关闭自动混合精度，算完再转回激活的 dtype。
+- **形状。** `Q[T, d_h] ⊙ cos[T, d_h] → [T, d_h]`；cos、sin 两张表各有 `[T, d_h/2]` 个不同的数，复制成 `[T, d_h]` 与 Q 对齐。
+
+#### 4.4.1 节：ALiBi 的实现形态
+
+偏置是一个与内容无关的常量张量，按 `[n_h, T, T]` 加到掩码上；因 Softmax 对一行加常数不变，实现只需键的位置。BLOOM 构造的张量形状是 `[B × n_h, 1, T]`，只含键位置，靠广播对上查询维。FlashAttention 以 `alibi_slopes` 参数原生支持这项偏置，接受形状 `(n_h,)` 或 `(B, n_h)` 的 fp32 斜率。
+
+#### 4.4.2 节：T5 相对位置偏置的分桶
+
+| 相对距离 | 0 | 1 | 15 | 16 | 17 | 20 | 24 | 32 | 64 | 96 | 128 及以上 |
+| ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
+| 桶号 | 0 | 1 | 15 | 16 | 16 | 17 | 19 | 21 | 26 | 29 | 31 |
+
+T5 的相对距离分桶（32 个桶、最大距离 128、因果方向），按 Transformers 的 `_relative_position_bucket` 规则算出。前 16 个桶一一对应距离 0 到 15，其余 16 个桶覆盖 16 到 127、宽度按对数增长，128 以上全部落进第 31 号桶。配置键是 `relative_attention_num_buckets` 与 `relative_attention_max_distance`。
+
+#### 4.4.3 节：分层混合位置方案的配置
+
+- **Llama 4。** `no_rope_layers` 逐层标出哪些层用 RoPE，`no_rope_layer_interval` 默认 4（每四层去掉一次）；`attention_chunk_size` 默认 8192，带 RoPE 的层做分块局部注意力。SmolLM3 用同一组配置键。
+- **Cohere Command 系列**（`cohere2` 架构）。按层类型判断是否调用 `apply_rotary_pos_emb`：滑窗层施加 RoPE，全局层不施加。
+- **部分旋转。** 配置键 `partial_rotary_factor`，GPT-NeoX 写作 `rotary_pct`。
+- **Gemma 3。** 滑窗层与全局层各配一个 $\theta$：全局层 1,000,000，滑窗层 10,000。
+
+#### 5.1.7 节：因果语言模型的标签移位与忽略标记
+
+Hugging Face 的因果语言模型接口只接收一个与 `input_ids` 等长的 `labels`，移位在损失函数里完成：先把 `labels` 右侧补一格 −100，再取 `labels[..., 1:]` 与 logits 对齐。以 `A B C D` 为例，logits 有 4 行，`labels` 补位后是 `A B C D −100`，去掉第一格得 `B C D −100`，与 4 行 logits 逐行对齐，第 4 行不计损失，共 3 个监督位置。交叉熵的 `ignore_index` 默认取 −100，被标记的位置既不进分子也不进分母。
+
+#### 5.2.7 节：MLM 名额分配的默认参数
+
+BERT 官方的 `create_pretraining_data.py` 默认 `max_seq_length = 128`、`masked_lm_prob = 0.15`、`max_predictions_per_seq = 20`（$128 \times 0.15 = 19.2$ 向上取整）。Hugging Face 的 `DataCollatorForLanguageModeling` 用三个参数表达 80/10/10：`mlm_probability = 0.15`、`mask_replace_prob = 0.8`、`random_replace_prob = 0.1`，剩下的 0.1 保持不变；它在每个批次现场采样，属于动态掩码。
+
+#### 5.3.2 节：T5 的哨兵词元
+
+哨兵是加进词表的特殊词元，不对应任何 wordpiece。T5 的 SentencePiece 词表有 32,000 个词，Hugging Face 的 `T5Tokenizer` 默认追加 `extra_ids = 100` 个哨兵，名字从 `<extra_id_0>` 起；`t5-base` 的 `config.json` 里 `vocab_size` 是 32128，即 32,100 再向上对齐。训练时 `T5ForConditionalGeneration` 由 `labels` 右移得到 `decoder_input_ids`。
+
+#### 6.1.5 节：Muon 在 Megatron 中的实现
+
+NVIDIA Megatron Core 为 Muon 配了一个**逐层分布式优化器**：把整层指派给某个数据并行进程，整层的正交化不需要额外通信就能算出，绕开了 ZeRO/FSDP 按元素分片与“正交化需要完整矩阵”之间的冲突。Megatron-LM 命令行一侧的对应项：
+
+| 参数 | 含义 |
+| --- | --- |
+| `--optimizer muon` | 选用 Muon |
+| `--muon-num-ns-steps` | Newton-Schulz 迭代次数，默认 5 |
+| `--muon-scalar-optimizer` | 一维参数交给哪个优化器，默认 `adam` |
+
+#### 6.2.4 节：学习率调度在框架里的名字
+
+- Hugging Face `transformers.optimization`：`get_cosine_schedule_with_warmup`、`get_linear_schedule_with_warmup`、`get_inverse_sqrt_schedule`、`get_cosine_with_min_lr_schedule_with_warmup`、`get_wsd_schedule`，通过 `lr_scheduler_type` 选择；WSD 的枚举值是 `SchedulerType.WARMUP_STABLE_DECAY`。
+- Megatron-LM：`--lr-decay-style` 取 `constant`、`linear`、`cosine`、`inverse-square-root`、`WSD`；`--min-lr` 指定终值，`--lr-warmup-iters` 或 `--lr-warmup-fraction` 指定预热长度。选 WSD 时 `--lr-wsd-decay-style`（`exponential`、`linear`、`cosine`、`minus_sqrt`）与 `--lr-wsd-decay-iters` 单独控制衰减段。
+
+#### 6.3.2 与 6.3.6 节：分布式梯度裁剪与 soft-cap 的配置
+
+- 参数被张量并行、流水线并行或 FSDP 切开后，全局范数要先跨卡归约平方和再开方。FSDP 提供自己的 `clip_grad_norm_` 方法；Megatron-LM 用 `--clip-grad` 指定阈值（默认 1.0），在分布式优化器内部完成跨组归约。`torch.nn.utils.clip_grad_norm_()` 返回裁剪之前的总范数，可直接作为监控量。
+- Gemma 2 的 soft-cap 在 Hugging Face 配置里对应 `attn_logit_softcapping`（默认 50.0）与 `final_logit_softcapping`（默认 30.0）；FlashAttention 的 Python 接口为注意力层的 soft-cap 提供 `softcap` 参数。
+
+#### 6.4.2 节：打包的序列边界
+
+FlashAttention 的变长接口用 `cu_seqlens`（各序列的累计起点）描述打包后的序列边界，等价于块对角的注意力掩码。只重置 `position_ids` 能让位置编号从 0 重新开始，但阻断不了样本之间的注意力。
+
+#### 7.1.4 与 7.1.5 节：NCCL 与 DDP
+
+- NCCL 的 [`NCCL_ALGO` 环境变量](https://docs.nvidia.com/deeplearning/nccl/user-guide/docs/env.html)列出 Ring、Tree 等算法，默认按拓扑自动选择。
+- DDP（[文档](https://docs.pytorch.org/docs/stable/generated/torch.nn.parallel.DistributedDataParallel.html)）按 `model.parameters()` 的逆序装桶，桶大小由 `bucket_cap_mb` 控制，默认 25 MiB。
+- `no_sync()` 上下文管理器让其内部的反向只在本地累加梯度，退出后的第一次反向再统一同步。
+- `find_unused_parameters=True`：每步遍历 autograd 图，找出本步不产生梯度的参数并提前标记就绪，含条件分支的模型需要它，代价是每步多一次图遍历。
+- `gradient_as_bucket_view=True`：梯度张量直接作为桶的视图，省掉一份与梯度等大的拷贝。
+
+#### 7.2 节：DeepSpeed ZeRO 与 FSDP2 的接口
+
+DeepSpeed（[配置文档](https://www.deepspeed.ai/docs/config-json/)）：
+
+| 配置项 | 对应的机制 |
+| --- | --- |
+| `zero_optimization.stage` | 0 到 3：关闭、分优化器状态、再分梯度、再分参数 |
+| `overlap_comm` | 梯度归约是否与反向计算重叠 |
+| `reduce_bucket_size` | 一次归约的元素数，作用与 DDP 的桶相同 |
+| `reduce_scatter` | ZeRO-1 的梯度归约用 Reduce-Scatter 而非 AllReduce，默认开启 |
+| `stage3_prefetch_bucket_size` | 参数预取缓冲的大小，调小省显存，但计算更容易等通信 |
+| `stage3_max_live_parameters` | 每卡同时驻留的完整参数上限，即 7.2.3 峰值公式里的第二项 |
+| `offload_optimizer`、`offload_param` | ZeRO-Offload／Infinity 的卸载；后者只在 stage 3 下有效 |
+
+PyTorch FSDP2（`fully_shard`，[文档](https://docs.pytorch.org/docs/stable/distributed.fsdp.fully_shard.html)）：
+
+- 初始化时 `model.parameters()` 原地从 `torch.Tensor` 转成沿第 0 维切分的 `DTensor`；前向和反向之前由 pre-hook 做 All-Gather 并转回普通张量，之后由 post-hook 释放未分片的参数。
+- 每调用一次 `fully_shard(module)` 形成一个通信组，组内参数用一次 All-Gather 取回；文档要求自底向上逐层调用，不要只包最外层。
+- `reshard_after_forward`：`True` 是标准的 ZeRO-3；`False` 前向之后不释放，省掉反向的 All-Gather，通信量回到 2Ψ；根单元默认取 `False`；取整数则前向之后重分片到更小的组（例如节点内 8 卡）。
+- `MixedPrecisionPolicy`：`param_dtype` 决定 All-Gather 与计算的精度，`reduce_dtype` 决定梯度归约的精度；分片参数本身保持高精度，兼作主权重。
+- HSDP 用二维 device mesh 表达：第 0 维是节点、第 1 维是节点内的卡，参数的 placement 为 `(Replicate(), Shard(0))`，即沿 mesh 第 1 维分片、沿第 0 维复制；一维 mesh 的全分片是 `(Shard(0),)`。`Shard(0)` 里的 0 指参数张量自身的第 0 维，与 mesh 的维度编号无关。
+
+#### 7.3 节：张量并行的源码与接口
+
+- Megatron-LM：7.3.3 的 f、g 是 `megatron/core/tensor_parallel/mappings.py` 里的两个 `torch.autograd.Function`，`_CopyToModelParallelRegion`（前向恒等、反向 `_reduce`）与 `_ReduceFromModelParallelRegion`（反之）。层定义在 `megatron/core/tensor_parallel/layers.py`：`ColumnParallelLinear`、`RowParallelLinear`、`VocabParallelEmbedding`；分片 logits 上的交叉熵是 `VocabParallelCrossEntropy`。并行度由 `tensor_model_parallel_size` 配置，序列并行由 `sequence_parallel` 开启；`tp_comm_overlap` 把通信切碎后与同层矩阵乘法交错执行，只能在序列并行开启时使用。
+- PyTorch 原生：`torch.distributed.tensor.parallel` 的 `parallelize_module`，配合 `ColwiseParallel`、`RowwiseParallel`、`SequenceParallel`，以及在分片 logits 上算交叉熵的 `loss_parallel`（[文档](https://docs.pytorch.org/docs/stable/distributed.tensor.parallel.html)）。
+
+#### 7.5 节：重计算的接口
+
+- PyTorch `torch.utils.checkpoint.checkpoint` 默认 `preserve_rng_state=True`，在检查点处保存并恢复随机数状态；[文档](https://docs.pytorch.org/docs/stable/checkpoint.html)建议使用 `use_reentrant=False` 的实现。
+- Megatron-LM 的 `CudaRNGStatesTracker` 让张量并行区域内的 dropout 在各卡上取不同种子，区域外取相同种子。
+- Megatron-LM 用 `recompute_granularity` 选粒度：`selective` 重算 `recompute_modules` 指定的子模块（默认 `core_attn`）；`full` 重算整层，由 `recompute_method` 决定哪些层参与：`uniform` 把各层均匀分组、每组存一个检查点，`block` 让每个流水线级只对指定数量的层重算、其余层照常保存。
+
+#### 7.6 节：AMP 的接口与默认值
+
+- `torch.amp.GradScaler` 的默认值：`init_scale` 65,536，`backoff_factor` 0.5，`growth_factor` 2.0，`growth_interval` 2,000 步（[文档](https://docs.pytorch.org/docs/stable/amp.html)）。
+- 与梯度累积、裁剪配合的调用顺序：全部微批量完成 `scaler.scale(loss).backward()` 后，调用一次 `scaler.unscale_(optimizer)`，再做梯度范数监控与裁剪，最后 `scaler.step(optimizer)`、`scaler.update()`。
+- `torch.autocast` 在 CUDA 上：矩阵乘法、卷积、`linear` 等用指定的低精度；`softmax`、`log_softmax`、`layer_norm`、`cross_entropy`、`exp`、`log`、`pow`、`sum`、`norm` 等用 FP32；另有一类按多个输入中最宽的类型执行，未列入规则的算子跟随输入。列表随设备后端而异，CUDA 的列表不能直接当成 CPU 的规则；显式指定 `dtype` 与原位算子也有例外。原生 AMP 下不要再对模型手动调用 `.half()` 或 `.bfloat16()`。
+
+#### 7.7.3 节：分布式检查点（DCP）
+
+`torch.distributed.checkpoint`（[文档](https://docs.pytorch.org/docs/stable/distributed.checkpoint.html)）：`save` 让每个 rank 只保存本地分片，每个检查点至少每 rank 一个文件；`async_save` 先把状态拷到暂存区（默认是 CPU 锁页内存），再在单独的线程里写入。状态对象只要实现 `state_dict` 与 `load_state_dict` 就能一并保存，数据加载器位置和随机数状态可照此接入。
+
+#### 8.1.2 节：TRL SFTTrainer 的三种数据格式与掩码开关（v1.7.0）
+
+**进阶：框架对照。** 以下到本小节末是 TRL 里的具体开关，换框架时名字会变，第一遍阅读可以跳过。[TRL 的 `SFTTrainer` 文档](https://huggingface.co/docs/trl/sft_trainer)区分以下情况（对应 [v1.7.0 实现](https://github.com/huggingface/trl/blob/v1.7.0/trl/trainer/sft_trainer.py)；下列默认行为针对未预先提供 `labels` 的文本数据）：
+
+- **语言建模格式**：单个 `text` 字段或完整 `messages` 列表，默认对整个序列的有效目标计损失；出现 `user`、`assistant` 角色并不会自动改成只训练回答。
+- **提示词—补全格式**：分开的 `prompt` 与 `completion` 字段，`completion_only_loss=None` 默认只训练补全部分；设置 `completion_only_loss=False` 才取消这层提示词屏蔽。
+- **只训练助手消息**：对话数据需显式设置 `assistant_only_loss=True`，且模板要用 `{% generation %}` 与 `{% endgeneration %}` 标出助手生成区间。TRL 可为部分已支持的模型族自动换用带这些标记的训练模板，其他模板需自行核验。若同时启用补全掩码，只训练两个掩码的交集。
+
+**多轮对话的监督范围由这个选择决定。** 8.1.2 节的配方采用完整 `messages` 加助手掩码，因此可训练多个助手回合，产生多段不连续的计损失区间；若把历史放进 `prompt`、最后一轮回答放进 `completion` 并只训练补全，就只监督最后一轮。训练前应抽取实际批次，逐词元对照 `input_ids` 与 `labels`：用户与系统位置是否为 −100，目标助手回合是否保留，以及回答结束词元是否仍在监督范围内。
+
+#### 8.3.5 节：TRL DPOTrainer 的配置项
+
+框架侧，TRL 的 `DPOTrainer` 把 $\beta$、损失变体与参考对数概率的预计算都做成了配置项。参数名随版本变动，机制不变：**一个 $\beta$、一种损失形状、一份参考对数概率是否落盘。**
+
+#### 9.1.2 节：vLLM 采样器的两组处理器与 logprobs 的取值位置
+
+> [!NOTE]
+> **进阶：vLLM 的两处实现。** vLLM 的采样器按“会改变 argmax 吗”把处理器分成两组，先执行会影响贪心结果的，再按请求分出贪心与随机两条路径。`logprobs` 默认在语法掩码之后、①的其余处理与②③④之前就算好：无约束请求拿到的是模型的原始分布，约束请求拿到的是已遮掉不合法词元的分布，两者都不是实际抽样所用的分布。
+
+#### 9.1.3 节：Llama 3 的两个结束词元 ID 与 HF 的 unfinished_sequences
+
+**结束词元可以不止一个。** Llama 3 的[官方分词器](https://github.com/meta-llama/llama3/blob/main/llama/tokenizer.py)定义 `stop_tokens = {<|end_of_text|>, <|eot_id|>}`。特殊词元排在 128,000 个基础词元之后，前者是第 2 个，ID 为 128001；后者是第 10 个，ID 为 128009。`<|end_of_text|>` 表示整段文本结束，`<|eot_id|>` 表示一轮对话结束，对话模板在每条消息末尾写的是后者。对话模型答完一轮时选出的是 `<|eot_id|>`；若停止集合里只配了 `<|end_of_text|>`，循环不会停，模型继续往下写，直到撞上长度上限。“模型停不下来”多数是这类配置问题，不是模型问题。
+
+**批内先结束的序列。** 静态批处理中，先结束的序列不能离开，只能继续占位。Hugging Face `generate()` 用一个 `unfinished_sequences` 向量标记，已结束的行此后每轮填入 `pad_token_id`，整批要等最长的一条。连续批处理让结束的序列立即退出、新请求补位（见 [11.2 节](../11_serving/11.2_continuous_batching.md)）。
+
+#### 9.1.4 节：Hugging Face 的 padding_side 与右填充警告
+
+实现上，Hugging Face 的分词器用 `padding_side="left"` 设置；`generate()` 发现仅解码器模型的输入是右填充时会给出警告。“单条推理正常、批量推理胡言乱语”这类故障，多半错在填充方向，模型和权重没有问题。
+
+#### 9.1.5 节：vLLM detokenize_incrementally 的两个下标
+
+**做法。** 增量反分词不解码单个词元，而是解码一个窗口。vLLM 的 [`detokenize_incrementally`](https://github.com/vllm-project/vllm/blob/main/vllm/tokenizers/detokenizer_utils.py) 维护两个下标 `prefix_offset` 和 `read_offset`：
+
+1. 把 `prefix_offset` 到 `read_offset` 的词元解码成前缀文本。
+2. 把 `prefix_offset` 到末尾的词元解码成新文本。
+3. 新文本若以 U+FFFD 结尾，说明末尾的字节序列尚未完整，本轮不输出，两个下标不动。
+4. 否则输出新文本比前缀文本多出的部分，并把两个下标前移。
+
+窗口带上几个已输出的词元，是为了让空格和合并规则在正确的上下文里生效。
+
+#### 9.2.2 节：Hugging Face 束搜索的缓存重排与 early_stopping
+
+**KV 缓存要跟着重排。** 新一轮的第 1 条序列来自旧的第 2 条，它要读的是旧第 2 条的缓存。朴素实现每轮按 `beam_idx` 把各层的 K、V 重新收集一遍，Hugging Face 里对应 `_reorder_cache` 或缓存对象的 `reorder_cache(beam_idx)`。若两条新序列来自同一个父序列，父序列的缓存还要复制一份。分页 KV 缓存把这件事变成改块表里的指针，只在写入共享块时才复制（见 [11.4 节](../11_serving/11.4_kv_memory_management.md)的写时复制）。
+
+**何时结束。** 已完成集合攒够 W 条并不一定能停：仍在扩展的序列可能在归一化之后反超。Hugging Face 用 `early_stopping` 控制：取 `True` 时攒够 `num_beams` 条即停；取 `False` 时用启发式判断继续搜索是否还可能更优；取 `"never"` 时只有确认不可能更优才停。结束后按归一化得分返回前 `num_return_sequences` 条。
+
+#### 9.2.3 节：Hugging Face 的 length_penalty 方向
+
+**实现中的参数名容易读反。** Hugging Face 的 `length_penalty` 是“得分除以 $|y|^{\alpha}$”这一长度归一化形式（[9.2.3 节](../09_decoding/9.2_greedy_beam.md)）里的指数：得分除以 `长度 ** length_penalty`，默认 1.0。得分是负数，所以取正值偏向更长的序列，取负值偏向更短。名字叫“惩罚”，调大却得到更长的输出。
+
+#### 9.3.1 节：温度趋零时 vLLM 与 HF 的处理
+
+**两个极限。** $\tau \to 0$ 时最大项的指数压倒其余各项，分布收缩到 argmax，等同贪心。实现里不会真的除以 0：vLLM 把温度低于 `1e-5` 的请求直接送入贪心分支；Hugging Face 要求温度严格为正，贪心由 `do_sample=False` 指定。$\tau \to \infty$ 时各项趋于相等，分布趋于均匀，Llama 3 词表下每个词元约 `1 ÷ 128,256 ≈ 7.8 × 10⁻⁶`。
+
+#### 9.3.3 节：Top-p 排序成本与 vLLM 的 PyTorch 原生路径
+
+**成本。** 求核需要按概率排序。Llama 3 的 logits 有 128,256 列，即 128,000 个基础词元加 256 个保留的特殊词元（见 9.1.3）。对这么多项做比较排序约 `n log₂ n ≈ 2.2 × 10⁶` 次比较，每行每轮一次，是采样阶段最贵的一步。vLLM 的 PyTorch 原生路径 `apply_top_k_top_p_pytorch` 在文档字符串里直接写明“排序在大批量下可能很慢”；9.3.8 会看到免排序的替代做法。
+
+#### 9.3.6 节：HF 与 vLLM 惩罚项的统计范围
+
+**统计范围不同。** Hugging Face 的重复惩罚默认把 Prompt 里的词元也算作“出现过”，要排除须传 `prompt_ignore_length`。vLLM 的重复惩罚同样统计 Prompt 加输出，频次与存在惩罚则只统计输出。迁移参数时要先确认范围。
+
+#### 9.3.8 节：引擎路径上的四个实现细节（multinomial、FP32/FP64、FlashInfer、词表并行）
+
+**进阶：几个实现细节。** 下面四条是引擎路径上的细节，第一遍可以跳过。
+
+- [9.3.8 节](../09_decoding/9.3_sampling.md)的指数竞赛（对每个词元抽 $q_i \sim \text{Exp}(1)$，取 $p_i/q_i$ 的 argmax），PyTorch 自己也用。`torch.multinomial` 在只抽 1 个样本或无放回抽样时，走的正是 `q = empty_like(p).exponential_(1)`、相除、argmax 这条快速路径，源码注释写明它来自 Gumbel-Softmax。vLLM 仍然自己实现一遍，文档字符串给的理由是 `torch.multinomial` 会引入 CPU 与 GPU 的同步；自己实现还便于给个别请求换上独立的随机数发生器。
+- Softmax 强制用 FP32。FP16 能表示的最小正数约 `6 × 10⁻⁸`，比它小的概率直接变成 0；BF16 只有 7 位尾数，相对精度约 0.8%。12.8 万项的长尾在半精度下会整段失真，vLLM 在处理链一开始就把 logits 转成 FP32，另有 `use_fp64_gumbel` 选项让噪声用 FP64。
+- 指定了 Top-k 或 Top-p 时，默认路径并不是 9.3.8 节的指数竞赛实现。CUDA 上若 FlashInfer 可用，`TopKTopPSampler` 走 `forward_cuda`，由 FlashInfer 的拒绝采样内核一步完成截断与抽样，免去 9.3.3 的整表排序。拒绝采样是指先抽出一个候选，不满足条件就丢弃重抽，直到抽中满足条件的为止。源码注明它与 `random_sample` 只是统计等价，同一个种子下两条路径的输出不保证相同。指数竞赛用于未指定 Top-k 与 Top-p 的请求，以及 `forward_native` 回退路径；带 `seed` 的请求（FlashInfer 不支持逐请求随机数发生器）和开启 `use_fp64_gumbel` 时也回到这条路径。
+- 词表沿张量并行切分时，裸的全词表抽样可以用“每卡局部最大值加一次全局带下标的 max 规约”完成。一旦有 Top-p、禁词表或约束掩码，就需要全局的候选集合或概率质量，实际通信收益取决于框架的实现。
+
+#### 9.3.9 节：vLLM 逐请求种子
+
+**种子。** 采样的随机性来自指数竞赛里的噪声 $q$（[9.3.8 节](../09_decoding/9.3_sampling.md)）。vLLM 的 `seed` 参数为该请求单独建一个随机数发生器，只改写 $q$ 中属于它的那一行；源码里的 TODO 写明这条路径逐请求处理、较慢。同一个种子只在同一引擎、同一条代码路径下可复现，换引擎或换路径都不保证。
+
+#### 9.4.7 节：vLLM structured_outputs 字段与后端
+
+> [!NOTE]
+> **进阶：vLLM 的字段与后端。** vLLM 把约束放在 `SamplingParams.structured_outputs` 里，类型是 `StructuredOutputsParams`，字段 `json`、`regex`、`choice`、`grammar`、`json_object`、`structural_tag` 各对应一种约束；后端由 `StructuredOutputsConfig.backend` 选择，可取 `auto`、`xgrammar`、`guidance`、`outlines`、`lm-format-enforcer`，默认 `auto`。旧版本把这项功能称作引导解码（guided decoding），参数名为 `guided_json`、`guided_regex` 等，这些字段已在 v0.12.0 移除。读旧文档和旧代码时两套名字指的是同一件事。
+
+#### 9.6.3 节：DiffusionGemma 模型卡的采样器设置
+
+**采样器。** 模型卡给出的配置把 9.6.1 的“保留最有把握的”落到了可操作的判据上：去噪步数上限 48；logits 的温度从 0.8 线性降到 0.4；每一步选出熵最低的一批位置，未选中的位置全部重新掩上；当画布上的平均熵低于阈值、且各位置的最高概率词元连续两步不变时，提前停止。
+
+两处判据针对的都是 9.6.1 的条件独立近似。每步选多少个位置不固定：按熵从低到高选入，并使这批位置之间互信息的上界保持在 0.1 以下。互信息量的正是独立采样忽略掉的位置间依赖，而一个位置与其他位置的互信息不会超过它自己的熵，所以先选熵低的。提前停止要求两个条件同时成立：平均熵低于 0.005 说明各位置的分布已经集中，最高概率词元连续两步不变说明画布不再被改写。只满足前一条时，可能有位置刚被改过，其余位置所依据的条件还在变。
+
+#### 10.2.4 与 10.2.7 节：GQA 与 MLA 的配置键
+
+- Hugging Face 的模型配置里，Q 头数与 KV 头数是 `num_attention_heads` 与 `num_key_value_heads` 两个字段；计算时把每组 K、V 沿头维复制或广播给组内各查询头。
+- DeepSeek-V3 的 MLA 配置：`hidden_size = 7168`、`num_attention_heads = 128`、`kv_lora_rank = 512`（缓存的隐向量宽度）、`qk_nope_head_dim = 128`、`qk_rope_head_dim = 64`（RoPE 旁路宽度）、`v_head_dim = 128`；查询侧另有一个 `q_lora_rank = 1536` 的低维隐向量 $c^{Q}_t$，$q^{R}_t = \operatorname{RoPE}(c^{Q}_t W^{QR})$。
+- vLLM 的 MLA 后端在源码注释里把两种计算形态称为 compute friendly（用于 prefill，把 K、V 展开成完整形状）与 data-movement friendly（用于 decode，吸收投影后直接读 576 维的缓存）。
+
+#### 10.2.6 与 10.3.7 节：分页 KV 的张量形状
+
+- **物理块池**：每层一个大张量，形如 `[num_blocks, block_size, n_kv, d_h]`，K、V 各一份。块按需分配，物理上不必相邻。
+- **块表**：每个请求一张，形如 `[max_num_blocks_per_seq]` 的整数数组，第 k 项是逻辑第 k 块对应的物理块号。位置 i 的 K/V 在物理块 `block_table[i // block_size]` 的第 `i % block_size` 个槽里。
+- `flash_attn` 包的 `flash_attn_with_kvcache` 接受形如 `[batch_size, max_num_blocks_per_seq]` 的 `block_table`，此时 `k_cache` 的形状为 `[num_blocks, page_block_size, nheads_k, headdim]`；同一个调用负责把新词元的 K、V 写入对应槽位。
+
+#### 10.3.3 至 10.3.6 节：FlashAttention 2 到 4 的硬件映射
+
+GPU 的线程层级与存储层级（取自 FlashAttention-3 论文对 H100 的描述）：
+
+| 层级 | 并行单位 | 对应的存储 | 容量与带宽（H100） |
+| --- | --- | --- | --- |
+| 芯片 | grid | GMEM，即 HBM | 80 GiB，3.35 TB/s |
+| GPC | threadblock cluster | L2 缓存 | 50 MiB，12 TB/s |
+| SM | threadblock，即 CTA | SMEM，片上共享内存 | 每 SM 228 KiB，全卡 31 TB/s |
+| 线程 | thread | RMEM，寄存器 | 每线程至多 256 个寄存器 |
+
+GPU 的线程层级与存储层级。32 个线程组成一个 warp，4 个相邻 warp 组成一个 warpgroup；同一 CTA 内的线程可直接寻址 SMEM。
+
+- **FA3（Hopper）。** 张量内存加速器（TMA）在 GMEM 与 SMEM 之间异步搬运；Tensor Core 经 warpgroup 级的 `WGMMA` 指令异步调用，可直接从共享内存取输入。warp 特化把一个 CTA 内的 warp 分成生产者（只经 TMA 把下一块 K、V 装入 SMEM 的环形缓冲）与消费者（只做矩阵乘），并用 `setmaxnreg` 把寄存器多分给做矩阵乘的 warpgroup。FP8 路径用块级量化（每小块 Q、K、V 独立定标）与非相干处理（量化前乘随机 ±1 对角阵与 Hadamard 矩阵之积）。
+- **FA4（Blackwell）。** 每个 SM 新增 256 KB 的 Tensor Memory（TMEM）存放 Tensor Core 的中间结果，矩阵乘分块从 64 × 128 增大到 128 × 128，Tensor Core 操作完全异步并可直接写 TMEM；反向传播配合 2-CTA MMA 模式减少共享内存流量与原子加。指数运算的硬件指令是 `MUFU.EX2`；软件模拟把 $2^{\lfloor x \rfloor}$ 交给整数 ALU 改写指数位，小数部分用多项式逼近走 FMA，每行只对 10–25% 的元素这样做，比例按矩阵乘与指数运算的吞吐比经验调定。FA3 的设计搬到 Blackwell 上，共享内存流量和指数运算的耗时超过矩阵乘 25–60%。
+- **指令与架构编号。** `cp.async` 要求 sm_80 及以上；`tcgen05.mma` 面向 sm_100a 与 sm_110a（PTX ISA 9.0 起 sm_101a 更名为 sm_110a）。
+
+#### 10.3.8 节：注意力内核的框架入口
+
+- PyTorch 的 `torch.nn.functional.scaled_dot_product_attention` 在 FlashAttention-2、Memory-Efficient Attention 与 C++ 数学实现三种后端之间自动选择，可用上下文管理器 `torch.nn.attention.sdpa_kernel` 限定后端；融合后端不满足输入约束时给出警告并退回数学实现。
+- Hugging Face Transformers 在 `from_pretrained` 时用 `attn_implementation` 参数选择实现，如 `"sdpa"` 或 `"flash_attention_2"`。
+- `flash_attn` 包提供 `flash_attn_func`、`flash_attn_varlen_func` 与 `flash_attn_with_kvcache`。变长接口把一批序列拼成 `[total_tokens, n_h, d_h]`，另传累计长度数组 `cu_seqlens_q` 与 `cu_seqlens_k`，形状 `[batch_size + 1]`；三条长度 3、5、2 的序列对应 `[0, 3, 8, 10]`。
+
+#### 10.4.7 节：量化权重的存储与框架入口
+
+- 4 位权重打包存放，两个拼成一个字节，或如 AutoGPTQ 的 `qweight` 那样八个拼成一个 32 位整数；缩放因子与零点另存为小张量。Llama 3 8B 的 `down_proj[14336 → 4096]` 用 `g = 128` 时，每个输出通道的 14,336 个输入权重分成 112 组，缩放因子形状为 `[4096, 112]`，FP16 下 0.92 MB；打包后的权重 29.4 MB，BF16 原始大小是 117.4 MB。
+- Hugging Face Transformers 通过 `from_pretrained` 的 `quantization_config` 参数加载或生成量化模型，如 `GPTQConfig(bits=4, ...)`。
+- vLLM 用 `--quantization` 指定权重量化方法，用 `--kv-cache-dtype` 指定 KV 缓存的存储类型，取值 `auto` 时沿用模型的数据类型，`fp8` 等价于 `fp8_e4m3`。
+- GPTQ 的实现以 128 列为一批更新，并用 Cholesky 分解保证数值稳定。
+
+#### 10.6.3 节：投机解码的框架入口
+
+vLLM、TensorRT-LLM 与 SGLang 都支持投机解码。以 vLLM 为例，通过 `--speculative-config` 传入一个 JSON：`method` 选草稿来源，文档列出的常用取值有 `draft_model`、`ngram`、`suffix`、`mtp`、`eagle3`、`dflash`；`model` 指定草稿模型；`num_speculative_tokens` 即 $\gamma$。`ngram` 方法另有 `prompt_lookup_min` 与 `prompt_lookup_max` 控制匹配窗口。
+
+#### 11.1.3 节：TensorRT-LLM 的部署参考
+
+TensorRT-LLM 现行版本的 PyTorch 后端直接加载 checkpoint，不需要预先编译 engine；TensorRT engine 后端已[移除](https://nvidia.github.io/TensorRT-LLM/latest/legacy/tensorrt-backend-removal.html)。旧资料中“原始权重 → TensorRT-LLM checkpoint → 构建 engine → 运行”的[历史构建流程](https://nvidia.github.io/TensorRT-LLM/latest/legacy/architecture/workflow.html)只适用于旧版；engine 是推理执行产物，不是可续训的检查点。维护旧服务时须使用相同版本的示例与运行库，不能把旧版转换脚本拼接到新入口。
+
+- **输入。** 受支持模型的完整权重、模型配置与分词器；量化模型还要有匹配的量化配置和缩放因子。[快速入门](https://nvidia.github.io/TensorRT-LLM/latest/quick-start-guide.html)中 `LLM` 可加载本地 Hugging Face 模型目录或受支持的量化 checkpoint，在线服务入口是 `trtllm-serve`。训练框架应先导出推理权重（A.7.3）。
+- **启动与请求路径。** 启动时加载权重，确定精度与并行布局，配置 KV 容量、最大批量和词元预算（参数见[服务入口](https://nvidia.github.io/TensorRT-LLM/latest/commands/trtllm-serve/trtllm-serve.html)）。运行时每个 rank 一个 `PyExecutor` 工作进程：`Scheduler` 选本轮工作，`KVCacheManager` 准备缓存块，`ModelEngine` 执行前向，`Sampler` 从 logits 选词元（[架构说明](https://nvidia.github.io/TensorRT-LLM/latest/developer-guide/overview.html)）。与 11.1 节图 11-1 的循环同构。
+- **优化与验收。** 先用受支持的高精度配置核对分词、聊天模板、停止条件和保留集质量，再逐项加入量化、多卡或前缀复用。量化的权重格式、缩放方式与可用内核必须匹配（[量化说明](https://nvidia.github.io/TensorRT-LLM/latest/features/quantization.html)）；能否同时启用多项优化查[功能组合矩阵](https://nvidia.github.io/TensorRT-LLM/latest/features/feature-combination-matrix.html)。单卡已能容纳权重时，先测单卡基线，再比较两卡 TP 与两份单卡副本。
+- **排障。** 加载失败先查架构、权重格式与软硬件支持；启动 OOM 查权重、工作区和 CUDA Graph 的预算；长请求或高并发才出现的容量问题再查 KV 块、准入与抢占；输出异常先对齐输入词元、模板和采样参数，再查量化误差。性能验收按 11.13 节重放相同负载，报告质量、错误率与 TTFT/TPOT。
+
+#### 11.1.3 节：引擎实现细节
+
+- vLLM：PyTorch 模型默认经 `torch.compile` 编译，加分段与整图的 CUDA/HIP Graph，`--enforce-eager` 才退回即时执行（11.10.5）。
+- llama.cpp 服务端的 `cache_prompt` 默认开启：新请求与槽位里上一次的 Prompt 比较，只重算不同的后缀。
+- DeepSpeed-FastGen 的[论文](https://arxiv.org/abs/2401.08671)报告有效吞吐最高 2.3 倍、平均延迟减半、词元级尾延迟最多降到 1/3.7，基线是尚无分块 Prefill 的早期 vLLM。
+
+#### 11.3.8 节：vLLM 调度器的机制名、状态名与指标名
+
+名称取自 v0.29.0 的 `vllm/config/scheduler.py`、`vllm/v1/core/sched/scheduler.py` 与 `vllm/v1/metrics/loggers.py`，随版本变动。词元预算、并发上限、分块开关、单请求块上限、出队策略的启动参数见 11.10 节。
+
+| 11.3 节的机制 | vLLM 里的名字 | 说明 |
+| --- | --- | --- |
+| 水位线 | `watermark` | 准入时保持空闲的 KV 块比例 |
+| 整条 Prompt 放得下才准入 | `scheduler_reserve_full_isl` | 防止分块 Prefill 下的过度准入 |
+| 在途上限 | `max_num_queued_reqs`、`max_num_queued_tokens` | 前者限等待加运行的请求总数，后者限处于 Prefill 阶段的 Prompt 词元总量；超限的新请求返回 HTTP 503 |
+| 状态机 | `RequestStatus.WAITING`、`RUNNING`、`PREEMPTED`、`FINISHED_*` | 被抢占时 `num_computed_tokens` 置 0 并放回等待队列，FCFS 下插在队首 |
+| 调度记账 | `num_computed_tokens`、`num_tokens_with_spec` | 源码注释说明调度器没有 Prefill 与 Decode 两个阶段，只有前者追赶后者 |
+| 观测 | `vllm:num_preemptions`、`vllm:num_requests_waiting`、`vllm:kv_cache_usage_perc` | 对应 11.3.5 的抢占计数、11.3.6 的排队区与容量墙 |
+
+vLLM 调度器的机制、状态与指标名对照。
+
+#### 11.4.1、11.4.3 节：KV 池的参数与张量布局
+
+- 允许引擎占用的显存比例 `u` 在 vLLM 里是 `gpu_memory_utilization`。vLLM 启动时用最大批次的假输入跑一遍前向实测激活峰值，再把剩余显存划给 KV 池。
+- 引擎在每步前向之前为本步的每个词元算好槽位，排成一维数组（vLLM 里叫 `slot_mapping`）交给内核。
+- 张量的维度次序因后端而异。vLLM 的 FlashAttention 后端一层的缓存张量是 `[块数, n_kv, 块大小, 2 × d_h]`，K 与 V 在最后一维并排；Llama 3 8B、53.94 GB 的池为 `[25720, 8, 16, 256]`，每层 1.69 GB，32 层合 53.94 GB。
+
+#### 11.5.2、11.5.6、11.5.7 节：前缀缓存的实现细节
+
+- vLLM 的[自动前缀缓存](https://docs.vllm.ai/en/latest/design/prefix_caching/)默认哈希函数为 SHA-256，文档提醒换用更快的非密码学哈希会抬高碰撞风险；可命中长度上限为 `T − 1` 再向下对齐到块边界；请求可携带 `cache_salt`，盐进入第 0 块的键；要求返回 Prompt 对数概率的请求跳过缓存查找；适配器名与多模态内容哈希进入块的额外键。共享前缀专用的 cascade attention 内核默认关闭。
+- SGLang 的前缀树以命名空间键隔离不同适配器的分支。调度策略 `--schedule-policy` 默认 `fcfs`，`lpm` 为最长前缀优先（11.11.4）。
+- SGLang 网关的 `cache_aware` 策略分四步：为每个实例维护一棵只按自己转发过的请求更新的近似前缀树（存原始字符）；新请求求与各树的匹配比例，超过阈值送往该实例，否则送往树最小的实例；待处理请求数的最大值与最小值之差超过绝对阈值、且最大值超过最小值的给定倍数时，改按最短队列分发；后台按 LRU 淘汰近似树的叶子。各阈值的默认值随版本变动。
+- vLLM Router（2025 年 12 月发布）提供 `consistent_hash` 策略，按会话或用户 ID 等路由键做一致性哈希；另有 Power of Two、轮询与随机（[发布说明](https://vllm.ai/blog/vllm-router-release)）。
+
+#### 11.6 节：vLLM 多 LoRA 的实现与配置
+
+名称取自 vLLM v0.29.0。
+
+- 分段索引：[`LoRAKernelMeta`](https://github.com/vllm-project/vllm/blob/v0.29.0/vllm/lora/ops/triton_ops/lora_kernel_metadata.py) 保存 11.6 节图 11-13 底部的索引。`token_lora_mapping` 是每个词元的适配器号，`num_tokens_per_lora` 是各段词元数，`lora_token_start_loc` 是它带前导 0 的前缀和，即各段边界；vLLM 不搬动词元，而用 `token_indices_sorted_by_lora_ids` 记下排序后的行号，内核据此间接取行。降维与升维对应同目录下的 `lora_shrink_op.py` 与 `lora_expand_op.py`，由 `vllm/lora/punica_wrapper/` 封装后供各线性层调用。
+- 静态槽位：[`create_lora_weights`](https://github.com/vllm-project/vllm/blob/v0.29.0/vllm/lora/layers/base_linear.py) 为每层分配两组全零张量，打包层（`qkv_proj`、`gate_up_proj`）每个切片一份。`lora_a_stacked` 的形状是 `[max_loras, 1, max_lora_rank, d_in]`，`lora_b_stacked` 是 `[max_loras, 1, d_out, max_lora_rank]`，`set_lora` 把适配器的 `A`、`B` 拷进某个槽的左上角；vLLM 按“输出 × 输入”存放，行列与本书相反。降维内核从堆叠张量的形状读出秩，所以每个适配器都按 `max_lora_rank` 计算。
+- 调度约束：[调度器](https://github.com/vllm-project/vllm/blob/v0.29.0/vllm/v1/core/sched/scheduler.py)在接纳等待请求时，批里已有 `max_loras` 个不同的适配器、而新请求用的是另一个时，跳过它。
+- S-LoRA 的两个内核：Prefill 用 MBGMM（Multi-size Batched Gather Matrix-Matrix Multiplication），Decode 用 MBGMV（矩阵乘向量），Multi-size 指同一批内秩可以不同，Gather 指按页表逐页取数。
+
+| 机制 | 决定它的量 | vLLM v0.29.0 的配置项 |
+| --- | --- | --- |
+| 同一批里最多几个不同的适配器 | 显存槽位数 | `max_loras`，默认 1 |
+| 槽位按多大的秩预留 | 填充开销（11.6.6） | `max_lora_rank`，默认 16；[文档](https://github.com/vllm-project/vllm/blob/v0.29.0/docs/features/lora.md)建议设为实际用到的最大秩 |
+| 主机内存里保留几个适配器 | 换入命中率 | `max_cpu_loras`，缺省等于 `max_loras`，不得小于它 |
+| 哪些线性层挂增量一路 | 内核启动次数与槽位显存 | `target_modules`（命令行 `--lora-target-modules`，如只保留 `o_proj` 与 `qkv_proj`） |
+| 张量并行下适配器怎么切 | 增量一路的通信量 | `fully_sharded_loras`，默认关闭，此时只对增量一路的一半计算做切分 |
+
+vLLM [`LoRAConfig`](https://github.com/vllm-project/vllm/blob/v0.29.0/vllm/config/lora.py) 的配置项与 11.6 节各机制的对应；启用多 LoRA 的总开关是 `--enable-lora`。
+
+#### 11.7 节：约束解码库的接口与引擎接线
+
+- XGrammar 的 Python 接口：`GrammarCompiler` 负责编译并自带缓存（`compile_json_schema`、`compile_regex`、`compile_grammar`）；每个请求一个 `GrammarMatcher`，`fill_next_token_bitmask` 填位图（11.7.1），`accept_token` 做采样后的状态转移，`find_jump_forward_string` 对应跳跃前进（11.7.5），`rollback` 用于投机解码的回退（11.7.6；v0.1.21 改用 Earley 解析器后不再限制回退步数）。批量填位图用 `BatchGrammarMatcher`；`apply_token_bitmask_inplace` 以 `indices` 参数只处理指定的行；树状草稿用 `traverse_draft_tree`。论文版本用持久化栈支持常数时间回退，按节点自适应地存合法列表、不合法列表或整张位图，使 JSON 文法的缓存从 160 MB 降到 0.46 MB。XGrammar [v0.1.21](https://github.com/mlc-ai/xgrammar/releases/tag/v0.1.21)（2025 年 7 月）以 Earley 解析器替换下推自动机。
+- outlines-core：JSON Schema 经 `build_regex_from_schema` 转成正则，自引用按 `max_recursion_depth`（默认 3）展开；预计算的 `Index` 只为合法词元存落点。
+- vLLM：约束放在 `SamplingParams.structured_outputs`；后端默认 `auto`，先校验能否用 XGrammar，失败（Schema 用到 XGrammar 不支持的特性）时退到 `guidance`（llguidance），逻辑在 `vllm/sampling_params.py`。
+- SGLang：`--grammar-backend` 可取 `xgrammar`、`outlines`、`llguidance`、`none`，不指定时用 `xgrammar`（[文档](https://docs.sglang.io/advanced_features/structured_outputs.html)）。
+- llama.cpp：[文法文档](https://github.com/ggml-org/llama.cpp/blob/master/grammars/README.md)写明 JSON Schema 中不支持的特性会被静默跳过，Schema 只约束输出、不会注入 Prompt。
+
+#### 11.8.2 节：张量并行的线性层在代码里叫什么
+
+Megatron-LM 把两种切法写成 `ColumnParallelLinear` 和 `RowParallelLinear` 两个模块。vLLM 的 Llama 实现沿用同一思路：
+
+- 列切：`qkv_proj` 是 `QKVParallelLinear`，`gate_up_proj` 是 `MergedColumnParallelLinear`。
+- 行切：`o_proj` 和 `down_proj` 是 `RowParallelLinear`，all-reduce 在它的末尾。
+- 词表维切：嵌入是 `VocabParallelEmbedding`，输出是 `ParallelLMHead`。
+
+读到这几个类名，就能判断一个矩阵是列切还是行切、all-reduce 发生在哪里。
+
+#### 11.8.8 节：vLLM 的并行参数
+
+| 参数 | 含义 |
+| --- | --- |
+| `--tensor-parallel-size` | 张量并行度 |
+| `--pipeline-parallel-size` | 流水线并行度 |
+| `--data-parallel-size` | 数据并行度，稠密模型下即副本数 |
+| `--enable-expert-parallel` | 打开后专家层用专家并行，并行度等于 `TP × DP`；不打开时专家层在同一个 `DP × TP` 组内按张量并行切 |
+
+vLLM 的并行参数与 11.8 节四种多卡方式的对应（v0.29.0）。worker 进程数为 `TP × PP`。
+
+#### 11.9.7 节：分离式部署的三个实现
+
+- **vLLM**：两个 vLLM 实例加一个连接器（connector）。启动参数 `--kv-transfer-config` 里，`kv_connector` 选连接器，`kv_role` 取 `kv_producer`（Prefill 实例）或 `kv_consumer`（Decode 实例）。连接器分两半：与调度器同进程的一半决定传哪些块，各 worker 进程里的一半执行传输，并与注意力层配合实现逐层存取。请求级的交接信息放在 `kv_transfer_params` 里，如 `do_remote_decode`、`do_remote_prefill`。传输失败时的处置以 NIXL 连接器为例由 `kv_load_failure_policy` 控制，默认 `fail`（报错），取 `recompute` 才在 Decode 侧本地重算。文档标明该特性仍为实验性质；连接器兼容性文档把两侧张量并行度不同的配置记作 Hetero TP。
+- **NVIDIA Dynamo**：路由由 `PrefillRouter` 编排，KV 经 NIXL 在两侧显存之间直传。各后端的交接元数据不同：vLLM 传块 ID 与远端连接信息，SGLang 传用于 RDMA 握手的 `bootstrap_info`。
+- **Mooncake**：全局调度器 Conductor、每节点一个负责传输的 Messenger 进程，以及由 CPU 内存和 SSD 组成的 KVCache 池。
+
+连接器清单、参数名与默认阈值变化很快，以各项目当前文档为准。
+
+#### 11.10 节：vLLM v0.29.0 的模块与参数
+
+以下取自 vLLM v0.29.0（提交 `98dff2a`）的 V1 引擎，即 `vllm/v1/` 目录。V1 是引擎架构的代号；worker 里执行前向的 model runner 另有先后两套实现，编号与引擎的 V1 无关。
+
+**一个请求的八步与对应的类。**
+
+1. 输入处理：`Renderer`（`vllm/renderers/`，方法 `render_chat`）套模板并分词；`InputProcessor` 校验采样参数、LoRA 与长度，产出 `EngineCoreRequest`。
+2. 跨进程提交：`AsyncLLM` 为请求建输出队列；`EngineCoreClient` 用 msgpack 序列化，经 ZMQ 套接字发给引擎核心。过线的是词元 ID、采样参数、可选的 LoRA 与缓存盐，不含文本。
+3. 调度：引擎核心的输入线程把请求放进 `input_queue`，主线程的忙循环 `run_busy_loop` 交给 `Scheduler.add_request`。循环体是 `schedule()`、`execute_model()`、`update_from_output()`；开启异步调度时是 `step_with_batch_queue()`，否则是 `step()`。排批时向 `KVCacheManager` 申请块，产出 `SchedulerOutput`。
+4. 下发：多卡时 `MultiprocExecutor` 经共享内存消息队列一次广播给全部 worker；单卡时 `UniProcExecutor` 把 worker 建在引擎核心进程内。
+5. 前向与采样：`GPUModelRunner`。
+6. 回传：只有最后一个流水级的 TP rank 0 把 `ModelRunnerOutput` 传回。
+7. 更新：`update_from_output()` 记新词元、检查停止条件、释放已结束请求的块；新词元 ID 经输出线程和 ZMQ 回到 API 服务进程。
+8. 反分词与流式输出：`OutputProcessor`。
+
+**进程数。** [架构文档](https://github.com/vllm-project/vllm/blob/v0.29.0/docs/design/arch_overview.md)给出的进程数是“API 服务数 + 引擎核心数 + GPU 数”：`-tp 4` 的单机部署为 6 个；数据并行时每个 DP rank 一个引擎核心，另加一个协调进程，`-tp 2 -dp 4` 为 17 个。物理核数少于进程数时吞吐和延迟明显变差，见[优化文档的 CPU 资源一节](https://github.com/vllm-project/vllm/blob/v0.29.0/docs/configuration/optimization.md#cpu-resources-for-gpu-deployments)。
+
+**启动时的显存实测。** 顺序是：加载权重；`profile_run` 用 `max_num_batched_tokens` 个假词元跑一次前向记录峰值；`gpu_worker.py` 的 `determine_available_memory` 按 `M_KV = u × M_total − M_weights − M_peak − M_graph` 算出 KV 字节数（`u` 即 `gpu_memory_utilization`，默认 0.92）；`kv_cache_utils.py` 取整为块数；一次性分配；捕获 CUDA Graph。启动日志打印 `GPU KV cache size: N tokens` 与 `Maximum concurrency for <max_model_len> tokens per request: Kx`，后者等于块数除以单请求满长所需块数。`--kv-cache-memory-bytes` 可跳过实测直接指定 KV 字节数。
+
+**每步词元预算与请求数上限的默认分档**（在线服务入口）：
+
+| 显存 | `max_num_batched_tokens` | `max_num_seqs` |
+| --- | ---: | ---: |
+| 不低于 160 GiB | 16,384 | 1,024 |
+| 不低于 70 GiB 且不是 A100 | 8,192 | 1,024 |
+| 其余 | 2,048 | 256 |
+
+`scheduler_reserve_full_isl` 默认开启：新请求准入时要求整条输入放得下。`long_prefill_token_threshold` 限制单个请求每步最多占多少预算。
+
+**请求状态 `RequestStatus`。** 排队状态有四种：`WAITING`（普通排队）、`WAITING_FOR_STRUCTURED_OUTPUT_GRAMMAR`（等语法编译）、`WAITING_FOR_REMOTE_KVS`（等分离式部署的远端 KV）、`WAITING_FOR_STREAMING_REQ`（等流式输入的下一段）；后三种被调度器临时跳过，不挡后面的普通请求。在批里的是 `RUNNING`，被抢占的是 `PREEMPTED`，其后的取值表示结束并记录原因。
+
+**调度器内部。** 运行队列 `running`、等待队列 `waiting`；要块调用 `KVCacheManager.allocate_slots`，返回 `None` 即抢占后重试；接纳时另查 `max_loras`。发给 worker 的批描述里，新请求带全量 `NewRequestData`，老请求只带增量 `CachedRequestData`。异步调度（`async_scheduling`）给每个 Decode 请求记一个输出占位 `num_output_placeholders`。约束解码的掩码由 `get_grammar_bitmask` 在 CPU 上计算，随 `sample_tokens` 送到 worker。
+
+**块管理的数据结构**（`vllm/v1/core/block_pool.py` 与 `kv_cache_utils.py`）：
+
+- `KVCacheBlock`：块号 `block_id`、引用计数 `ref_cnt`、块哈希，以及前后两个空闲链表指针。
+- `FreeKVCacheBlockQueue`：空闲块的双向链表，指针长在块对象上，从中间摘除是 O(1)。
+- `cached_block_hash_to_block`：块哈希到块的映射。
+- `null_block`：0 号块，启动时取走只作占位，可分配的是 `N_blocks − 1` 块。
+
+哈希键由 `hash_block_tokens` 计算，输入是“父块哈希、本块词元、附加键”；该版本把 prompt embeds 的哈希放进附加键，另提供更快但不抗碰撞的 `xxhash`。请求 prompt logprobs 时跳过缓存读取。
+
+**worker 侧。** `BlockTables`（`vllm/v1/worker/gpu/block_table.py`）持有 `block_tables[max_num_reqs, 每请求最大块数]`（int32，每个 KV 组一张）与 `slot_mappings[KV 组数, max_num_batched_tokens]`（int64）；槽位由 Triton 内核 `_compute_slot_mappings_kernel` 算出。拼批的 `prepare_inputs` 产出 `input_ids`、`positions`、`slot_mapping` 与 `query_start_loc`；LM head 只取 `logits_indices` 指定的行。默认的 model runner 是第二套（`vllm/v1/worker/gpu/model_runner.py`，设计文档 `docs/design/model_runner_v2.md`）；第一套 `gpu_model_runner.py` 仍在树里，供尚不支持的特性回退。
+
+**CUDA Graph。** 默认尺寸表是 `[1, 2, 4]`，加 8 到 248 每隔 8 一个，再加 256 起每隔 16 一个，上限 `min(2 × max_num_seqs, 512)`（数据中心级 Blackwell 上为 1,024）；`max_num_seqs = 1,024` 时共 51 个尺寸。`cudagraph_mode` 默认 `FULL_AND_PIECEWISE`：纯 Decode 的批回放整图，混合批回放分段图、注意力留在图外（见 [CUDA Graphs 设计文档](https://github.com/vllm-project/vllm/blob/v0.29.0/docs/design/cuda_graphs.md)）。`--enforce-eager` 关掉全部图。
+
+**主要启动参数。**
+
+| 参数 | v0.29.0 默认值 | 调的是什么 |
+| --- | --- | --- |
+| `--gpu-memory-utilization` | 0.92 | 本实例可用显存占总量的比例，权重也算在内 |
+| `--kv-cache-dtype` | `auto`（随模型精度） | KV 每个数的字节数；`fp8` 使块数翻倍 |
+| `--block-size` | 16 | 每块词元数 |
+| `--max-num-batched-tokens` | 按显存分档 | 每步词元预算 |
+| `--max-num-seqs` | 按显存分档 | 每步请求数上限，也决定 CUDA Graph 尺寸上限 |
+| `--enable-chunked-prefill` | 模型支持即开启 | 关闭后放不进剩余预算的 Prompt 整条等下一步 |
+| `--long-prefill-token-threshold` | 0（不限） | 单个请求每步最多占用的预算 |
+| `--scheduling-policy` | `fcfs` | 排队顺序与抢占对象；`priority` 按请求优先级 |
+| `--enable-prefix-caching` | 模型支持即开启 | 块哈希表是否启用 |
+| `--prefix-caching-hash-algo` | `sha256` | 哈希的速度与抗碰撞性 |
+| `--async-scheduling` | 兼容即开启 | 调度与前向重叠 |
+| `--compilation-config` 的 `cudagraph_mode` | `FULL_AND_PIECEWISE` | 哪些批回放整图或分段图 |
+| `--enforce-eager` | 关 | 关掉全部 CUDA Graph |
+| `--tensor-parallel-size`、`--pipeline-parallel-size`、`--enable-expert-parallel` | 1、1、关 | 三种并行；worker 数为 `TP × PP` |
+| `--enable-lora`、`--max-loras`、`--max-lora-rank` | 关、1、16 | 同一批内的适配器数与秩上限 |
+| `--structured-outputs-config` | 后端 `auto` | 语法掩码由哪个后端计算 |
+| `--kv-transfer-config` | 无 | KV connector：分离式部署与 KV 卸载共用的通路 |
+| `--kv-offloading-size` | 无 | 经 KV connector 给前缀缓存加一层主机内存 |
+| `--speculative-config` | 无 | 草稿来源与每步草稿数 |
+
+vLLM v0.29.0 的主要启动参数与默认值，取自 `vllm/config/` 下各配置类与 `vllm/engine/arg_utils.py`。
+
+#### 11.11 节：SGLang v0.5.20 的模块与参数
+
+以下取自 [SGLang v0.5.20](https://github.com/sgl-project/sglang/tree/v0.5.20) 的源码与文档；后端运行时在 `python/sglang/srt`。
+
+**前端提示的调用链。** `StreamExecutor.fork` 在分支数大于 1 时先提交一条 `SglCommitLazy`，`RuntimeEndpoint` 把它翻译成一个 `max_new_tokens = 0` 的 `/generate` 请求。
+
+**后端的三个组件**（彼此用 ZMQ 通信，见 `entrypoints/engine.py`）：
+
+| 组件 | 所在进程 | 职责 |
+| --- | --- | --- |
+| `TokenizerManager` | 主进程，与 HTTP 服务同在 | 分词，把词元 ID 发给调度器；收到文本后返回客户端 |
+| `Scheduler` | 子进程 | 收请求、组批、执行前向、处理结果；持有前缀树、显存池、语法管理器 |
+| `DetokenizerManager` | 子进程 | 把输出词元 ID 增量还原成文本 |
+
+SGLang 后端的三个组件。`Scheduler` 主循环的四步依次是 `ingest_requests`、`get_next_batch_to_run`、`run_batch`、`process_batch_result`；默认主循环是 `event_loop_overlap`，下一批的输入词元经 `FutureMap` 留在 GPU 上。
+
+**三张表。** 源码里的 `RadixAttention` 类（`layers/radix_attention.py`）只是模型中的注意力层，把计算转交给 FlashInfer、FlashAttention、Triton 等后端；前缀复用逻辑在 `mem_cache/`。KV 池 `MHATokenToKVPool` 每层一个 `k_buffer[N + page_size, n_kv, d_h]` 与同形的 `v_buffer`，多出的一页是占位页；`req_to_token`（由 `ReqToTokenPool` 持有，int32，`[请求数 + 1, 最大上下文]`）是块大小为 1 的块表；树节点 `TreeNode` 存 `key`（词元段）、`value`（int64 槽位下标）、`children`、`lock_ref`、`last_access_time`，备份到主机内存的一份记在 `host_value`。树的操作对应 `match_prefix`、`_split_node`、`insert`、`inc_lock_ref`/`dec_lock_ref`、`cache_unfinished_req`、`cache_finished_req`、`evict`；“可淘汰”“受保护”的计数是 `evictable_size_` 与 `protected_size_`。
+
+v0.5.20 的默认工厂返回 `UnifiedRadixCache`，把全注意力、滑动窗口和 Mamba 状态三类缓存挂在同一棵树上；`radix_cache.py` 的 `RadixCache` 只处理全注意力，不到一千行，适合入门阅读。
+
+**页大小。** 启用 FlashMLA 时 `page_size` 被强制为 64，TensorRT-LLM 的 MLA 后端只接受 32 或 64。页大于 1 时 `RadixKey.page_aligned` 把键截到页的整数倍。
+
+**淘汰策略与键。** `--radix-eviction-policy` 可取 `lru`（默认）、`lfu`、`slru`、`priority`，差别只在堆的排序键：`lru` 用 `last_access_time`，`lfu` 用 `(hit_count, last_access_time)`，`slru` 把命中次数达到阈值（默认 2）的节点归入保护段。键的隔离靠 `RadixKey.extra_key`，带 LoRA 的请求把适配器 ID 拼进它；多租户另有 `cache_salt`。分层缓存（HiCache）由 `--enable-hierarchical-cache` 打开，外部存储另需 `--hicache-storage-backend`。
+
+**排序策略。** `--schedule-policy` 默认 `fcfs`；感知缓存的有 `lpm`、`dfs-weight`、`hrrn`，不感知的有 `fcfs`、`lof`、`random`、`routing-key`。选 `lpm` 时等待队列超过 128 个请求当轮退回 `fcfs`；批内前缀检查的阈值是 32 个词元，只在 `lpm` 与 `hrrn` 下执行。
+
+**准入与撤回的常数。** 准入由 `PrefillAdder` 记账（`--max-prefill-tokens` 默认 16,384，另有 `--chunked-prefill-size`）。预留系数 `ρ` 即 `new_token_ratio`，初值 `0.7 × schedule_conservativeness`，上限 1，每个无撤回的 Decode 步线性下降，600 步降到初值的 0.14 倍；`max_new_tokens` 在余额式里截断到 4,096，新请求另加一页。`check_decode_mem` 发现槽位不够时 `retract_decode` 撤回请求，默认 `--retraction-policy length` 先撤已生成词元最少的；撤回后 `ρ` 重估为 `(已生成词元总数 + 20 × 请求数) ÷ (max_new_tokens 总数 + 1)`，直接覆盖旧值。
+
+**结构化输出。** `--grammar-backend` 可取 `xgrammar`（默认）、`outlines`、`llguidance`、`none`。`GrammarManager` 以 `(类型, 语法字符串)` 为键查编译缓存，未命中时交线程池编译，请求进 `grammar_queue`；掩码由 `SamplingBatchInfo.update_regex_vocab_mask` 分配，采样后 `grammar.accept_token` 推进状态；与重叠调度配合时采样推迟到 `launch_batch_sample_if_needed`。各语法对象仍定义 `try_jump_forward` 与 `jump_and_retokenize`，但 `constrained/` 目录之外没有调用点。
+
+**主要启动参数。**
+
+| 启动参数 | 默认值 | 对应的机制 |
+| --- | --- | --- |
+| `--disable-radix-cache` | 关 | 关闭前缀树，请求结束即释放全部槽位 |
+| `--page-size` | 1 | KV 池与树的粒度 |
+| `--radix-eviction-policy` | `lru` | 淘汰堆的排序键 |
+| `--enable-hierarchical-cache` | 关 | 在主机内存保留 K/V 备份 |
+| `--hicache-storage-backend` | 无 | 第三级外部存储，跨实例共享 |
+| `--schedule-policy` | `fcfs` | 等待队列排序 |
+| `--schedule-conservativeness` | 1.0 | `ρ` 的初值系数 |
+| `--chunked-prefill-size` | 按硬件自动确定 | 分块 Prefill 的块长；−1 为关闭 |
+| `--enable-mixed-chunk` | 关 | 分块 Prefill 与 Decode 混排 |
+| `--mem-fraction-static` | 按显存自动确定 | 权重与 KV 池占显存的比例 |
+| `--disable-overlap-schedule` | 关 | 关闭重叠调度 |
+| `--grammar-backend` | `xgrammar` | 约束解码后端 |
+
+SGLang v0.5.20 的主要启动参数。多实例部署时，网关的 `cache_aware` 策略维护近似的字符级前缀树来选实例。
+
+#### 11.13 节：vLLM 的压测参数与指标名
+
+**压测。** `vllm bench serve` 用 `--request-rate` 指定速率，默认按泊松过程到达，`--burstiness` 调突发程度；`--request-rate` 取默认的 `inf` 时所有请求同时到达，测的是最大吞吐；`--max-concurrency` 是闭环的并发上限。
+
+**`/metrics` 端点里值得长期保留的指标。**
+
+- 状态量：`vllm:num_requests_running`、`vllm:num_requests_waiting`、`vllm:kv_cache_usage_perc`。
+- 计数器：`vllm:num_preemptions`、`vllm:prefix_cache_queries` 与 `vllm:prefix_cache_hits`（两者之比是命中率）、`vllm:prompt_tokens`、`vllm:generation_tokens`。
+- 直方图：`vllm:time_to_first_token_seconds`、`vllm:inter_token_latency_seconds`、`vllm:request_time_per_output_token_seconds`、`vllm:request_queue_time_seconds`、`vllm:e2e_request_latency_seconds`。
+- 多模态：前端的处理器缓存由 `vllm:mm_cache_queries` 与 `vllm:mm_cache_hits` 统计；编码器输出缓存由调度器侧的 `EncoderCacheManager` 管理。
+
+**护栏产品。** 规则层如 NeMo Guardrails（用 Colang 描述对话约束）；分类层如 Llama Guard（3-8B 面向文本，4-12B 面向多模态）。网关产品如 LiteLLM、Kong。
+
+#### 12.1.3 与 12.1.7 节：BERT 的配置键与模块树
+
+下表是 Hugging Face `BertConfig` 里决定形状的键，取值以 `google-bert/bert-base-uncased` 与对应 large 权重的 `config.json` 为准。
+
+| 项目 | 配置键 | BERT-Base | BERT-Large |
+| --- | --- | ---: | ---: |
+| 层数 L | `num_hidden_layers` | 12 | 24 |
+| 隐藏宽度 H | `hidden_size` | 768 | 1,024 |
+| 注意力头数 A | `num_attention_heads` | 12 | 16 |
+| 前馈中间层宽度 | `intermediate_size` | 3,072 | 4,096 |
+| 词表 | `vocab_size` | 30,522 | 30,522 |
+| 位置表行数 | `max_position_embeddings` | 512 | 512 |
+| 段嵌入行数 | `type_vocab_size` | 2 | 2 |
+
+BERT 两档规格对应的配置键。论文称词表为 30,000 个 WordPiece 词元，发布权重的 `vocab_size` 是 30,522。
+
+`BertModel` 的模块树：
+
+- 嵌入：`embeddings.{word,position,token_type}_embeddings` 与 `embeddings.LayerNorm`。
+- 每层：`encoder.layer[i].attention.self.{query,key,value}`、`encoder.layer[i].attention.output.dense`、`encoder.layer[i].intermediate.dense`、`encoder.layer[i].output.dense`。
+- 句级输出：`pooler.dense`。
+- 预训练头：MLM 头是 `cls.predictions.transform.dense`、`cls.predictions.transform.LayerNorm` 与 `cls.predictions.decoder`（与词嵌入共享权重，另有一个 `[30522]` 的偏置）；NSP 头是 `cls.seq_relationship`。
+
+#### 12.2.1 节：RoBERTa 与 BERT 的配置差异
+
+`RobertaModel` 与 `BertModel` 的模块树同构，配置上只有三处不同：`vocab_size=50265`、`type_vocab_size=1`、`max_position_embeddings=514`。514 不是笔误：位置编号从 `padding_idx + 1` 起算，头两个编号被占掉。BERT 论文称自己的分词为 WordPiece，RoBERTa 论文把它描述为“字符级 BPE，词表 30K”，指的是同一张 30,522 行的表。
+
+#### 12.2.2 节：ALBERT 的配置键
+
+`AlbertModel` 的配置键是 `embedding_size=128`（即 E）、`num_hidden_groups=1`（共享组数）、`inner_group_num=1`；`E → H` 的那层投影叫 `embeddings.embedding_hidden_mapping_in`。`vocab_size` 是 30,000，与 BERT 的 30,522 不同。
+
+#### 12.2.3 节：ELECTRA 的类名与发布配置
+
+判别器是 `ElectraForPreTraining`（二分类头叫 `discriminator_predictions`），生成器是 `ElectraForMaskedLM`；判别器没有词表输出头，要当 MLM 用得另接后者。`google/electra-base-discriminator` 的 `hidden_size` 是 768，配套的 `google/electra-base-generator` 是 256，为 1/3，落在论文建议的 1/4 到 1/2 之间；两者的 `embedding_size` 都是 768，对应生成器与判别器共享词嵌入。`google/electra-small-discriminator` 把 `embedding_size` 设为 128、`hidden_size` 设为 256，用的是 ALBERT 的嵌入分解。
+
+#### 12.3.2 至 12.3.4 节：Longformer 与 BigBird 的配置键、位置表与回退门槛
+
+- **Longformer。** `LongformerConfig.attention_window` 是每层一个值的列表，发布权重里 12 层全是 512；前向另收一个 `global_attention_mask` 指定哪些位置走全局。全局注意力另用一套投影 `Q_g / K_g / V_g`，与窗口注意力的 `Q_s / K_s / V_s` 分开学。发布配置的 `max_position_embeddings` 是 4,098，比 4,096 多两行，沿用 RoBERTa 的位置偏移约定；4,096 行由原来的 512 行复制 8 次得到，每份内部相邻位置的嵌入与原表相同，只有两份拷贝相接的 7 处不连续。
+- **Longformer 的三种实现。** 纯 PyTorch 的循环版省显存但很慢，只用于测试；分块版支持非空洞的情形，用于预训练与微调；另有一个用 TVM 生成的自定义 CUDA 核，用在语言建模实验上。论文在自回归语言建模实验里还用了逐层增大的窗口与少数头上的空洞（dilation），这两项没有用在预训练的编码器上。论文给出的感受野 `L × w` 是左右两侧合计的宽度近似，不是单向传播距离。
+- **BigBird。** `BigBirdConfig.attention_type` 取 `"block_sparse"` 或 `"original_full"`，配合 `block_size` 与 `num_random_blocks`。`google/bigbird-roberta-base` 的取值是 `block_size = 64`、`num_random_blocks = 3`、`max_position_embeddings = 4096`、`vocab_size = 50358`；论文的 BigBird-itc 变体（把序列中已有的若干词元设为全局词元）取全局 `g = 2 × b`、窗口 `w = 3 × b`，`b` 即块大小。
+- **回退门槛。** `transformers` 的实现要求序列长度至少为 `(5 + 2 × num_random_blocks) × block_size`，默认值下是 704；低于它就打印警告并把 `attention_type` 切回 `original_full`。
+
+#### 12.3.5 节：ModernBERT 的配置键
+
+| 部件 | ModernBERT-base 的取值 | 配置键 |
+| --- | --- | --- |
+| 位置编码 | RoPE，全局层 θ = 160,000、局部层 θ = 10,000 | `global_rope_theta`、`local_rope_theta` |
+| 前馈 | GeGLU，中间层 1,152、GLU 上投影 2,304 | `intermediate_size` |
+| 偏置项 | 除最后的解码线性层外全部关闭 | `attention_bias`、`mlp_bias`、`norm_bias` |
+| 注意力 | 每 3 层一层全局，其余为 128 词元的局部滑动窗口 | `global_attn_every_n_layers`、`local_attention` |
+| 层数 | 22 | `num_hidden_layers` |
+| 词表 | 50,368（64 的倍数，含 83 个预留位） | `vocab_size` |
+| 序列长度 | 8,192 | `max_position_embeddings` |
+| 池化 | 默认平均 | `classifier_pooling` |
+
+ModernBERT-base 的配置键，取值以 `answerdotai/ModernBERT-base` 的 `config.json` 为准。全局层用 FlashAttention 3、局部层用 FlashAttention 2，因为模型开发时 FlashAttention 3 还不支持滑动窗口。
+
+#### 12.3.6 节：sentence-transformers 的池化配置
+
+`sentence-transformers` 把池化做成独立模块，用 `1_Pooling/config.json` 配置。发布模型 `sentence-transformers/all-MiniLM-L6-v2` 里 `pooling_mode_mean_tokens` 为真、`pooling_mode_cls_token` 为假，后面再串一个 L2 归一化模块，使余弦相似度与内积等价。Sentence-BERT 在分类数据上把两个句向量拼成 `(u, v, |u − v|)` 接 softmax，在回归数据上直接优化余弦相似度。
+
+#### 13.1.6 节：推理词元的接口字段与两种失效状态
+
+以 [OpenAI 推理指南](https://developers.openai.com/api/docs/guides/reasoning)为准，字段名与档位随接口版本调整。
+
+- **用量字段。** 用量对象里的 `output_tokens_details.reasoning_tokens` 给出一次请求用了多少推理词元；它们计入输出词元。
+- **截断状态。** 生成的词元撞上上下文上限或 `max_output_tokens` 时，响应状态为 `incomplete`，此时可能一个可见词元都没有产出，输入与推理词元照样计费。指南建议起步时为推理和输出预留至少 25,000 个词元。
+- **思考预算。** `reasoning.effort` 提供从 `none` 到 `max` 的若干档，调的是思考预算，不是策略类型；支持哪几档、默认哪一档随模型而定。
+
+#### 13.2.2 节：Llama 3 8B 配置字段对应的模块与权重形状
+
+Hugging Face `LlamaDecoderLayer` 里各字段落到的模块。权重按 `[输出维, 输入维]` 存放，与正文 `[行, 列]` 的数据流写法互为转置。
+
+| 字段 | 取值 | 对应模块与权重形状 |
+| --- | ---: | --- |
+| `num_hidden_layers` | 32 | `model.layers.0` 到 `.31` |
+| `hidden_size` | 4,096 | 每个位置的向量 `x[T, 4096]` |
+| `num_attention_heads` | 32 | `self_attn.q_proj.weight[4096, 4096]` |
+| `num_key_value_heads` | 8 | `self_attn.k_proj.weight[1024, 4096]`，`v_proj` 同形 |
+| `intermediate_size` | 14,336 | `mlp.gate_proj`、`up_proj` 各 `[14336, 4096]`，`down_proj[4096, 14336]` |
+| `vocab_size` | 128,256 | `model.embed_tokens.weight[128256, 4096]` |
+| `tie_word_embeddings` | `false` | 另有 `lm_head.weight[128256, 4096]` |
+| `rms_norm_eps` | 1e-05 | `input_layernorm`、`post_attention_layernorm` 各 `[4096]` |
+| `rope_theta` | 500,000 | 不占参数，逐层作用在 q、k 上 |
+| `max_position_embeddings` | 8,192 | Llama 3.1 起为 131,072 |
+
+Llama 3 8B 的配置字段与模块名对照。Llama 1 与 Llama 2 的 7B 的 `intermediate_size` 是 11,008，即 $\frac{8}{3} \times 4{,}096 = 10{,}922.67$ 向上取到 256 的倍数。
+
+#### 13.4.1 与 13.4.3 节：BART 的掩码词元与 T5 的两份缓存
+
+- BART 论文里的掩码写作 `[MASK]`，fairseq 与 Hugging Face 实现中的词元是 `<mask>`。
+- Hugging Face 的 `T5ForConditionalGeneration` 在生成时把编码器结果放在 `encoder_outputs` 里跨步复用，把解码器自注意力与交叉注意力两份 K/V 一起放在 `past_key_values` 里；`generate` 只在第一步计算 `encoder_outputs`。
+- `google-t5/t5-base` 的检查点里有三张相对位置偏置表（每张 $32 \times 12 = 384$ 个数，32 个相对距离分桶乘 12 个头）：编码器 1 张、解码器 2 张。解码器的第二张挂在交叉注意力上，加载时作为多余的键忽略。
+
+#### 14.2.1 节：MoE 前向六步在框架里的对应
+
+- Hugging Face Transformers：DeepSeek-V3 的 MoE 层是 `DeepseekV3MoE`，第 2、3 步在其 `gate` 子模块（打分、sigmoid、top-k 与归一化），第 5 步在 `experts`。
+- vLLM：`FusedMoE` 把第 4–6 步实现为“按专家排序 → 分组 → 分组 GEMM”三段内核。
+- Megablocks 一类 dropless 实现改用变长分组 GEMM，把置换和变长一起交给内核，不设容量上限。
+
+DeepSeek-V3 的相关配置键（`config.json`）：`hidden_size = 7168`、`intermediate_size = 18432`（前 3 层稠密 FFN）、`moe_intermediate_size = 2048`、`n_routed_experts = 256`、`n_shared_experts = 1`、`num_experts_per_tok = 8`、`num_hidden_layers = 61`、`first_k_dense_replace = 3`。
+
+#### 14.2.5 节：执行侧的负载均衡（SGLang 的 Waterfill 与 LPLB）
+
+出处：[Improving DeepEP MoE Load Balance in SGLang with Waterfill and LPLB](https://lmsys.org/blog/2026-06-26-waterfill-lplb)。
+
+- **Waterfill** 处理共享专家。共享专家对每个词元都生效，固定绑在某张卡上就成了额外负担。Waterfill 把它变成可调度的槽位：路由专家选定之后，估计各专家并行卡的当前负载，再把共享专家的工作按空闲程度分配过去。
+- **LPLB**（Linear-Programming-Based Load Balancer）处理冗余专家副本。它为每一层、每一批求解一个线性规划：在各物理副本之间切分该逻辑专家的词元，目标是最小化各卡负载的峰值；一条守恒约束保证它只重新分配已有流量，不制造也不丢弃词元。
+
+两者都不改变路由器的 top-k 决策：Waterfill 只改共享专家由哪张卡执行，LPLB 只改词元落到同一逻辑专家的哪个副本上，输出不变，因此可以在推理阶段直接启用。在该文的实测配置下（两台 Hopper 节点共 16 卡，TP16-DP16-EP16），吞吐改善是个位数百分比；LPLB 需要确实配置了冗余专家，否则是纯额外开销。
+
+#### 14.3.3 节：Mamba 官方实现的构造参数与内核
+
+- `mamba_ssm` 库中，块结构的超参就是 `Mamba(d_model, d_state, d_conv, expand)` 四个构造参数，默认 `d_state = 16`、`d_conv = 4`、`expand = 2`；扫描内核是 `selective_scan_fn`。
+- 论文里 $f_\Delta$ 先投到 1 维再广播到全部通道，官方实现把这 1 维推广为宽度 `dt_rank` 的低秩投影。
+- 因果卷积与 SiLU 在 `mamba_simple.py` 中写在同一行：`x = self.act(self.conv1d(x)[..., :seqlen])`。
+
+#### 14.3.7 节：Qwen3.5 线性层的状态形状
+
+Transformers 中 `Qwen3_5MoeGatedDeltaNet` 的递推状态形状是 `[batch, linear_num_value_heads, linear_key_head_dim, linear_value_head_dim]`，即每个 value 头一块 `[128, 128]` 的矩阵；每层 64 个 value 头，每层 `64 × 128 × 128 = 1,048,576` 个数，45 层合计 47,185,920 个数（BF16 约 90 MiB），与序列长度无关。`linear_num_key_heads = 16` 小于 `linear_num_value_heads = 64`，实现里把 Query 与 Key 按 4 倍 `repeat_interleave` 广播上去，相当于把 GQA 的共享方式用到线性层，省的是投影参数，不是状态。
+
+#### 14.4.4 节：占位符替换的实现位置
+
+LLaVA 系列在嵌入层查表得到 `inputs_embeds` 之后，由宿主代码把 `<image>` 占位符所在的行替换成投影器输出的视觉特征；Qwen2-VL 用 `<|vision_start|>` 与 `<|vision_end|>` 两个界标包住视觉段。
+
+#### 14.5.2 节：Qwen3 聊天模板的出处
+
+14.5.2 的六步对应 Qwen3 `tokenizer_config.json` 里 `chat_template` 的 Jinja 分支。`<tool_call>` 与 `</tool_call>` 在 `added_tokens_decoder` 里是两个新增词元，`special` 字段为 `false`；该文件里标 `true` 的只有 `<|im_start|>`、`<|im_end|>` 一类控制词元。
+
+#### 14.5.6 节：MCP 的消息字段与传输
+
+- 工具发现：`tools/list` 返回的每个工具含 `name`、`description` 与 `inputSchema`。调用：`tools/call`，参数为 `name` 与 `arguments`；返回里的 `content` 是结果内容，`isError` 标记工具自身是否出错。消息格式是 JSON-RPC 2.0。
+- 传输：标准传输有标准输入输出（stdio）与 Streamable HTTP 两种；更早的 HTTP+SSE 传输已被 Streamable HTTP 取代并标为弃用，规范保留一节讲向后兼容。修订版本号与字段集合随规范演进，以[规范](https://modelcontextprotocol.io/specification/latest)的当前修订为准。
+
+#### 14.7.3 节：长上下文相关的配置字段
+
+- Hugging Face 模型配置中，`rope_scaling` 描述长度扩展方案，各字段见 A.7.8 的 4.3.5 节条目。
+- `num_attention_heads` 与 `num_key_value_heads` 决定 Ulysses 序列并行的并行度上限（不复制 KV 时不超过 KV 头数）与每词元 KV 字节数（[10.2 节](../10_inference_optimization/10.2_kv_cache.md)）。
+- vLLM 的 `max_model_len` 是单个请求允许的最大长度。启动时引擎检查 KV 池至少装得下一个这么长的请求，并在日志里按它报告最大并发数；KV 按实际长度分页分配（[11.4 节](../11_serving/11.4_kv_memory_management.md)），这个数是全部请求都跑满时的并发。字段名与默认值随版本变化，以所用版本的官方文档为准。
+
+#### 14.8.6 节：TransformerLens 的钩子名与形状
+
+`HookedTransformer.run_with_cache` 一次前向就把全部中间激活缓存下来，按钩子名取用：
+
+- `blocks.{l}.hook_resid_pre`、`hook_resid_mid`、`hook_resid_post`：残差流的三个位置，形状 `[batch, pos, d_model]`。
+- `blocks.{l}.attn.hook_pattern`：Softmax 之后的注意力权重，形状 `[batch, head_index, query_pos, key_pos]`；检测归纳头只需要它。
+- `blocks.{l}.attn.hook_z`：各头读出的 context，形状 `[batch, pos, head_index, d_head]`。
+
+配套库：训练与分析 SAE 的 SAELens、做干预实验的 nnsight、公开 SAE 权重的 Gemma Scope。接口名与默认值随版本变化，以当时的官方文档为准。
