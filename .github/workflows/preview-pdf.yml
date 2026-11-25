@@ -34,9 +34,11 @@ jobs:
         with:
           chrome-version: stable
       - name: Install fonts and PDF tools
+        timeout-minutes: 5
         run: |
-          sudo apt-get update
-          sudo apt-get install -y fonts-noto-cjk fonts-noto-cjk-extra poppler-utils
+          apt_options=(-o Acquire::Retries=2 -o Acquire::http::Timeout=20 -o Acquire::https::Timeout=20)
+          sudo apt-get "${apt_options[@]}" update
+          sudo apt-get "${apt_options[@]}" install -y fonts-noto-cjk poppler-utils
       - name: Resolve latest mdPress release
         run: |
           url="$(curl -fsSL --retry 3 -o /dev/null -w '%{url_effective}' https://github.com/yeasy/mdPress/releases/latest)"
