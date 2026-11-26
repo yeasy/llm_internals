@@ -2,9 +2,9 @@
 
 <!-- volatile-facts: verified_at=2026-11-06 expires_at=2026-12-06 ttl_days=30 conflict_status=resolved-conflict -->
 
-> 核验日期：2026-11-06；到期日期：2026-12-06。这里的模型时间线、价格、上下文、硬件可用性和 serving 生态均属于快变事实。30 天到期后，项目检查会拒绝通过，必须重新访问权威入口并更新核验元数据。**这两个日期必须与本节源文件顶部 `volatile-facts` 注释里的 `verified_at` / `expires_at` 逐字一致**——注释是项目检查唯一读取的真值，散文这份是给读者看的副本，改一处忘改另一处即为失配（已由测试断言）。
+> 整表核验日期：2026-11-06；到期日期：2026-12-06。模型、价格、硬件和推理引擎条目可在两次全表核验之间单独更新；发布日期见相应条目，最新状态以所列官方来源为准。
 >
-> **上一轮预留的检查已完成**：Kimi K3 的权重已于 **2026-07-27** 实际开放。按上一轮定下的判据实测：`moonshotai/Kimi-K3` 的 `resolve/main/config.json` 返回 **200**、仓库含 118 个文件、`gated: false`。注意仓库名只有 `moonshotai/Kimi-K3` 一个，`-Instruct` / `-Base` 两个名字返回 401（不存在或不公开），不要照抄。技术报告见 [arXiv:2607.24653](https://arxiv.org/abs/2607.24653)（2026-07-27，Kimi Team，402 位作者）。
+> Kimi K3 于 2026-07-27 开放权重。可在 [模型仓库](https://huggingface.co/moonshotai/Kimi-K3)查阅配置文件，或阅读 [Kimi 团队的技术报告](https://arxiv.org/abs/2607.24653)。
 
 | 类别 | 当前维护口径 | 权威入口 | 编辑要求 |
 | --- | --- | --- | --- |
@@ -20,4 +20,4 @@
 | Benchmark | SWE-bench、GPQA、MMLU、long-context eval 等只作为 dated snapshot。 | benchmark 官方站点、论文、仓库 | 说明评测集、版本、是否使用工具和污染风险。 |
 | 新近论文快照数字 | 正文引用的 2026 年新近研究（8.3.4 IH-Challenge 的 +10.0%、10.1.4 execution-idle 的 19.7%/10.7% 与五组回放的区间、8.2.3 训练—推理失配 TIM、3.5.5 mHC 的 6.7% 训练开销与损失降幅、8.2.4 GSPO 的裁剪范围与评分细则奖励的增益、8.5.1 突现错位的比例、11.9.6 MegaScale-Infer 的 1.90 倍、14.2 LatentMoE 的吞吐与 Engram 的损失、14.3.5 Mamba-3 的困惑度、14.6 ScaleRL 的拟合参数与 pass@k 交叉实验等）按论文当时版本记录。 | [IH-Challenge](https://arxiv.org/abs/2603.10521), [Making Claude a chemist](https://www.anthropic.com/research/making-claude-a-chemist), [Execution-Idle](https://arxiv.org/abs/2604.04745), [TIM 诊断](https://arxiv.org/abs/2605.14220), [mHC](https://arxiv.org/abs/2512.24880), [GSPO](https://arxiv.org/abs/2507.18071), [Rubrics as Rewards](https://arxiv.org/abs/2507.17746), [Emergent Misalignment](https://arxiv.org/abs/2502.17424), [MegaScale-Infer](https://arxiv.org/abs/2504.02263), [LatentMoE](https://arxiv.org/abs/2601.18089), [Engram](https://arxiv.org/abs/2601.07372), [Mamba-3](https://arxiv.org/abs/2603.15569), [ScaleRL](https://arxiv.org/abs/2510.13786), [pass@k 交叉](https://arxiv.org/abs/2504.13837) | 复核时对照 arXiv/官方页当前版本；数字变动则更新正文快照口径。TIM 一条只写论文确证的缓解手段（TIS、拒绝采样、批次不变算子）——社区二手转述里常见的 FP16 dtype、SIS、GSPO 等说法**不在该论文正文中**，未经一手核实不得补入。execution-idle 的比例**必须连同集群构成与负载类型引用**，不得写成通用结论——论文自己报告跨五组回放的能耗区间是 7%–65%；另注意 `BurstGPT Chat` 是公开 trace 的名字，不要转述成某家厂商的线上请求。 |
 
-`conflict_status=resolved-conflict` 不是“来源永远一致”的声明，而是记录本轮已发现的 GPT-5.6 预览/已发布冲突已有明确裁决。若权威来源再次互相冲突，应先把状态改为 `open-conflict`；项目检查会失败，直到正文、附录和来源链完成重新核验并改回 `resolved-conflict`。
+GPT-5.6 的模型目录与 API 变更记录曾给出不同的可用状态。表中时间线采用较晚的官方发布记录，区分合作方预览与正式 API 开放。
