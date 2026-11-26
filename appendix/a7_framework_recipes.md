@@ -576,7 +576,7 @@ python examples/paper_summary.py predict "$PAPER_WORK/data/test.jsonl" \
 
 **按原文验收。** 逐篇看两个模型的摘要。数一数有多少说法得不到原文支持，再数漏了几项必须覆盖的信息。已经提到但写错的信息只计在第一项。把人工核对结果按 `paper_id` 分别写进 `base-review.jsonl` 和 `tuned-review.jsonl`。下列两行是一次实跑后填的适配器评分。脚本按论文编号核对三份文件，汇总空输出、问题数和通过的摘要数。
 
-```json
+```jsonl
 {"paper_id":"test-water","unsupported_claims":2,"missed_key_points":1}
 {"paper_id":"test-museum","unsupported_claims":0,"missed_key_points":0}
 ```
